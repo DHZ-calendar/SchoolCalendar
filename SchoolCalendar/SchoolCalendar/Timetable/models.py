@@ -29,6 +29,9 @@ class School(models.Model):
     """
     name = models.CharField(max_length=256, null=False, blank=False)
 
+    def __str__(self):
+        return self.name
+
 
 class Teacher(MyUser):
     """
@@ -56,6 +59,12 @@ class SchoolYear(models.Model):
     # Used to evaluate to which school_year any date belongs to. A good day could be the 31st of August
     date_start = models.DateField(blank=False, null=False)
 
+    def __str__(self):
+        """
+        :return: School years displayed as 2019-2020
+        """
+        return "{}-{}".format(str(self.year_start), str(self.year_start + 1))
+
 
 class Course(models.Model):
     """
@@ -65,6 +74,12 @@ class Course(models.Model):
     section = models.CharField(max_length=256, blank=False, null=False)   # In class IA, the section is A
     school_year = models.ForeignKey(SchoolYear, on_delete=models.PROTECT, blank=False, null=False)
     school = models.ForeignKey(School,  on_delete=models.CASCADE, blank=False, null=False)
+
+    def __str__(self):
+        """
+        :return: classes as 1 A, 2 Bord and so on (according to what year and section are like)
+        """
+        return "{} {}".format(str(self.year), self.section)
 
 
 class HourSlot(models.Model):
@@ -80,6 +95,14 @@ class HourSlot(models.Model):
     day_of_week = models.IntegerField(choices=DAYS_OF_WEEK, null=False, blank=False)
     # This counts the effective duration of each lecture (e.g., lectures of 55' actually are worth 1 hour)
     legal_duration = models.DurationField(null=False, blank=False)
+
+    def __str__(self):
+        """
+        :return: hourslots like "Monday, 8:00-9:00"
+        """
+        return "{}, {}-{}".format(DAYS_OF_WEEK[self.day_of_week][1],
+                                  self.starts_at.strftime("%H:%M"),
+                                  self.ends_at.strftime("%H:%M"),)
 
 
 class AbsenceBlock(models.Model):
