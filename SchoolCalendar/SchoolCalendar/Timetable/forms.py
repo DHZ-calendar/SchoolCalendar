@@ -2,6 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 from durationwidget.widgets import TimeDurationWidget
+from django.utils.translation import gettext as _
 
 from Timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday,\
                              Stage, Subject, HoursPerTeacherInClass, Assignment
@@ -67,6 +68,7 @@ class AbsenceBlockForm(ModelForm):
 
 
 class HolidayForm(ModelForm):
+
     date_start = forms.DateField(widget=forms.TextInput(attrs={
         'class': 'datepicker'
     }))
@@ -77,3 +79,37 @@ class HolidayForm(ModelForm):
     class Meta:
         model = Holiday
         fields = ['date_start', 'date_end', 'name', 'school', 'school_year']
+
+    def clean(self):
+        """
+        We need to check whether date_start <= date_end
+        :return:
+        """
+        if self.cleaned_data['date_start'] > self.cleaned_data['date_end']:
+            self.add_error(None, forms.ValidationError(_('The date_start field can\'t be later than the end date')))
+
+        return self.cleaned_data
+
+
+class StageForm(ModelForm):
+
+    date_start = forms.DateField(widget=forms.TextInput(attrs={
+        'class': 'datepicker'
+    }))
+    date_end = forms.DateField(widget=forms.TextInput(attrs={
+        'class': 'datepicker'
+    }))
+
+    class Meta:
+        model = Stage
+        fields = ['date_start', 'date_end', 'course', 'school', 'school_year']
+
+    def clean(self):
+        """
+        We need to check whether date_start <= date_end
+        :return:
+        """
+        if self.cleaned_data['date_start'] > self.cleaned_data['date_end']:
+            self.add_error(None, forms.ValidationError(_('The date_start field can\'t be later than the end date')))
+
+        return self.cleaned_data

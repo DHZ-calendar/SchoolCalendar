@@ -146,7 +146,8 @@ class Stage(models.Model):
     """
     During a stage, a class doesn't have teachers assigned (it is like an holiday, but specific for a given class).
     """
-    date = models.DateField(null=False, blank=False)
+    date_start = models.DateField(null=False, blank=False)
+    date_end = models.DateField(null=False, blank=False)
     course = models.ForeignKey(Course, null=False, blank=False, on_delete=models.CASCADE)
     school = models.ForeignKey(School, null=False, blank=False, on_delete=models.CASCADE)
     school_year = models.ForeignKey(SchoolYear, null=False, blank=False, on_delete=models.CASCADE)
