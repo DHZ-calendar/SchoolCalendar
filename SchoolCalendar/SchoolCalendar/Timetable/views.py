@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from Timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday,\
                              Stage, Subject, HoursPerTeacherInClass, Assignment
 
-from Timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYearForm, CourseForm
+from Timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYearForm, CourseForm, HourSlotForm
 
 # Create your views here.
 
@@ -43,3 +43,10 @@ class CourseCreate(CreateView):
     form_class = CourseForm
     template_name = 'Timetable/course_form.html'
     success_url = reverse_lazy('course-add')
+
+
+class HourSlotCreate(CreateView):
+    model = HourSlot
+    form_class = HourSlotForm
+    template_name = 'Timetable/hourslot_form.html'
+    success_url = reverse_lazy('hourslot-add')

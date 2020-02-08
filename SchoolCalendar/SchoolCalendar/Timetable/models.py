@@ -5,13 +5,13 @@ from django.contrib.auth.models import User
 
 
 DAYS_OF_WEEK = (
-    ('Monday', 0),
-    ('Tuesday', 1),
-    ('Wednesday', 2),
-    ('Thursday', 3),
-    ('Friday', 4),
-    ('Saturday', 5),
-    ('Sunday', 6)
+    (0, 'Monday'),
+    (1, 'Tuesday'),
+    (2, 'Wednesday'),
+    (3, 'Thursday'),
+    (4, 'Friday'),
+    (5, 'Saturday'),
+    (6, 'Sunday')
 )
 
 
@@ -77,7 +77,7 @@ class HourSlot(models.Model):
     ends_at = models.TimeField(null=False, blank=False)
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False)
     school_year = models.ForeignKey(SchoolYear, on_delete=models.PROTECT, null=False, blank=False)
-    day_of_week = models.CharField(choices=DAYS_OF_WEEK, max_length=32, null=False, blank=False)
+    day_of_week = models.IntegerField(choices=DAYS_OF_WEEK, null=False, blank=False)
     # This counts the effective duration of each lecture (e.g., lectures of 55' actually are worth 1 hour)
     legal_duration = models.DurationField(null=False, blank=False)
 
