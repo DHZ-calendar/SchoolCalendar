@@ -1,0 +1,12 @@
+{% extends 'Timetable/base.html' %}
+{% load i18n %}
+
+{% block body %}
+    <h1>{% trans 'Subject' %}</h1>
+    <form action="{% url 'subject-add' %}" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Submit">
+    </form>
+
+{% endblock %}

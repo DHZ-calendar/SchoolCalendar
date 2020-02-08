@@ -113,3 +113,44 @@ class StageForm(ModelForm):
             self.add_error(None, forms.ValidationError(_('The date_start field can\'t be later than the end date')))
 
         return self.cleaned_data
+
+
+class SubjectForm(ModelForm):
+
+    class Meta:
+        model = Subject
+        fields = ['name', 'school', 'school_year']
+
+
+class HoursPerTeacherInClassForm(ModelForm):
+
+    class Meta:
+        model = HoursPerTeacherInClass
+        fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'hours', 'hours_bes']
+
+
+class AssignmentForm(ModelForm):
+    date = forms.DateField(widget=forms.TextInput(attrs={
+        'class': 'datepicker'
+    }))
+    hour_start = forms.TimeField(widget=forms.TextInput(attrs={
+        'class': 'timepicker'
+    }))
+    hour_end = forms.TimeField(widget=forms.TextInput(attrs={
+        'class': 'timepicker'
+    }))
+
+    class Meta:
+        model = Assignment
+        fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'date', 'hour_start', 'hour_end', 'bes',
+                  'substitution', 'absent']
+
+    def clean(self):
+        """
+        We need to check whether date_start <= date_end
+        :return:
+        """
+        if self.cleaned_data['hour_start'] > self.cleaned_data['hour_end']:
+            self.add_error(None, forms.ValidationError(_('The start time field can\'t be later than the end time')))
+
+        return self.cleaned_data

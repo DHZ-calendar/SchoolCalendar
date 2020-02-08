@@ -1,0 +1,12 @@
+{% extends 'Timetable/base.html' %}
+{% load i18n %}
+
+{% block body %}
+    <h1>{% trans 'Hours Per Teacher in Class' %}</h1>
+    <form action="{% url 'hours_per_teacher_in_class-add' %}" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Submit">
+    </form>
+
+{% endblock %}

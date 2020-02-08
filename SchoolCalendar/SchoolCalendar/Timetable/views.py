@@ -6,7 +6,8 @@ from Timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, C
                              Stage, Subject, HoursPerTeacherInClass, Assignment
 
 from Timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYearForm, CourseForm, HourSlotForm, \
-                            AbsenceBlockForm, HolidayForm, StageForm
+                            AbsenceBlockForm, HolidayForm, StageForm, SubjectForm, HoursPerTeacherInClassForm,\
+                            AssignmentForm
 
 
 class SchoolCreate(CreateView):
@@ -70,3 +71,24 @@ class StageCreate(CreateView):
     form_class = StageForm
     template_name = 'Timetable/stage_form.html'
     success_url = reverse_lazy('stage-add')
+
+
+class SubjectCreate(CreateView):
+    model = Subject
+    form_class = SubjectForm
+    template_name = 'Timetable/subject_form.html'
+    success_url = reverse_lazy('subject-add')
+
+
+class HoursPerTeacherInClassCreate(CreateView):
+    model = HoursPerTeacherInClass
+    form_class = HoursPerTeacherInClassForm
+    template_name = 'Timetable/hoursPerTeacherInClass_form.html'
+    success_url = reverse_lazy('hours_per_teacher_in_class-add')
+
+
+class AssignmentCreate(CreateView):
+    model = Assignment
+    form_class = AssignmentForm
+    template_name = 'Timetable/assignment_form.html'
+    success_url = reverse_lazy('assignment-add')

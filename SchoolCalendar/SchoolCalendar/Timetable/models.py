@@ -161,6 +161,9 @@ class Subject(models.Model):
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False)
     school_year = models.ForeignKey(SchoolYear, on_delete=models.CASCADE, null=False, blank=False)
 
+    def __str__(self):
+        return self.name
+
 
 class HoursPerTeacherInClass(models.Model):
     """
@@ -192,10 +195,13 @@ class Assignment(models.Model):
     date = models.DateField(null=False, blank=False)
 
     # Both hour start and hour end should coincide with the HourSlot if the hour is not special.
-    hour_start = models.TimeField()
-    hour_end = models.TimeField()
+    hour_start = models.TimeField(null=False, blank=False)
+    hour_end = models.TimeField(null=False, blank=False)
     bes = models.BooleanField(null=False, blank=False, default=False)
     substitution = models.BooleanField(null=False, blank=False, default=False)
     absent = models.BooleanField(null=False, blank=False, default=False)   # for substituted teachers
 
-
+    def __str__(self):
+        return "{}; {}; {}; {} - {}".format(
+            self.teacher, self.course, self.date, self.hour_start, self.hour_end
+        )
