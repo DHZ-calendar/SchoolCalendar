@@ -1,3 +1,4 @@
+from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 
@@ -21,3 +22,13 @@ class AdminSchoolForm(UserCreationForm):
     class Meta:
         model = AdminSchool
         fields = ['username', 'first_name', 'last_name', 'email', 'school']
+
+
+class SchoolYearForm(ModelForm):
+    date_start = forms.DateField(widget=forms.TextInput(attrs={
+        'class': 'datepicker'
+    }))
+
+    class Meta:
+        model = SchoolYear
+        fields = ['year_start', 'date_start']
