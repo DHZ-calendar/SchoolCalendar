@@ -1,0 +1,12 @@
+{% extends 'Timetable/base.html' %}
+{% load i18n %}
+
+{% block body %}
+    <h1>{% trans 'Absence Block' %}</h1>
+    <form action="{% url 'absenceblock-add' %}" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Submit">
+    </form>
+
+{% endblock %}

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.translation import gettext as _
 
 # Create your models here.
 
@@ -128,11 +129,17 @@ class Holiday(models.Model):
     """
     Days when teachers don't have lectures
     """
-    date = models.DateField(null=False, blank=False)
+    # The holiday lasts from date_start to date_end inclusive
+    # In order to make a 1 day holiday, just use the same date for both start and end.
+    date_start = models.DateField(null=False, blank=False)
+    date_end = models.DateField(null=False, blank=False)
     name = models.CharField(max_length=256, null=False, blank=False)
     school = models.ForeignKey(School, null=False, blank=False, on_delete=models.PROTECT)
     # Maybe this is useless (as the information is kept in the date)
     school_year = models.ForeignKey(SchoolYear, null=False, blank=False, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return _("{}: from {} to {}".format(self.name, self.date_start, self.date_end))
 
 
 class Stage(models.Model):

@@ -6,7 +6,7 @@ from Timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, C
                              Stage, Subject, HoursPerTeacherInClass, Assignment
 
 from Timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYearForm, CourseForm, HourSlotForm, \
-                            AbsenceBlockForm
+                            AbsenceBlockForm, HolidayForm
 
 # Create your views here.
 
@@ -58,3 +58,10 @@ class AbsenceBlockCreate(CreateView):
     form_class = AbsenceBlockForm
     template_name = 'Timetable/absenceBlock_form.html'
     success_url = reverse_lazy('absenceblock-add')
+
+
+class HolidayCreate(CreateView):
+    model = Holiday
+    form_class = HolidayForm
+    template_name = 'Timetable/holiday_form.html'
+    success_url = reverse_lazy('holiday-add')

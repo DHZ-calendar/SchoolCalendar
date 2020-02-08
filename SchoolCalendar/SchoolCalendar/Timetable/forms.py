@@ -64,3 +64,16 @@ class AbsenceBlockForm(ModelForm):
     class Meta:
         model = AbsenceBlock
         fields = ['teacher', 'hour_slot', 'school_year']
+
+
+class HolidayForm(ModelForm):
+    date_start = forms.DateField(widget=forms.TextInput(attrs={
+        'class': 'datepicker'
+    }))
+    date_end = forms.DateField(widget=forms.TextInput(attrs={
+        'class': 'datepicker'
+    }))
+
+    class Meta:
+        model = Holiday
+        fields = ['date_start', 'date_end', 'name', 'school', 'school_year']
