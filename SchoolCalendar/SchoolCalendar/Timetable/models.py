@@ -40,6 +40,9 @@ class Teacher(MyUser):
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False)
     notes = models.TextField(blank=True, null=True)   # Optional field
 
+    def __str__(self):
+        return "{} {}".format(self.first_name, self.last_name)
+
 
 class AdminSchool(MyUser):
     """
@@ -113,6 +116,12 @@ class AbsenceBlock(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, null=False, blank=False)
     hour_slot = models.ForeignKey(HourSlot, on_delete=models.CASCADE, null=False, blank=False)
     school_year = models.ForeignKey(SchoolYear, on_delete=models.CASCADE, null=False, blank=False)
+
+    def __str__(self):
+        """
+        :return:
+        """
+        return "{}, {}, {}".format(str(self.teacher), str(self.hour_slot), str(self.school_year))
 
 
 class Holiday(models.Model):

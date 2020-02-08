@@ -57,3 +57,10 @@ class HourSlotForm(ModelForm):
     class Meta:
         model = HourSlot
         fields = ["hour_number", 'starts_at', 'ends_at', 'school', 'school_year', 'day_of_week', 'legal_duration']
+
+
+class AbsenceBlockForm(ModelForm):
+
+    class Meta:
+        model = AbsenceBlock
+        fields = ['teacher', 'hour_slot', 'school_year']
