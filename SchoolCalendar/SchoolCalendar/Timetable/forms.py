@@ -32,3 +32,10 @@ class SchoolYearForm(ModelForm):
     class Meta:
         model = SchoolYear
         fields = ['year_start', 'date_start']
+
+
+class CourseForm(ModelForm):
+    class Meta:
+        model = Course
+        fields = ['year', 'section', 'school_year', 'school']
+
