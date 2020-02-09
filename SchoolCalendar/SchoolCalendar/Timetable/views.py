@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic import TemplateView
 from django.urls import reverse_lazy
 
 from Timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday,\
@@ -92,3 +93,7 @@ class AssignmentCreate(CreateView):
     form_class = AssignmentForm
     template_name = 'Timetable/assignment_form.html'
     success_url = reverse_lazy('assignment-add')
+
+
+class TimetableView(TemplateView):
+    template_name = 'Timetable/timetable.html'

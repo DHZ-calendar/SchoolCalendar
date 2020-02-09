@@ -20,10 +20,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-timepicker/0.5.2/css/bootstrap-timepicker.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-timepicker/0.5.2/js/bootstrap-timepicker.min.js"></script>
 
+    {% block head %}
+    {% endblock %}
 
+    <style>
+        {% block style %}    
+        {% endblock %}
+    </style>
 </head>
 <body>
     {% block body %}
     {% endblock %}
+
+
+    <script>
+        {% block script %}
+        {% endblock %}
+    </script>
 </body>
 </html>

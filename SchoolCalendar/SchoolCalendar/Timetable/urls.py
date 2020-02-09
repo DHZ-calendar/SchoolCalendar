@@ -1,9 +1,11 @@
 from django.urls import path
 from Timetable.views import SchoolCreate, TeacherCreate, AdminSchoolCreate, SchoolYearCreate, CourseCreate,\
                             HourSlotCreate, AbsenceBlockCreate, HolidayCreate, StageCreate, SubjectCreate, \
-                            HoursPerTeacherInClassCreate, AssignmentCreate
+                            HoursPerTeacherInClassCreate, AssignmentCreate, TimetableView
 
 urlpatterns = [
+    path('', TimetableView.as_view(), name='timetable-view'),
+
     path('school/add/', SchoolCreate.as_view(), name='school-add'),
     path('teacher/add/', TeacherCreate.as_view(), name='teacher-add'),
     path('admin_school/add/', AdminSchoolCreate.as_view(), name='adminschool-add'),
