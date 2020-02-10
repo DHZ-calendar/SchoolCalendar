@@ -16,7 +16,7 @@ from Timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYear
                             AbsenceBlockForm, HolidayForm, StageForm, SubjectForm, HoursPerTeacherInClassForm,\
                             AssignmentForm
 
-from Timetable.serializers import TeacherSerializer, CourseYearOnlySerializer
+from Timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer
 
 from Timetable.filters import TeacherFromSameSchoolFilterBackend
 from Timetable import utils
@@ -117,11 +117,10 @@ class TeacherViewSet(ModelViewSet):
     filter_backends = [TeacherFromSameSchoolFilterBackend]
 
 
-class CourseYearOnlyListViewSet(ListModelMixin,
-                                GenericViewSet):
+class CourseYearOnlyListViewSet(ListModelMixin, GenericViewSet):
 
     serializer_class = CourseYearOnlySerializer
-    queryset = Course.objects.all()
+    queryset = Course.objects.all()   # I think it gets overridden by get_queryset
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
@@ -132,6 +131,20 @@ class CourseYearOnlyListViewSet(ListModelMixin,
         if school:
             return Course.objects.filter(school=school).values('year').distinct()
 
+
+class CourseSectionOnlyListViewSet(ListModelMixin, GenericViewSet):
+
+    serializer_class = CourseSectionOnlySerializer
+    queryset = Course.objects.all()   # I think it gets overridden by get_queryset
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        :return: only the years of courses of the user logged's school
+        """
+        school = utils.get_school_from_user(self.request.user)
+        if school:
+            return Course.objects.filter(school=school).values('section').distinct()
 
 
 
