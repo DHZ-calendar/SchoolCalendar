@@ -1,11 +1,18 @@
-from django.urls import path
+from django.urls import path, re_path, include
 from Timetable.views import SchoolCreate, TeacherCreate, AdminSchoolCreate, SchoolYearCreate, CourseCreate,\
                             HourSlotCreate, AbsenceBlockCreate, HolidayCreate, StageCreate, SubjectCreate, \
-                            HoursPerTeacherInClassCreate, AssignmentCreate, TimetableView
+                            HoursPerTeacherInClassCreate, AssignmentCreate, TimetableView, UserViewSet
+
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(r'users', UserViewSet)
+
 
 urlpatterns = [
-    path('', TimetableView.as_view(), name='timetable-view'),
-
+    #path('', TimetableView.as_view(), name='timetable-view'),
+    re_path(r'^api-auth/', include('rest_framework.urls')),    # Django Rest Framework
+    re_path(r'^api/', include(router.urls)),
     path('school/add/', SchoolCreate.as_view(), name='school-add'),
     path('teacher/add/', TeacherCreate.as_view(), name='teacher-add'),
     path('admin_school/add/', AdminSchoolCreate.as_view(), name='adminschool-add'),

@@ -2,6 +2,9 @@ from django.shortcuts import render
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import TemplateView
 from django.urls import reverse_lazy
+from django.contrib.auth.models import User
+
+from rest_framework.viewsets import ModelViewSet
 
 from Timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday,\
                              Stage, Subject, HoursPerTeacherInClass, Assignment
@@ -9,6 +12,8 @@ from Timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, C
 from Timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYearForm, CourseForm, HourSlotForm, \
                             AbsenceBlockForm, HolidayForm, StageForm, SubjectForm, HoursPerTeacherInClassForm,\
                             AssignmentForm
+
+from Timetable.serializers import UserSerializer
 
 
 class SchoolCreate(CreateView):
@@ -97,3 +102,8 @@ class AssignmentCreate(CreateView):
 
 class TimetableView(TemplateView):
     template_name = 'Timetable/timetable.html'
+
+
+class UserViewSet(ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
