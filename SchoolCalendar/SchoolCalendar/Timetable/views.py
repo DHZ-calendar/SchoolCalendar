@@ -8,6 +8,7 @@ from rest_framework.viewsets import ModelViewSet, ViewSet, GenericViewSet
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, \
     UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
 
 from Timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday,\
                              Stage, Subject, HoursPerTeacherInClass, Assignment
@@ -18,8 +19,10 @@ from Timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYear
 
 from Timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer
 
-from Timetable.filters import TeacherFromSameSchoolFilterBackend
+from Timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter
 from Timetable import utils
+
+from Timetable.serializers import HolidaySerializer
 
 
 class SchoolCreate(CreateView):
@@ -147,6 +150,9 @@ class CourseSectionOnlyListViewSet(ListModelMixin, GenericViewSet):
             return Course.objects.filter(school=school).values('section').distinct()
 
 
-
-
-
+class HolidayViewSet(ModelViewSet):
+    queryset = Holiday.objects.all()
+    serializer_class = HolidaySerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = HolidayPeriodFilter
