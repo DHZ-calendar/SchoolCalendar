@@ -4,7 +4,10 @@ from django.views.generic import TemplateView
 from django.urls import reverse_lazy
 from django.contrib.auth.models import User
 
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ViewSet, GenericViewSet
+from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, \
+    UpdateModelMixin
+from rest_framework.permissions import IsAuthenticated
 
 from Timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday,\
                              Stage, Subject, HoursPerTeacherInClass, Assignment
@@ -13,7 +16,10 @@ from Timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYear
                             AbsenceBlockForm, HolidayForm, StageForm, SubjectForm, HoursPerTeacherInClassForm,\
                             AssignmentForm
 
-from Timetable.serializers import UserSerializer
+from Timetable.serializers import TeacherSerializer, CourseYearOnlySerializer
+
+from Timetable.filters import TeacherFromSameSchoolFilterBackend
+from Timetable import utils
 
 
 class SchoolCreate(CreateView):
@@ -104,6 +110,30 @@ class TimetableView(TemplateView):
     template_name = 'Timetable/timetable.html'
 
 
-class UserViewSet(ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+class TeacherViewSet(ModelViewSet):
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [TeacherFromSameSchoolFilterBackend]
+
+
+class CourseYearOnlyListViewSet(ListModelMixin,
+                                GenericViewSet):
+
+    serializer_class = CourseYearOnlySerializer
+    queryset = Course.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        :return: only the years of courses of the user logged's school
+        """
+        school = utils.get_school_from_user(self.request.user)
+        if school:
+            return Course.objects.filter(school=school).values('year').distinct()
+
+
+
+
+
+
