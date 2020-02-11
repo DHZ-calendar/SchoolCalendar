@@ -20,10 +20,10 @@ from Timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYear
 from Timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer
 
 from Timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
-    StagePeriodFilter
+    StagePeriodFilter, AbsenceBlockFilter
 from Timetable import utils
 
-from Timetable.serializers import HolidaySerializer, StageSerializer
+from Timetable.serializers import HolidaySerializer, StageSerializer, AbsenceBlockSerializer
 
 
 class CreateViewWithUser(CreateView):
@@ -75,7 +75,7 @@ class HourSlotCreate(CreateViewWithUser):
     success_url = reverse_lazy('hourslot-add')
 
 
-class AbsenceBlockCreate(CreateView):
+class AbsenceBlockCreate(CreateViewWithUser):
     model = AbsenceBlock
     form_class = AbsenceBlockForm
     template_name = 'Timetable/absenceBlock_form.html'

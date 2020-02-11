@@ -77,7 +77,15 @@ class HourSlotForm(BaseFormWithSchoolCheck):
         fields = ["hour_number", 'starts_at', 'ends_at', 'school', 'school_year', 'day_of_week', 'legal_duration']
 
 
-class AbsenceBlockForm(ModelForm):
+class AbsenceBlockForm(BaseFormWithSchoolCheck):
+    """
+    It actually inherits the clean_school method, but doesn't have the school field. It shouldn't be a problem.
+    """
+    def __init__(self, user, *args, **kwargs):
+        super(AbsenceBlockForm, self).__init__(user, *args, **kwargs)
+        self.user = user
+        self.fields['teacher'] = forms.ModelChoiceField(
+            queryset=Teacher.objects.filter(school__id=get_school_from_user(self.user).id))
 
     class Meta:
         model = AbsenceBlock

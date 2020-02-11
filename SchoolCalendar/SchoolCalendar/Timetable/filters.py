@@ -1,9 +1,9 @@
 from rest_framework.filters import BaseFilterBackend
 
-from django_filters import FilterSet, DateFilter
+from django_filters import FilterSet, DateFilter, ChoiceFilter
 
 from Timetable.utils import get_school_from_user
-from Timetable.models import Holiday, Stage
+from Timetable.models import Holiday, Stage, AbsenceBlock, Teacher, AdminSchool
 
 
 class TeacherFromSameSchoolFilterBackend(BaseFilterBackend):
@@ -30,7 +30,7 @@ class HolidayPeriodFilter(FilterSet):
 
     class Meta:
         model = Holiday
-        fields = ['from_date', 'to_date']
+        fields = ['from_date', 'to_date', 'school_year']
 
 
 class StagePeriodFilter(FilterSet):
