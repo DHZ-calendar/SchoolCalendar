@@ -14,3 +14,12 @@ def get_school_from_user(user):
     if admin_school:
         return admin_school[0].school
     return None
+
+
+def convert_weekday_into_0_6_format(day):
+    """
+    Dates go from 1 (Sunday) to 7 (Saturday), whereas our db keeps them from 0 (Monday) to 6 (Sunday)
+    :param day:
+    :return:
+    """
+    return (day - 2) % 7

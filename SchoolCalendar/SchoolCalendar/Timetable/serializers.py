@@ -4,7 +4,7 @@ from rest_framework.serializers import IntegerField, CharField, DateField, Seria
 import datetime
 
 from Timetable.models import Teacher, Holiday, Stage, AbsenceBlock, Assignment, HoursPerTeacherInClass, HourSlot
-
+from Timetable import utils
 
 class TeacherSerializer(ModelSerializer):
     class Meta:
@@ -98,6 +98,57 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
     """
     Serializer for teachers
     """
+    missing_hours = SerializerMethodField()
+    # missing_hours_bes = SerializerMethodField()
+
     class Meta:
         model = HoursPerTeacherInClass
-        fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'hours', 'hours_bes']
+        fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'hours', 'hours_bes', 'missing_hours']
+
+    def get_missing_hours(self, obj, *args, **kwargs):
+        """
+        Missing hours is computed over the hours the teacher needs to do for a given class,
+        and the hours already planned in that class.
+        :param obj:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        pass
+        assignments = Assignment.objects.filter(teacher=obj.teacher,
+                                                course=obj.course,
+                                                subject=obj.subject,
+                                                school=obj.school,
+                                                school_year=obj.school_year,
+                                                bes=False).values('date__week_day', 'hour_start', 'hour_end')
+
+        for el in assignments:
+            el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
+
+        hours_slots = HourSlot.objects.filter(school=obj.school,
+                                              school_year=obj.school_year).values("day_of_week", "starts_at",
+                                                                                  "ends_at", "legal_duration")
+        # Create a 3 dimensional map, indexed by day_of_week, starts_at, ends_at -> legal_duration
+        map_hour_slots = {}
+        for el in hours_slots:
+            if el['day_of_week'] not in map_hour_slots:
+                map_hour_slots[el['day_of_week']] = {}
+            if el['starts_at'] not in map_hour_slots[el['day_of_week']]:
+                map_hour_slots[el['day_of_week']][el['starts_at']] = {}
+            if el['ends_at'] not in map_hour_slots[el['day_of_week']][el['starts_at']]:
+                map_hour_slots[el['day_of_week']][el['starts_at']][el['ends_at']] = {}
+            map_hour_slots[el['day_of_week']][el['starts_at']][el['ends_at']] = el['legal_duration']
+
+        for el in assignments:
+            if el["date__week_day"] in map_hour_slots and el['hour_start'] in map_hour_slots[el['date__week_day']] and \
+                    el['hour_end'] in map_hour_slots[el['date__week_day']][el['hour_start']]:
+                el['legal_duration'] = map_hour_slots[el['date__week_day']][el['hour_start']][el['hour_end']]
+            else:
+                el['legal_duration'] = el['hour_end'] - el['hour_start']
+
+        total = datetime.timedelta(0)
+        for el in assignments:
+            total += el['legal_duration']
+
+        return obj.hours - int(total.seconds/3600)
+
