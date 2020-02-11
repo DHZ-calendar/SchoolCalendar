@@ -92,3 +92,12 @@ class HourSlotSerializer(ModelSerializer):
     class Meta:
         model = HourSlot
         fields = ['hour_number', 'starts_at', 'ends_at', 'school', 'school_year', 'day_of_week', 'legal_duration']
+
+
+class HoursPerTeacherInClassSerializer(ModelSerializer):
+    """
+    Serializer for teachers
+    """
+    class Meta:
+        model = HoursPerTeacherInClass
+        fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'hours', 'hours_bes']

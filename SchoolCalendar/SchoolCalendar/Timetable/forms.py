@@ -31,6 +31,73 @@ class BaseFormWithSchoolCheck(ModelForm):
         return self.cleaned_data['school']
 
 
+class BaseFormWithTeacherAndSchoolCheck(BaseFormWithSchoolCheck):
+    """
+    Base form class, which allows to retrieve only the correct teachers according to the school of the user logged
+    """
+    def __init__(self, user, *args, **kwargs):
+        super(BaseFormWithTeacherAndSchoolCheck, self).__init__(user, *args, **kwargs)
+        self.fields['teacher'] = forms.ModelChoiceField(
+            queryset=Teacher.objects.filter(school__id=get_school_from_user(self.user).id))
+
+    def clean_teacher(self):
+        """
+        Check whether the teacher is in the school of the user logged.
+        Somewhere else we should check that the user logged has enough permissions to do anything with a teacher.
+        :return:
+        """
+        if get_school_from_user(self.user) != self.cleaned_data['teacher'].school:
+            self.add_error(None, forms.ValidationError(_('The teacher {} is not in the School ({}).'.format(
+                self.cleaned_data['teacher'], self.cleaned_data['teacher'].school
+            ))))
+        return self.cleaned_data['teacher']
+
+
+class BaseFormWithCourseTeacherAndSchoolCheck(BaseFormWithTeacherAndSchoolCheck):
+    """
+    Base form class, which allows to retrieve only the correct course according to the school of the user logged
+    """
+    def __init__(self, user, *args, **kwargs):
+        super(BaseFormWithCourseTeacherAndSchoolCheck, self).__init__(user, *args, **kwargs)
+        self.fields['course'] = forms.ModelChoiceField(
+            queryset=Course.objects.filter(school__id=get_school_from_user(self.user).id))
+
+    def clean_course(self):
+        """
+        Check whether the course is in the school of the user logged.
+        Somewhere else we should check that the user logged has enough permissions to do anything with a course.
+        :return:
+        """
+        if get_school_from_user(self.user) != self.cleaned_data['course'].school:
+            self.add_error(None, forms.ValidationError(_('The course {} is not in the School ({}).'.format(
+                self.cleaned_data['course'], self.cleaned_data['course'].school
+            ))))
+        return self.cleaned_data['course']
+
+
+class BaseFormWithSubjectCourseTeacherAndSchoolCheck(BaseFormWithCourseTeacherAndSchoolCheck):
+    """
+    Base form class, which allows to retrieve only the correct subject according to the school of the user logged.
+    Moreover it inherits from BaseFormWithCourseTeacherAndSchoolCheck
+    """
+    def __init__(self, user, *args, **kwargs):
+        super(BaseFormWithSubjectCourseTeacherAndSchoolCheck, self).__init__(user, *args, **kwargs)
+        self.fields['subject'] = forms.ModelChoiceField(
+            queryset=Subject.objects.filter(school__id=get_school_from_user(self.user).id))
+
+    def clean_subject(self):
+        """
+        Check whether the course is in the school of the user logged.
+        Somewhere else we should check that the user logged has enough permissions to do anything with a course.
+        :return:
+        """
+        if get_school_from_user(self.user) != self.cleaned_data['subject'].school:
+            self.add_error(None, forms.ValidationError(_('The subject {} is not taught in the School ({}).'.format(
+                self.cleaned_data['subject'], self.cleaned_data['subject'].school
+            ))))
+        return self.cleaned_data['subject']
+
+
 class TeacherForm(UserCreationForm, BaseFormWithSchoolCheck):
     class Meta:
         model = Teacher
@@ -77,16 +144,10 @@ class HourSlotForm(BaseFormWithSchoolCheck):
         fields = ["hour_number", 'starts_at', 'ends_at', 'school', 'school_year', 'day_of_week', 'legal_duration']
 
 
-class AbsenceBlockForm(BaseFormWithSchoolCheck):
+class AbsenceBlockForm(BaseFormWithTeacherAndSchoolCheck):
     """
     It actually inherits the clean_school method, but doesn't have the school field. It shouldn't be a problem.
     """
-    def __init__(self, user, *args, **kwargs):
-        super(AbsenceBlockForm, self).__init__(user, *args, **kwargs)
-        self.user = user
-        self.fields['teacher'] = forms.ModelChoiceField(
-            queryset=Teacher.objects.filter(school__id=get_school_from_user(self.user).id))
-
     class Meta:
         model = AbsenceBlock
         fields = ['teacher', 'hour_slot', 'school_year']
@@ -115,8 +176,7 @@ class HolidayForm(BaseFormWithSchoolCheck):
         return self.cleaned_data
 
 
-class StageForm(BaseFormWithSchoolCheck):
-
+class StageForm(BaseFormWithCourseTeacherAndSchoolCheck):
     date_start = forms.DateField(widget=forms.TextInput(attrs={
         'class': 'datepicker'
     }))
@@ -127,6 +187,19 @@ class StageForm(BaseFormWithSchoolCheck):
     class Meta:
         model = Stage
         fields = ['date_start', 'date_end', 'course', 'name', 'school', 'school_year']
+
+    def __init__(self, user, *args, **kwargs):
+        """
+        A bit dirty here:
+        We have no teacher here, but we have it among the fields, as we inherit from
+        BaseFormWithCourseTeacherAndSchoolCheck.
+        Therefore, we need to remove after having populated fields with super.
+        :param user:
+        :param args:
+        :param kwargs:
+        """
+        super(StageForm, self).__init__(user, *args, **kwargs)
+        self.fields.pop('teacher')
 
     def clean(self):
         """
@@ -146,7 +219,7 @@ class SubjectForm(BaseFormWithSchoolCheck):
         fields = ['name', 'school', 'school_year']
 
 
-class HoursPerTeacherInClassForm(BaseFormWithSchoolCheck):
+class HoursPerTeacherInClassForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck):
 
     class Meta:
         model = HoursPerTeacherInClass
