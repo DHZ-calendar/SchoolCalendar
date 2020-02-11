@@ -19,7 +19,7 @@ from Timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYear
 
 from Timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer
 
-from Timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter
+from Timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool
 from Timetable import utils
 
 from Timetable.serializers import HolidaySerializer
@@ -154,5 +154,5 @@ class HolidayViewSet(ModelViewSet):
     queryset = Holiday.objects.all()
     serializer_class = HolidaySerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (QuerysetFromSameSchool,)
     filterset_class = HolidayPeriodFilter

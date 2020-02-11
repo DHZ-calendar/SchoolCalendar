@@ -15,6 +15,15 @@ class TeacherFromSameSchoolFilterBackend(BaseFilterBackend):
         return queryset.filter(school=school.id)
 
 
+class QuerysetFromSameSchool(BaseFilterBackend):
+    """
+    Generic filter that filters any queryset by school
+    """
+    def filter_queryset(self, request, queryset, view):
+        school = get_school_from_user(request.user)
+        return queryset.filter(school=school.id)
+
+
 class HolidayPeriodFilter(FilterSet):
     to_date = DateFilter(field_name='date_start', lookup_expr='lte')
     from_date = DateFilter(field_name='date_end', lookup_expr='gte')
