@@ -39,4 +39,4 @@ class StagePeriodFilter(FilterSet):
 
     class Meta:
         model = Stage
-        fields = ['from_date', 'to_date']
+        fields = ['from_date', 'to_date', 'school_year']

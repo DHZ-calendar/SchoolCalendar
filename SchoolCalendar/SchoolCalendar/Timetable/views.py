@@ -20,10 +20,10 @@ from Timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYear
 from Timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer
 
 from Timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
-    StagePeriodFilter, AbsenceBlockFilter
+    StagePeriodFilter
 from Timetable import utils
 
-from Timetable.serializers import HolidaySerializer, StageSerializer, AbsenceBlockSerializer
+from Timetable.serializers import HolidaySerializer, StageSerializer, HourSlotSerializer
 
 
 class CreateViewWithUser(CreateView):
@@ -54,7 +54,7 @@ class AdminSchoolCreate(CreateView):
     success_url = reverse_lazy('adminschool-add')
 
 
-class SchoolYearCreate(CreateViewWithUser):
+class SchoolYearCreate(CreateView):
     model = SchoolYear
     form_class = SchoolYearForm
     template_name = 'Timetable/school_year_form.html'
@@ -162,7 +162,7 @@ class HolidayViewSet(ModelViewSet):
     queryset = Holiday.objects.all()
     serializer_class = HolidaySerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = (QuerysetFromSameSchool,)
+    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
     filterset_class = HolidayPeriodFilter
 
 
@@ -170,5 +170,12 @@ class StageViewSet(ModelViewSet):
     queryset = Stage.objects.all()
     serializer_class = StageSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = (QuerysetFromSameSchool,)
+    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
     filterset_class = StagePeriodFilter
+
+#
+# class HourSlotsViewSet(ModelViewSet):
+#     queryset = HourSlot.objects.all()
+#     serializer_class = HourSlotSerializer
+#     permission_classes = [IsAuthenticated]
+#     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool,)

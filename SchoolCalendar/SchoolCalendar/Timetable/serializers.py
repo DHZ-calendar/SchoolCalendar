@@ -70,7 +70,6 @@ class AbstractTimePeriodSerializer(ModelSerializer):
 class HolidaySerializer(AbstractTimePeriodSerializer):
     """
     Returns the holiday filtered in a given period.
-
     """
     class Meta:
         model = Holiday
@@ -84,3 +83,10 @@ class StageSerializer(AbstractTimePeriodSerializer):
     class Meta:
         model = Stage
         fields = ['start', 'end', 'date_start', 'date_end', 'name', 'course', 'school', 'school_year']
+
+
+class HourSlotSerializer(ModelSerializer):
+    """
+    Serializer for Hour Slots. No period filter is required
+    """
+    pass

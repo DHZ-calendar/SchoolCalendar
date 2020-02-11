@@ -2,8 +2,7 @@ from django.urls import path, re_path, include
 from Timetable.views import SchoolCreate, TeacherCreate, AdminSchoolCreate, SchoolYearCreate, CourseCreate,\
                             HourSlotCreate, AbsenceBlockCreate, HolidayCreate, StageCreate, SubjectCreate, \
                             HoursPerTeacherInClassCreate, AssignmentCreate, TimetableView, TeacherViewSet, \
-                            CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
-                            AbsenceBlockViewSet
+                            CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet
 
 from rest_framework.routers import DefaultRouter
 
