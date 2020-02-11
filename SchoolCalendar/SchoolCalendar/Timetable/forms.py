@@ -6,7 +6,7 @@ from django.utils.translation import gettext as _
 
 from Timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday,\
                              Stage, Subject, HoursPerTeacherInClass, Assignment
-
+from Timetable.utils import get_school_from_user
 
 class SchoolForm(ModelForm):
     class Meta:
@@ -80,6 +80,11 @@ class HolidayForm(ModelForm):
         model = Holiday
         fields = ['date_start', 'date_end', 'name', 'school', 'school_year']
 
+    def __init__(self, user, *args, **kwargs):
+        super(HolidayForm, self).__init__(*args, **kwargs)
+        self.user = user
+        self.fields['school'] = forms.ModelChoiceField(queryset=School.objects.filter(id=get_school_from_user(self.user).id))
+
     def clean(self):
         """
         We need to check whether date_start <= date_end
@@ -89,6 +94,10 @@ class HolidayForm(ModelForm):
             self.add_error(None, forms.ValidationError(_('The date_start field can\'t be later than the end date')))
 
         return self.cleaned_data
+
+    def clean_school(self):
+        if get_school_from_user(self.user) != self.cleaned_data['school']:
+            self.add_error(None, forms.ValidationError(_('The school is not a valid choice.')))
 
 
 class StageForm(ModelForm):

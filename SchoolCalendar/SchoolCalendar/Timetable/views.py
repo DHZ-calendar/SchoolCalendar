@@ -76,6 +76,10 @@ class AbsenceBlockCreate(CreateView):
 
 
 class HolidayCreate(CreateView):
+    def get_form_kwargs(self):
+        kwargs = super(HolidayCreate, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
     model = Holiday
     form_class = HolidayForm
     template_name = 'Timetable/holiday_form.html'
