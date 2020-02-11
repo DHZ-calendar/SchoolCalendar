@@ -20,7 +20,7 @@ from Timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYear
 from Timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer
 
 from Timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
-    StagePeriodFilter
+    StagePeriodFilter, HourSlotFilter
 from Timetable import utils
 
 from Timetable.serializers import HolidaySerializer, StageSerializer, HourSlotSerializer
@@ -173,9 +173,11 @@ class StageViewSet(ModelViewSet):
     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
     filterset_class = StagePeriodFilter
 
-#
-# class HourSlotsViewSet(ModelViewSet):
-#     queryset = HourSlot.objects.all()
-#     serializer_class = HourSlotSerializer
-#     permission_classes = [IsAuthenticated]
-#     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool,)
+
+class HourSlotViewSet(ModelViewSet):
+    queryset = HourSlot.objects.all()
+    serializer_class = HourSlotSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool,)
+    filterset_class = HourSlotFilter
+

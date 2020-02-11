@@ -3,7 +3,7 @@ from rest_framework.serializers import HyperlinkedModelSerializer, ModelSerializ
 from rest_framework.serializers import IntegerField, CharField, DateField, SerializerMethodField
 import datetime
 
-from Timetable.models import Teacher, Holiday, Stage, AbsenceBlock, Assignment, HoursPerTeacherInClass
+from Timetable.models import Teacher, Holiday, Stage, AbsenceBlock, Assignment, HoursPerTeacherInClass, HourSlot
 
 
 class TeacherSerializer(ModelSerializer):
@@ -89,4 +89,6 @@ class HourSlotSerializer(ModelSerializer):
     """
     Serializer for Hour Slots. No period filter is required
     """
-    pass
+    class Meta:
+        model = HourSlot
+        fields = ['hour_number', 'starts_at', 'ends_at', 'school', 'school_year', 'day_of_week', 'legal_duration']
