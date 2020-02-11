@@ -3,7 +3,7 @@ from rest_framework.serializers import HyperlinkedModelSerializer, ModelSerializ
 from rest_framework.serializers import IntegerField, CharField, DateField, SerializerMethodField
 import datetime
 
-from Timetable.models import Teacher, Holiday
+from Timetable.models import Teacher, Holiday, Stage
 
 
 class TeacherSerializer(ModelSerializer):
@@ -31,11 +31,13 @@ class CourseSectionOnlySerializer(Serializer):
     section = CharField()
 
 
-class HolidaySerializer(ModelSerializer):
+class AbstractTimePeriodSerializer(ModelSerializer):
     """
-    Returns the holiday filtered in a given period.
-    date_start and date_end are the actual extremes of the holiday interval
-    start end are the extremes of the intersection among the holiday interval and the period filtered
+    date_start and date_end are the actual extremes of the model interval
+    start and end are the extremes of the intersection among the model interval and the period filtered
+
+    For instance, if the model has a period from 4th January and 15th January, and the filtered period is 7-20th of
+    January, then start and end are 7-15th of January.
     """
     start = SerializerMethodField()
     end = SerializerMethodField()
@@ -64,6 +66,21 @@ class HolidaySerializer(ModelSerializer):
         end = end if end < obj.date_end else obj.date_end
         return end
 
+
+class HolidaySerializer(AbstractTimePeriodSerializer):
+    """
+    Returns the holiday filtered in a given period.
+
+    """
     class Meta:
         model = Holiday
         fields = ['start', 'end', 'date_start', 'date_end', 'name', 'school', 'school_year']
+
+
+class StageSerializer(AbstractTimePeriodSerializer):
+    """
+    Stage Serializer with period filter
+    """
+    class Meta:
+        model = Stage
+        fields = ['start', 'end', 'date_start', 'date_end', 'name', 'course', 'school', 'school_year']
