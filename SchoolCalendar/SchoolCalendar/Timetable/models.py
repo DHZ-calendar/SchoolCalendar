@@ -151,6 +151,7 @@ class Stage(models.Model):
     course = models.ForeignKey(Course, null=False, blank=False, on_delete=models.CASCADE)
     school = models.ForeignKey(School, null=False, blank=False, on_delete=models.CASCADE)
     school_year = models.ForeignKey(SchoolYear, null=False, blank=False, on_delete=models.CASCADE)
+    name = models.CharField(null=True, blank=True, max_length=256)
 
 
 class Subject(models.Model):
