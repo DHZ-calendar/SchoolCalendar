@@ -8,19 +8,36 @@ from Timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, C
                              Stage, Subject, HoursPerTeacherInClass, Assignment
 from Timetable.utils import get_school_from_user
 
+
 class SchoolForm(ModelForm):
     class Meta:
         model = School
         fields = ['name']
 
 
-class TeacherForm(UserCreationForm):
+class BaseFormWithSchoolCheck(ModelForm):
+    """
+    Base form class, which allows to retrieve only the correct schools, and perform clean on the school field
+    """
+    def __init__(self, user, *args, **kwargs):
+        super(BaseFormWithSchoolCheck, self).__init__(*args, **kwargs)
+        self.user = user
+        self.fields['school'] = forms.ModelChoiceField(
+            queryset=School.objects.filter(id=get_school_from_user(self.user).id))
+
+    def clean_school(self):
+        if get_school_from_user(self.user) != self.cleaned_data['school']:
+            self.add_error(None, forms.ValidationError(_('The school is not a valid choice.')))
+        return self.cleaned_data['school']
+
+
+class TeacherForm(UserCreationForm, BaseFormWithSchoolCheck):
     class Meta:
         model = Teacher
         fields = ['username', 'first_name', 'last_name', 'email', 'school', 'notes']
 
 
-class AdminSchoolForm(UserCreationForm):
+class AdminSchoolForm(UserCreationForm, BaseFormWithSchoolCheck):
     class Meta:
         model = AdminSchool
         fields = ['username', 'first_name', 'last_name', 'email', 'school']
@@ -36,7 +53,7 @@ class SchoolYearForm(ModelForm):
         fields = ['year_start', 'date_start']
 
 
-class CourseForm(ModelForm):
+class CourseForm(BaseFormWithSchoolCheck):
     year = forms.IntegerField(help_text="This is the class number, for class IA for instance it is 1.")
 
     class Meta:
@@ -44,7 +61,7 @@ class CourseForm(ModelForm):
         fields = ['year', 'section', 'school_year', 'school']
 
 
-class HourSlotForm(ModelForm):
+class HourSlotForm(BaseFormWithSchoolCheck):
     starts_at = forms.TimeField(widget=forms.TextInput(attrs={
         'class': 'datepicker'
     }))
@@ -67,7 +84,7 @@ class AbsenceBlockForm(ModelForm):
         fields = ['teacher', 'hour_slot', 'school_year']
 
 
-class HolidayForm(ModelForm):
+class HolidayForm(BaseFormWithSchoolCheck):
 
     date_start = forms.DateField(widget=forms.TextInput(attrs={
         'class': 'datepicker'
@@ -80,11 +97,6 @@ class HolidayForm(ModelForm):
         model = Holiday
         fields = ['date_start', 'date_end', 'name', 'school', 'school_year']
 
-    def __init__(self, user, *args, **kwargs):
-        super(HolidayForm, self).__init__(*args, **kwargs)
-        self.user = user
-        self.fields['school'] = forms.ModelChoiceField(queryset=School.objects.filter(id=get_school_from_user(self.user).id))
-
     def clean(self):
         """
         We need to check whether date_start <= date_end
@@ -92,15 +104,10 @@ class HolidayForm(ModelForm):
         """
         if self.cleaned_data['date_start'] > self.cleaned_data['date_end']:
             self.add_error(None, forms.ValidationError(_('The date_start field can\'t be later than the end date')))
-
         return self.cleaned_data
 
-    def clean_school(self):
-        if get_school_from_user(self.user) != self.cleaned_data['school']:
-            self.add_error(None, forms.ValidationError(_('The school is not a valid choice.')))
 
-
-class StageForm(ModelForm):
+class StageForm(BaseFormWithSchoolCheck):
 
     date_start = forms.DateField(widget=forms.TextInput(attrs={
         'class': 'datepicker'
@@ -111,7 +118,7 @@ class StageForm(ModelForm):
 
     class Meta:
         model = Stage
-        fields = ['date_start', 'date_end', 'course', 'school', 'school_year']
+        fields = ['date_start', 'date_end', 'course', 'name', 'school', 'school_year']
 
     def clean(self):
         """
@@ -124,21 +131,21 @@ class StageForm(ModelForm):
         return self.cleaned_data
 
 
-class SubjectForm(ModelForm):
+class SubjectForm(BaseFormWithSchoolCheck):
 
     class Meta:
         model = Subject
         fields = ['name', 'school', 'school_year']
 
 
-class HoursPerTeacherInClassForm(ModelForm):
+class HoursPerTeacherInClassForm(BaseFormWithSchoolCheck):
 
     class Meta:
         model = HoursPerTeacherInClass
         fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'hours', 'hours_bes']
 
 
-class AssignmentForm(ModelForm):
+class AssignmentForm(BaseFormWithSchoolCheck):
     date = forms.DateField(widget=forms.TextInput(attrs={
         'class': 'datepicker'
     }))

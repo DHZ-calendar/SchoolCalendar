@@ -26,6 +26,13 @@ from Timetable import utils
 from Timetable.serializers import HolidaySerializer, StageSerializer
 
 
+class CreateViewWithUser(CreateView):
+    def get_form_kwargs(self):
+        kwargs = super(CreateViewWithUser, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+
 class SchoolCreate(CreateView):
     model = School
     form_class = SchoolForm
@@ -33,7 +40,7 @@ class SchoolCreate(CreateView):
     success_url = reverse_lazy('school-add')
 
 
-class TeacherCreate(CreateView):
+class TeacherCreate(CreateViewWithUser):
     model = Teacher
     form_class = TeacherForm
     template_name = 'Timetable/teacher_form.html'
@@ -47,21 +54,21 @@ class AdminSchoolCreate(CreateView):
     success_url = reverse_lazy('adminschool-add')
 
 
-class SchoolYearCreate(CreateView):
+class SchoolYearCreate(CreateViewWithUser):
     model = SchoolYear
     form_class = SchoolYearForm
     template_name = 'Timetable/school_year_form.html'
     success_url = reverse_lazy('school_year-add')
 
 
-class CourseCreate(CreateView):
+class CourseCreate(CreateViewWithUser):
     model = Course
     form_class = CourseForm
     template_name = 'Timetable/course_form.html'
     success_url = reverse_lazy('course-add')
 
 
-class HourSlotCreate(CreateView):
+class HourSlotCreate(CreateViewWithUser):
     model = HourSlot
     form_class = HourSlotForm
     template_name = 'Timetable/hourslot_form.html'
@@ -75,39 +82,35 @@ class AbsenceBlockCreate(CreateView):
     success_url = reverse_lazy('absenceblock-add')
 
 
-class HolidayCreate(CreateView):
-    def get_form_kwargs(self):
-        kwargs = super(HolidayCreate, self).get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
+class HolidayCreate(CreateViewWithUser):
     model = Holiday
     form_class = HolidayForm
     template_name = 'Timetable/holiday_form.html'
     success_url = reverse_lazy('holiday-add')
 
 
-class StageCreate(CreateView):
+class StageCreate(CreateViewWithUser):
     model = Stage
     form_class = StageForm
     template_name = 'Timetable/stage_form.html'
     success_url = reverse_lazy('stage-add')
 
 
-class SubjectCreate(CreateView):
+class SubjectCreate(CreateViewWithUser):
     model = Subject
     form_class = SubjectForm
     template_name = 'Timetable/subject_form.html'
     success_url = reverse_lazy('subject-add')
 
 
-class HoursPerTeacherInClassCreate(CreateView):
+class HoursPerTeacherInClassCreate(CreateViewWithUser):
     model = HoursPerTeacherInClass
     form_class = HoursPerTeacherInClassForm
     template_name = 'Timetable/hoursPerTeacherInClass_form.html'
     success_url = reverse_lazy('hours_per_teacher_in_class-add')
 
 
-class AssignmentCreate(CreateView):
+class AssignmentCreate(CreateViewWithUser):
     model = Assignment
     form_class = AssignmentForm
     template_name = 'Timetable/assignment_form.html'
