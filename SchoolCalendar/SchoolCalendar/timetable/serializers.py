@@ -100,35 +100,25 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
     Serializer for teachers
     """
     missing_hours = SerializerMethodField()
-    # missing_hours_bes = SerializerMethodField()
+    missing_hours_bes = SerializerMethodField()
 
     class Meta:
         model = HoursPerTeacherInClass
-        fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'hours', 'hours_bes', 'missing_hours']
+        fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'hours', 'hours_bes', 'missing_hours',
+                  'missing_hours_bes']
 
-    def get_missing_hours(self, obj, *args, **kwargs):
+    def compute_total_hours_assignments(self, assignments, hours_slots):
         """
-        Missing hours is computed over the hours the teacher needs to do for a given class,
-        and the hours already planned in that class.
-        :param obj:
-        :param args:
-        :param kwargs:
-        :return:
+        In order to compute the total_hour_assignments for a teacher, we should merge assignments with the
+        hour_slots in a left outer join fashion.
+        Where there exists an hour slot for a given assignment, then we should use the 'legal_duration' field.
+        Where there is no time_slot for it, we should use instead the actual duration of the assignment.
+        :param assignments: the list of assignments for a given teacher, course, school_year, school, subject (bes can
+                            be both True or False)
+        :param hours_slots: the list of hour_slots for a given school and school_year
+        :return: the total number of hours planned (both past and in the future) for a given teacher, course, school,
+                 school_year, subject.
         """
-        pass
-        assignments = Assignment.objects.filter(teacher=obj.teacher,
-                                                course=obj.course,
-                                                subject=obj.subject,
-                                                school=obj.school,
-                                                school_year=obj.school_year,
-                                                bes=False).values('date__week_day', 'hour_start', 'hour_end')
-
-        for el in assignments:
-            el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
-
-        hours_slots = HourSlot.objects.filter(school=obj.school,
-                                              school_year=obj.school_year).values("day_of_week", "starts_at",
-                                                                                  "ends_at", "legal_duration")
         # Create a 3 dimensional map, indexed by day_of_week, starts_at, ends_at -> legal_duration
         map_hour_slots = {}
         for el in hours_slots:
@@ -150,6 +140,55 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
         total = datetime.timedelta(0)
         for el in assignments:
             total += el['legal_duration']
+        return total
 
+    def get_missing_hours(self, obj, *args, **kwargs):
+        """
+        Missing hours is computed over the hours the teacher needs to do for a given class,
+        and the hours already planned in that class.
+        :param obj:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        assignments = Assignment.objects.filter(teacher=obj.teacher,
+                                                course=obj.course,
+                                                subject=obj.subject,
+                                                school=obj.school,
+                                                school_year=obj.school_year,
+                                                bes=False).values('date__week_day', 'hour_start', 'hour_end')
+
+        for el in assignments:
+            el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
+
+        hours_slots = HourSlot.objects.filter(school=obj.school,
+                                              school_year=obj.school_year).values("day_of_week", "starts_at",
+                                                                                  "ends_at", "legal_duration")
+        total = self.compute_total_hours_assignments(assignments, hours_slots)
         return obj.hours - int(total.seconds/3600)
 
+    def get_missing_hours_bes(self, obj, *args, **kwargs):
+            """
+            Missing hours is computed over the hours the teacher needs to do for a given class,
+            and the hours already planned in that class.
+            :param obj:
+            :param args:
+            :param kwargs:
+            :return:
+            """
+            assignments = Assignment.objects.filter(teacher=obj.teacher,
+                                                    course=obj.course,
+                                                    subject=obj.subject,
+                                                    school=obj.school,
+                                                    school_year=obj.school_year,
+                                                    bes=True).values('date__week_day', 'hour_start', 'hour_end')
+
+            for el in assignments:
+                el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
+
+            hours_slots = HourSlot.objects.filter(school=obj.school,
+                                                  school_year=obj.school_year).values("day_of_week", "starts_at",
+                                                                                      "ends_at", "legal_duration")
+            total = self.compute_total_hours_assignments(assignments, hours_slots)
+
+            return obj.hours_bes - int(total.seconds / 3600)

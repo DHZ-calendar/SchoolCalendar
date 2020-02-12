@@ -47,7 +47,10 @@ class TeacherCreate(CreateViewWithUser):
     success_url = reverse_lazy('teacher-add')
 
 
-class AdminSchoolCreate(CreateView):
+class AdminSchoolCreate(CreateViewWithUser):
+    """
+    TODO: This should be made only by other admin_schools and superusers
+    """
     model = AdminSchool
     form_class = AdminSchoolForm
     template_name = 'timetable/adminschool_form.html'
