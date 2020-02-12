@@ -3,8 +3,8 @@ from rest_framework.serializers import HyperlinkedModelSerializer, ModelSerializ
 from rest_framework.serializers import IntegerField, CharField, DateField, SerializerMethodField
 import datetime
 
-from Timetable.models import Teacher, Holiday, Stage, AbsenceBlock, Assignment, HoursPerTeacherInClass, HourSlot
-from Timetable import utils
+from timetable.models import Teacher, Holiday, Stage, AbsenceBlock, Assignment, HoursPerTeacherInClass, HourSlot
+from timetable import utils
 
 class TeacherSerializer(ModelSerializer):
     class Meta:

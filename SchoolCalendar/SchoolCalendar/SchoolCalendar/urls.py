@@ -7,5 +7,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('timetable/', include('Timetable.urls'))
+    path('timetable/', include('timetable.urls'))
 ]

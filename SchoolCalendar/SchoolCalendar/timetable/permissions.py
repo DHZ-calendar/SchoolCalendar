@@ -1,6 +1,6 @@
 from rest_framework.permissions import BasePermission
 
-from Timetable.models import Teacher, AdminSchool
+from timetable.models import Teacher, AdminSchool
 
 #
 # class IsUserInSchool(BasePermission):

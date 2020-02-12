@@ -2,8 +2,8 @@ from rest_framework.filters import BaseFilterBackend
 
 from django_filters import FilterSet, DateFilter, ChoiceFilter
 
-from Timetable.utils import get_school_from_user
-from Timetable.models import Holiday, Stage, AbsenceBlock, Teacher, AdminSchool, HourSlot, HoursPerTeacherInClass
+from timetable.utils import get_school_from_user
+from timetable.models import Holiday, Stage, AbsenceBlock, Teacher, AdminSchool, HourSlot, HoursPerTeacherInClass
 
 
 class TeacherFromSameSchoolFilterBackend(BaseFilterBackend):

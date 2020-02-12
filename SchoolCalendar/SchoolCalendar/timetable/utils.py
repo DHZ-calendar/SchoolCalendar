@@ -1,4 +1,4 @@
-from Timetable.models import Teacher, AdminSchool
+from timetable.models import Teacher, AdminSchool
 
 
 def get_school_from_user(user):

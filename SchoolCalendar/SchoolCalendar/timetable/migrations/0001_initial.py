@@ -52,8 +52,8 @@ class Migration(migrations.Migration):
                 ('starts_at', models.TimeField()),
                 ('ends_at', models.TimeField()),
                 ('day_of_week', models.CharField(choices=[('Monday', 0), ('Tuesday', 1), ('Wednesday', 2), ('Thursday', 3), ('Friday', 4), ('Saturday', 5), ('Sunday', 6)], max_length=32)),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.School')),
-                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='Timetable.SchoolYear')),
+                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.School')),
+                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='timetable.SchoolYear')),
             ],
         ),
         migrations.CreateModel(
@@ -62,22 +62,22 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('year', models.IntegerField()),
                 ('section', models.CharField(max_length=256)),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.School')),
-                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='Timetable.SchoolYear')),
+                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.School')),
+                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='timetable.SchoolYear')),
             ],
         ),
         migrations.CreateModel(
             name='Teacher',
             fields=[
-                ('myuser_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='Timetable.MyUser')),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.School')),
+                ('myuser_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='timetable.MyUser')),
+                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.School')),
             ],
             options={
                 'verbose_name': 'user',
                 'verbose_name_plural': 'users',
                 'abstract': False,
             },
-            bases=('Timetable.myuser',),
+            bases=('timetable.myuser',),
             managers=[
                 ('objects', django.contrib.auth.models.UserManager()),
             ],
@@ -85,15 +85,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AdminSchool',
             fields=[
-                ('myuser_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='Timetable.MyUser')),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.School')),
+                ('myuser_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='timetable.MyUser')),
+                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.School')),
             ],
             options={
                 'verbose_name': 'user',
                 'verbose_name_plural': 'users',
                 'abstract': False,
             },
-            bases=('Timetable.myuser',),
+            bases=('timetable.myuser',),
             managers=[
                 ('objects', django.contrib.auth.models.UserManager()),
             ],

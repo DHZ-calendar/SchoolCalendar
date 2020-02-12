@@ -4,9 +4,9 @@ from django.contrib.auth.forms import UserCreationForm
 from durationwidget.widgets import TimeDurationWidget
 from django.utils.translation import gettext as _
 
-from Timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday,\
+from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday,\
                              Stage, Subject, HoursPerTeacherInClass, Assignment
-from Timetable.utils import get_school_from_user
+from timetable.utils import get_school_from_user
 
 
 class SchoolForm(ModelForm):

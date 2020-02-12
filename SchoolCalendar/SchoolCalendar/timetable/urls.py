@@ -1,5 +1,5 @@
 from django.urls import path, re_path, include
-from Timetable.views import SchoolCreate, TeacherCreate, AdminSchoolCreate, SchoolYearCreate, CourseCreate,\
+from timetable.views import SchoolCreate, TeacherCreate, AdminSchoolCreate, SchoolYearCreate, CourseCreate,\
                             HourSlotCreate, AbsenceBlockCreate, HolidayCreate, StageCreate, SubjectCreate, \
                             HoursPerTeacherInClassCreate, AssignmentCreate, TimetableView, TeacherViewSet, \
                             CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \

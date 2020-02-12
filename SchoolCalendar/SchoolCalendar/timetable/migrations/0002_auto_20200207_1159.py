@@ -8,7 +8,7 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('Timetable', '0001_initial'),
+        ('timetable', '0001_initial'),
     ]
 
     operations = [
@@ -34,8 +34,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=256)),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.School')),
-                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.SchoolYear')),
+                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.School')),
+                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.SchoolYear')),
             ],
         ),
         migrations.CreateModel(
@@ -43,9 +43,9 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('date', models.DateField()),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.Course')),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.School')),
-                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.SchoolYear')),
+                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.Course')),
+                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.School')),
+                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.SchoolYear')),
             ],
         ),
         migrations.CreateModel(
@@ -54,11 +54,11 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('hours', models.IntegerField()),
                 ('hours_bes', models.IntegerField()),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.Course')),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.School')),
-                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.SchoolYear')),
-                ('subject', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.Subject')),
-                ('teacher', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.Teacher')),
+                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.Course')),
+                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.School')),
+                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.SchoolYear')),
+                ('subject', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.Subject')),
+                ('teacher', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.Teacher')),
             ],
         ),
         migrations.CreateModel(
@@ -67,8 +67,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('date', models.DateField()),
                 ('name', models.CharField(max_length=256)),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='Timetable.School')),
-                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.SchoolYear')),
+                ('school', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='timetable.School')),
+                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.SchoolYear')),
             ],
         ),
         migrations.CreateModel(
@@ -81,20 +81,20 @@ class Migration(migrations.Migration):
                 ('bes', models.BooleanField(default=False)),
                 ('substitution', models.BooleanField(default=False)),
                 ('absent', models.BooleanField(default=False)),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.Course')),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.School')),
-                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.SchoolYear')),
-                ('subject', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.Subject')),
-                ('teacher', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.Teacher')),
+                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.Course')),
+                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.School')),
+                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.SchoolYear')),
+                ('subject', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.Subject')),
+                ('teacher', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.Teacher')),
             ],
         ),
         migrations.CreateModel(
             name='AbsenceBlock',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('hour_slot', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.HourSlot')),
-                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.SchoolYear')),
-                ('teacher', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Timetable.Teacher')),
+                ('hour_slot', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.HourSlot')),
+                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.SchoolYear')),
+                ('teacher', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='timetable.Teacher')),
             ],
         ),
     ]

@@ -1,9 +1,9 @@
-{% extends 'Timetable/base.html' %}
+{% extends 'timetable/base.html' %}
 {% load i18n %}
 
 {% block body %}
-    <h1>{% trans 'Holiday' %}</h1>
-    <form action="{% url 'holiday-add' %}" method="post">
+    <h1>{% trans 'School Year' %}</h1>
+    <form action="{% url 'school_year-add' %}" method="post">
         {% csrf_token %}
         {{ form }}
         <input type="submit" value="Submit">
