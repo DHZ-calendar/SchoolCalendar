@@ -18,13 +18,10 @@ class CourseYearOnlySerializer(Serializer):
     year = IntegerField()
 
 
-class CourseSectionOnlySerializer(Serializer):
-    def create(self, validated_data):
-        pass
-
-    def update(self, instance, validated_data):
-        pass
-    section = CharField()
+class CourseSectionOnlySerializer(ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['id', 'section', 'year']
 
 
 class AbstractTimePeriodSerializer(ModelSerializer):
@@ -66,7 +63,7 @@ class AbstractTimePeriodSerializer(ModelSerializer):
 class TeacherSerializer(ModelSerializer):
     class Meta:
         model = Teacher
-        fields = ['id', 'url', 'username', 'email', 'is_staff', 'school', 'notes']
+        fields = ['id', 'url', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'school', 'notes']
 
 
 class CourseSerializer(ModelSerializer):

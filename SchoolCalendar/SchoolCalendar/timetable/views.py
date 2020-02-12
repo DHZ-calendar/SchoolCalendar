@@ -154,21 +154,12 @@ class CourseYearOnlyListViewSet(ListModelMixin, GenericViewSet):
             return Course.objects.filter(school=school).values('year').distinct()
 
 
-class CourseSectionOnlyListViewSet(ListModelMixin, GenericViewSet):
-
+class CourseSectionOnlyListViewSet(ModelViewSet):
     serializer_class = CourseSectionOnlySerializer
-    queryset = Course.objects.all()   # I think it gets overridden by get_queryset
+    queryset = Course.objects.all()
     permission_classes = [IsAuthenticated]
     filterset_class = CourseSectionOnlyFilter
     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
-
-    def get_queryset(self):
-        """
-        :return: only the years of courses of the user logged's school
-        """
-        school = utils.get_school_from_user(self.request.user)
-        if school:
-            return Course.objects.filter(school=school).values('section').distinct()
 
 
 class HolidayViewSet(ModelViewSet):
