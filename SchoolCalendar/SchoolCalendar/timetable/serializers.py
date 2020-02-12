@@ -10,7 +10,7 @@ from timetable import utils
 class TeacherSerializer(ModelSerializer):
     class Meta:
         model = Teacher
-        fields = ['url', 'username', 'email', 'is_staff', 'school', 'notes']
+        fields = ['id', 'url', 'username', 'email', 'is_staff', 'school', 'notes']
 
 
 class CourseYearOnlySerializer(Serializer):

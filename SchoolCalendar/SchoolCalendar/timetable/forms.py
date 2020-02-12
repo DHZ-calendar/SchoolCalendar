@@ -226,7 +226,7 @@ class HoursPerTeacherInClassForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck)
         fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'hours', 'hours_bes']
 
 
-class AssignmentForm(BaseFormWithSchoolCheck):
+class AssignmentForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck):
     date = forms.DateField(widget=forms.TextInput(attrs={
         'class': 'datepicker'
     }))
