@@ -8,13 +8,13 @@ from timetable.views import SchoolCreate, TeacherCreate, AdminSchoolCreate, Scho
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
-router.register(r'teachers', TeacherViewSet)
-router.register(r'year_only_course', CourseYearOnlyListViewSet)
-router.register(r'section_only_course', CourseSectionOnlyListViewSet)
-router.register(r'holidays', HolidayViewSet)
-router.register(r'stages', StageViewSet)
-router.register(r'hour_slots', HourSlotViewSet)
-router.register(r'hour_per_teacher_in_class', HoursPerTeacherInClassViewSet)
+router.register(r'teachers', TeacherViewSet, basename='teacher')
+router.register(r'year_only_course', CourseYearOnlyListViewSet, basename='year_only_course')
+router.register(r'section_only_course', CourseSectionOnlyListViewSet, basename='section_only_course')
+router.register(r'holidays', HolidayViewSet, basename='holiday')
+router.register(r'stages', StageViewSet, basename='stage')
+router.register(r'hour_slots', HourSlotViewSet, basename='hour_slot')
+router.register(r'hour_per_teacher_in_class', HoursPerTeacherInClassViewSet, basename='hour_per_teacher_in_class')
 
 # router.register(r'absence_blocks', AbsenceBlockViewSet)
 
