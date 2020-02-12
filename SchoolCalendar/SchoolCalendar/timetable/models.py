@@ -85,7 +85,7 @@ class Course(models.Model):
         """
         :return: classes as 1 A, 2 Bord and so on (according to what year and section are like)
         """
-        return "{} {}".format(str(self.year), self.section)
+        return "{} {}, {}".format(str(self.year), self.section, str(self.school_year))
 
 
 class HourSlot(models.Model):
