@@ -215,6 +215,13 @@ class AssignmentSerializer(ModelSerializer):
     hour_slot = SerializerMethodField()
 
     def get_hour_slot(self, obj, *args, **kwargs):
+        """
+        TODO: should better add the hour slot as as a FK in the Assignment model
+        Per each Assignment, it returns the corresponding HourSlot (if it exists), otherwise None
+        The problem is that it makes a query for each instance of assignment!
+        :param obj: the assignment instance
+        :return:
+        """
         el = HourSlot.objects.filter(
             day_of_week=obj.date.weekday(),
             starts_at=obj.hour_start,
