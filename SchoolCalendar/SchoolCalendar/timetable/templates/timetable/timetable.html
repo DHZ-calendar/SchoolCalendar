@@ -125,6 +125,9 @@
 
             //update list of teachers
             getTeachers();
+
+            //update assignments
+            getAssignments();
         });
     }
 
@@ -144,6 +147,32 @@
                         <span>{% trans 'Missing hours' %}: ${tea.missing_hours} - {% trans 'B.E.S.' %}: ${tea.missing_hours_bes}</span><br/>
                     </li>`;
                 $('#teachers_list').append(html);
+            }
+        });
+    }
+
+    function getAssignments(startDate, endDate){
+        let url = "{% url 'assignments-list' %}";
+        let data = {
+            'school_year': $('#school_year').val(),
+            'course': $('#course_section').val(),
+            'from_date': startDate,
+            'to_date': endDate
+        };
+        timetable.deleteAllEvents();
+        $.get(url, data=data, function(data) {
+            for(let assign of data){
+                if(assign.hour_slot !== undefined){
+                    let teacher = assign.teacher.first_name + " " + assign.teacher.last_name;
+                    let customEvent = new Event(assign.hour_slot, teacher, assign.subject.name);
+                    let clickEvent = (event) => {
+                        alert("Lecture " + event.lecture + ", teacher " + event.teacher);
+                    };
+                    timetable.addEvent(customEvent, assign.hour_slot, clickEvent);
+                }
+                else{
+                    //TODO: assign custom id and create block if missing
+                }
             }
         });
     }

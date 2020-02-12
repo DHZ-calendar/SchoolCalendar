@@ -211,7 +211,7 @@ class AssignmentSerializer(ModelSerializer):
     Serializer for teachers
     """
     teacher = TeacherSerializer()
-    course = CourseSerializer()
+    subject = SubjectSerializer()
     hour_slot = SerializerMethodField()
 
     def get_hour_slot(self, obj, *args, **kwargs):
@@ -225,6 +225,7 @@ class AssignmentSerializer(ModelSerializer):
         if el:
             return el[0].id
         return None
+
 
     class Meta:
         model = Assignment
