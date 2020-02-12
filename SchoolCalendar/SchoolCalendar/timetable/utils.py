@@ -1,3 +1,5 @@
+import datetime
+
 from timetable.models import Teacher, AdminSchool
 
 
@@ -23,3 +25,7 @@ def convert_weekday_into_0_6_format(day):
     :return:
     """
     return (day - 2) % 7
+
+
+def get_closest_smaller_Monday():
+    return datetime.datetime.now().date() - datetime.timedelta(days=datetime.datetime.now().date().weekday())
