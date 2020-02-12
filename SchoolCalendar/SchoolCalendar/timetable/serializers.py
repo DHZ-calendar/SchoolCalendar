@@ -3,14 +3,9 @@ from rest_framework.serializers import HyperlinkedModelSerializer, ModelSerializ
 from rest_framework.serializers import IntegerField, CharField, DateField, SerializerMethodField
 import datetime
 
-from timetable.models import Teacher, Holiday, Stage, AbsenceBlock, Assignment, HoursPerTeacherInClass, HourSlot
+from timetable.models import Teacher, Holiday, Stage, AbsenceBlock, Assignment, HoursPerTeacherInClass, HourSlot, \
+    Course, Subject
 from timetable import utils
-
-
-class TeacherSerializer(ModelSerializer):
-    class Meta:
-        model = Teacher
-        fields = ['id', 'url', 'username', 'email', 'is_staff', 'school', 'notes']
 
 
 class CourseYearOnlySerializer(Serializer):
@@ -68,6 +63,24 @@ class AbstractTimePeriodSerializer(ModelSerializer):
         return end
 
 
+class TeacherSerializer(ModelSerializer):
+    class Meta:
+        model = Teacher
+        fields = ['id', 'url', 'username', 'email', 'is_staff', 'school', 'notes']
+
+
+class CourseSerializer(ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['id', 'year', 'school', 'school_year', 'section']
+
+
+class SubjectSerializer(ModelSerializer):
+    class Meta:
+        model = Subject
+        fields = ['id', 'name', 'school', 'school_year']
+
+
 class HolidaySerializer(AbstractTimePeriodSerializer):
     """
     Returns the holiday filtered in a given period.
@@ -101,6 +114,8 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
     """
     missing_hours = SerializerMethodField()
     missing_hours_bes = SerializerMethodField()
+    teacher = TeacherSerializer()
+    subject = SubjectSerializer()
 
     class Meta:
         model = HoursPerTeacherInClass
