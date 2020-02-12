@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, UserManager, AbstractUser
 from django.utils.translation import gettext as _
 
 # Create your models here.
@@ -16,7 +16,7 @@ DAYS_OF_WEEK = (
 )
 
 
-class MyUser(User):
+class MyUser(AbstractUser):
     """
     Custom Subclass for User (in case we ever need it)
     """
@@ -49,6 +49,8 @@ class AdminSchool(MyUser):
     """
     This is the headmaster, the only user capable to create the timetable
     """
+    class Meta:
+        verbose_name = 'Admin School'
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False)
 
 

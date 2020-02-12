@@ -6,6 +6,7 @@ import datetime
 from timetable.models import Teacher, Holiday, Stage, AbsenceBlock, Assignment, HoursPerTeacherInClass, HourSlot
 from timetable import utils
 
+
 class TeacherSerializer(ModelSerializer):
     class Meta:
         model = Teacher
