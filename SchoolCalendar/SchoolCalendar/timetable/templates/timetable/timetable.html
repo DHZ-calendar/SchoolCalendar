@@ -5,6 +5,8 @@
 <!-- TODO: change using git submodule -->
 <link rel="stylesheet" href="https://raw.githack.com/DHZ-calendar/timetable.js/develop/timetable.css"/>
 <script src="https://raw.githack.com/DHZ-calendar/timetable.js/develop/timetable.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 {% endblock %}
 
 {% block style %}  
@@ -43,10 +45,10 @@
         <div class="col-10">
             <div class="row">                
                 <div class="col text-left">
-                    <button type="button" class="btn btn-secondary btn-sm"><- {% trans 'Previous week'%}</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="goPrevWeek()"><- {% trans 'Previous week'%}</button>
                 </div>
                 <div class="col text-right">
-                    <button type="button" class="btn btn-secondary btn-sm">{% trans 'Next week'%} -></button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="goNextWeek()">{% trans 'Next week'%} -></button>
                 </div>
             </div>
             <table class="container-fluid" id="calendar">
@@ -67,19 +69,51 @@
 
 {% block script %}
     let timetable;
+    let currentDate;
     $(document).ready(() => {
         let cal = $("#calendar");
         timetable = new Timetable(cal, 7, 23);
 
+        //find the first day of the week        
+        currentDate = moment().day(1).toDate();
+
         getBlocks();
+        loadData();
         getClassYears();
     });
+
+    function loadData(){
+        let startDate = currentDate;
+        let endDate = moment(startDate).add(6, 'days').toDate();
+
+        timetable.setDays(new Date(startDate));
+
+        getHolidays(startDate, endDate);
+        getStages(startDate, endDate);
+        getAssignments(startDate, endDate);
+    }
+
+    function goNextWeek(){
+        currentDate = moment(currentDate).add(7, 'days').toDate();
+        loadData();
+    }
+    function goPrevWeek(){
+        currentDate = moment(currentDate).subtract(7, 'days').toDate();
+        loadData();
+    }
 
     function parseStringTime(time){
         let arr = time.split(':');
         let hours = parseInt(arr[0]);
         let min = parseInt(arr[1]);
         return { hours: hours, min: min };
+    }
+    function formatDate(date){
+        if(date === undefined)
+            return date;
+
+        let frm = (x) => ("0" + x).slice(-2);
+        return date.getFullYear() + "-" + frm(date.getMonth() + 1) + "-" + frm(date.getDate());
     }
 
     function getBlocks(){
@@ -156,8 +190,8 @@
         let data = {
             'school_year': $('#school_year').val(),
             'course': $('#course_section').val(),
-            'from_date': startDate,
-            'to_date': endDate
+            'from_date': formatDate(startDate),
+            'to_date': formatDate(endDate)
         };
         timetable.deleteAllEvents();
         $.get(url, data=data, function(data) {
@@ -172,6 +206,44 @@
                 }
                 else{
                     //TODO: assign custom id and create block if missing
+                }
+            }
+        });
+    }
+
+    function getHolidays(startDate, endDate){
+        let url = "{% url 'holiday-list' %}";
+        let data = {
+            'school_year': $('#school_year').val(),
+            'from_date': formatDate(startDate),
+            'to_date': formatDate(endDate)
+        };
+        $.get(url, data=data, function(data) {
+            for(let day of data){
+                let start = moment(day.start);
+                let end = moment(day.end);
+                while(start <= end) {
+                    timetable.lockDay(start.weekday(), day.name);
+                    start.add(1, 'days');
+                }
+            }
+        });
+    }
+    function getStages(startDate, endDate){
+        let url = "{% url 'stage-list' %}";
+        let data = {
+            'school_year': $('#school_year').val(),
+            'course': $('#course_section').val(),
+            'from_date': formatDate(startDate),
+            'to_date': formatDate(endDate)
+        };
+        $.get(url, data=data, function(data) {
+            for(let day of data){
+                let start = moment(day.start);
+                let end = moment(day.end);
+                while(start <= end) {
+                    timetable.lockDay(start.weekday(), day.name);
+                    start.add(1, 'days');
                 }
             }
         });
