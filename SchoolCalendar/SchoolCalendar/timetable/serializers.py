@@ -212,8 +212,21 @@ class AssignmentSerializer(ModelSerializer):
     """
     teacher = TeacherSerializer()
     course = CourseSerializer()
-    
+    hour_slot = SerializerMethodField()
+
+    def get_hour_slot(self, obj, *args, **kwargs):
+        el = HourSlot.objects.filter(
+            day_of_week=obj.date.weekday(),
+            starts_at=obj.hour_start,
+            ends_at=obj.hour_end,
+            school=obj.school,
+            school_year=obj.school_year
+        )
+        if el:
+            return el[0].id
+        return None
+
     class Meta:
         model = Assignment
         fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'date', 'hour_start', 'hour_end',
-                  'bes', 'substitution', 'absent']
+                  'bes', 'substitution', 'absent', 'hour_slot']
