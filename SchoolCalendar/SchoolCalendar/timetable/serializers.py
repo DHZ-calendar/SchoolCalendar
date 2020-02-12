@@ -210,7 +210,9 @@ class AssignmentSerializer(ModelSerializer):
     """
     Serializer for teachers
     """
-
+    teacher = TeacherSerializer()
+    course = CourseSerializer()
+    
     class Meta:
         model = Assignment
         fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'date', 'hour_start', 'hour_end',
