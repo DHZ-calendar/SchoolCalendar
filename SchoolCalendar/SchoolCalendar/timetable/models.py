@@ -16,7 +16,7 @@ DAYS_OF_WEEK = (
 )
 
 
-class MyUser(AbstractUser):
+class MyUser(User):
     """
     Custom Subclass for User (in case we ever need it)
     """
