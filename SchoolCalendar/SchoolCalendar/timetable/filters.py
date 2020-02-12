@@ -54,7 +54,13 @@ class HoursPerTeacherInClassFilter(FilterSet):
         fields = ['school_year', 'course']
 
 
-class CoursesFilter(FilterSet):
+class CourseSectionOnlyFilter(FilterSet):
+    class Meta:
+        model = Course
+        fields = ['school_year', 'year']
+
+
+class CourseYearOnlyFilter(FilterSet):
     class Meta:
         model = Course
         fields = ['school_year']
