@@ -20,7 +20,7 @@ from timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYear
 from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer
 
 from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
-    StagePeriodFilter, HourSlotFilter, HoursPerTeacherInClassFilter
+    StagePeriodFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CoursesFilter
 from timetable import utils
 from timetable.serializers import HolidaySerializer, StageSerializer, HourSlotSerializer, \
     HoursPerTeacherInClassSerializer
@@ -120,6 +120,12 @@ class AssignmentCreate(CreateViewWithUser):
 class TimetableView(TemplateView):
     template_name = 'timetable/timetable.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['school_years'] = SchoolYear.objects.all()
+        return context
+
 
 class TeacherViewSet(ModelViewSet):
     queryset = Teacher.objects.all()
@@ -133,6 +139,8 @@ class CourseYearOnlyListViewSet(ListModelMixin, GenericViewSet):
     serializer_class = CourseYearOnlySerializer
     queryset = Course.objects.all()   # I think it gets overridden by get_queryset
     permission_classes = [IsAuthenticated]
+    filterset_class = CoursesFilter
+    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
 
     def get_queryset(self):
         """
@@ -148,6 +156,8 @@ class CourseSectionOnlyListViewSet(ListModelMixin, GenericViewSet):
     serializer_class = CourseSectionOnlySerializer
     queryset = Course.objects.all()   # I think it gets overridden by get_queryset
     permission_classes = [IsAuthenticated]
+    filterset_class = CoursesFilter
+    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
 
     def get_queryset(self):
         """

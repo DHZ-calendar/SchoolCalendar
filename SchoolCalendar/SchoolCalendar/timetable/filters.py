@@ -3,7 +3,7 @@ from rest_framework.filters import BaseFilterBackend
 from django_filters import FilterSet, DateFilter, ChoiceFilter
 
 from timetable.utils import get_school_from_user
-from timetable.models import Holiday, Stage, AbsenceBlock, Teacher, AdminSchool, HourSlot, HoursPerTeacherInClass
+from timetable.models import Holiday, Stage, AbsenceBlock, Teacher, AdminSchool, HourSlot, HoursPerTeacherInClass, Course
 
 
 class TeacherFromSameSchoolFilterBackend(BaseFilterBackend):
@@ -52,3 +52,9 @@ class HoursPerTeacherInClassFilter(FilterSet):
     class Meta:
         model = HoursPerTeacherInClass
         fields = ['school_year', 'course']
+
+
+class CoursesFilter(FilterSet):
+    class Meta:
+        model = Course
+        fields = ['school_year']
