@@ -23,12 +23,19 @@
     </div>
     <div class="row">
         <div class="col">
-            <!-- TODO: change using a form -->
+            {% trans 'School year:' %}
+            <select id="school_year">
+                {% for year in school_years %}
+                    <option value="{{ year.id }}">{{ year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col">
             {% trans 'Choose a class:' %}
-            <select>
-                <option value="1">1 A</option>
-                <option value="2">2 A</option>
-                <option value="3">3 A</option>
+            <select id="course_year" onchange="getClassSections()">
+            </select>
+            {% trans 'section:' %}
+            <select id="course_section">
             </select>
         </div>
     </div>
@@ -67,6 +74,59 @@
     let timetable;
     $(document).ready(() => {
         let cal = $("#calendar");
-        timetable = new Timetable(cal, 8, 23);
+        timetable = new Timetable(cal, 7, 23);
+
+        getBlocks();
+        getClassYears();
     });
+
+    function parseStringTime(time){
+        let arr = time.split(':');
+        let hours = parseInt(arr[0]);
+        let min = parseInt(arr[1]);
+        return { hours: hours, min: min };
+    }
+
+    function getBlocks(){
+        let url = "{% url 'hour_slot-list' %}";
+        let data = {
+            'school_year': $('#school_year').val()
+        };
+        $.get(url, data=data, function(data) {
+            for(let slot of data){
+                let starts_at = parseStringTime(slot.starts_at);
+                let ends_at = parseStringTime(slot.ends_at);
+
+                let block = new Block(slot.id, slot.hour_number + "° lecture", slot.day_of_week, starts_at, ends_at);
+                timetable.addBlock(block);
+            }
+        });
+    }
+    function getClassYears(){
+        let url = "{% url 'year_only_course-list' %}";
+        let data = {
+            'school_year': $('#school_year').val()
+        };
+        $.get(url, data=data, function(data) {
+            for(let year of data){
+                $('#course_year').append(`<option value="${year.year}">${year.year}</option>`);
+            }
+
+            //update section select
+            getClassSections();
+        });
+    }
+    function getClassSections(){
+        let url = "{% url 'section_only_course-list' %}";
+        let data = {
+            'school_year': $('#school_year').val(),
+            'year': $('#course_year').val()
+        };
+        $('#course_section').empty();
+        $.get(url, data=data, function(data) {
+            for(let sect of data){
+                $('#course_section').append(`<option value="${sect.section}">${sect.section}</option>`);
+            }
+        });
+    }
 {% endblock %}
