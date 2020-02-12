@@ -204,3 +204,14 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
             total = self.compute_total_hours_assignments(assignments, hours_slots)
 
             return obj.hours_bes - int(total.seconds / 3600)
+
+
+class AssignmentSerializer(ModelSerializer):
+    """
+    Serializer for teachers
+    """
+
+    class Meta:
+        model = Assignment
+        fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'date', 'hour_start', 'hour_end',
+                  'bes', 'substitution', 'absent']

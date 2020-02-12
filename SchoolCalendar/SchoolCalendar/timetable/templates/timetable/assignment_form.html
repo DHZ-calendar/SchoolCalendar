@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block body %}
-    <h1>{% trans 'Hours Per Teacher in Class' %}</h1>
+    <h1>{% trans 'Assignment' %}</h1>
     <form action="{% url 'assignment-add' %}" method="post">
         {% csrf_token %}
         {{ form }}

@@ -3,7 +3,8 @@ from rest_framework.filters import BaseFilterBackend
 from django_filters import FilterSet, DateFilter, ChoiceFilter
 
 from timetable.utils import get_school_from_user
-from timetable.models import Holiday, Stage, AbsenceBlock, Teacher, AdminSchool, HourSlot, HoursPerTeacherInClass, Course
+from timetable.models import Holiday, Stage, AbsenceBlock, Teacher, AdminSchool, HourSlot, HoursPerTeacherInClass, \
+    Course, Assignment
 
 
 class TeacherFromSameSchoolFilterBackend(BaseFilterBackend):
@@ -64,3 +65,12 @@ class CourseYearOnlyFilter(FilterSet):
     class Meta:
         model = Course
         fields = ['school_year']
+
+
+class AssignmentFilter(FilterSet):
+    to_date = DateFilter(field_name='date', lookup_expr='lte')
+    from_date = DateFilter(field_name='date', lookup_expr='gte')
+
+    class Meta:
+        model = Assignment
+        fields = ['school_year', 'course', 'from_date', 'to_date']
