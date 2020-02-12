@@ -2,7 +2,9 @@ from rest_framework.filters import BaseFilterBackend
 
 from django_filters import FilterSet, DateFilter, ChoiceFilter
 
-from timetable.utils import get_school_from_user
+import datetime
+
+from timetable.utils import get_school_from_user, convert_weekday_into_0_6_format
 from timetable.models import Holiday, Stage, AbsenceBlock, Teacher, AdminSchool, HourSlot, HoursPerTeacherInClass, \
     Course, Assignment
 
@@ -70,6 +72,15 @@ class CourseYearOnlyFilter(FilterSet):
 class AssignmentFilter(FilterSet):
     to_date = DateFilter(field_name='date', lookup_expr='lte')
     from_date = DateFilter(field_name='date', lookup_expr='gte')
+
+    def __init__(self, data, *args, **kwargs):
+        if not data.get('from_date'):
+            data = data.copy()
+            data['from_date'] = datetime.datetime.now().date() - datetime.timedelta(
+                days=datetime.datetime.now().date().weekday())
+
+            data['to_date'] = data['from_date'] + datetime.timedelta(days=6)
+        super(AssignmentFilter, self).__init__(data, *args, **kwargs)
 
     class Meta:
         model = Assignment
