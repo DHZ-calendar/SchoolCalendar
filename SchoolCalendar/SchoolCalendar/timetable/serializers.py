@@ -233,8 +233,16 @@ class AssignmentSerializer(ModelSerializer):
             return el[0].id
         return None
 
-
     class Meta:
         model = Assignment
         fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'date', 'hour_start', 'hour_end',
                   'bes', 'substitution', 'absent', 'hour_slot', 'id']
+
+
+class AbsenceBlockSerializer(ModelSerializer):
+    teacher = TeacherSerializer()
+    hour_slot = HourSlotSerializer()
+
+    class Meta:
+        model = AbsenceBlock
+        fields = ['teacher', 'hour_slot', 'school_year', 'id']

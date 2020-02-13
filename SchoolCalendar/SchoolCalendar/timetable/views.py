@@ -18,14 +18,13 @@ from timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYear
                             AbsenceBlockForm, HolidayForm, StageForm, SubjectForm, HoursPerTeacherInClassForm,\
                             AssignmentForm
 
-from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer
-
 from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
     StagePeriodFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
     AssignmentFilter
 from timetable import utils
-from timetable.serializers import HolidaySerializer, StageSerializer, HourSlotSerializer, \
-    HoursPerTeacherInClassSerializer, AssignmentSerializer
+from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer,\
+    HolidaySerializer, StageSerializer, HourSlotSerializer, HoursPerTeacherInClassSerializer, AssignmentSerializer,\
+    AbsenceBlockSerializer
 
 
 class CreateViewWithUser(CreateView):
@@ -209,7 +208,6 @@ class TeacherAssignmentsViewSet(ListModelMixin, GenericViewSet):
     serializer_class = AssignmentSerializer
     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool,)
     filterset_class = AssignmentFilter   # Here you should not specify any course
-    # TODO: probably the school_year is useless, there is already the period
     lookup_url_kwarg = ['teacher_pk', 'school_year_pk']
 
     def get_queryset(self, *args, **kwargs):
@@ -233,3 +231,29 @@ class TeacherAssignmentsViewSet(ListModelMixin, GenericViewSet):
                                          school_year=school_year)
 
 
+class AbsenceBlocksPerTeacherViewSet(ListModelMixin, GenericViewSet):
+    queryset = AbsenceBlock.objects.all()
+    serializer_class = AbsenceBlockSerializer
+    filter_backends = (DjangoFilterBackend,)
+    lookup_url_kwarg = ['teacher_pk', 'school_year_pk']
+
+    def get_queryset(self, *args, **kwargs):
+        """
+        Get all absence blocks for the given teacher, in the given time period.
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        teacher_pk = self.kwargs.get(self.lookup_url_kwarg[0])
+        school_year_pk = self.kwargs.get(self.lookup_url_kwarg[1])
+        try:
+            #  Return the teacher, but only among the ones in the school of the currently logged in user
+            teacher = Teacher.objects.get(id=teacher_pk, school=utils.get_school_from_user(self.request.user))  
+            school_year = SchoolYear.objects.get(id=school_year_pk)
+
+        except ObjectDoesNotExist:
+            # If trying to retrieve an invalid object:
+            return Assignment.objects.none()
+
+        return AbsenceBlock.objects.filter(teacher=teacher,
+                                           school_year=school_year)

@@ -1,9 +1,10 @@
 from django.urls import path, re_path, include
-from timetable.views import SchoolCreate, TeacherCreate, AdminSchoolCreate, SchoolYearCreate, CourseCreate,\
-                            HourSlotCreate, AbsenceBlockCreate, HolidayCreate, StageCreate, SubjectCreate, \
-                            HoursPerTeacherInClassCreate, AssignmentCreate, TimetableView, TeacherViewSet, \
-                            CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
-                            HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet
+from timetable.views import SchoolCreate, TeacherCreate, AdminSchoolCreate, SchoolYearCreate, CourseCreate, \
+    HourSlotCreate, AbsenceBlockCreate, HolidayCreate, StageCreate, SubjectCreate, \
+    HoursPerTeacherInClassCreate, AssignmentCreate, TimetableView, TeacherViewSet, \
+    CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
+    HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
+    AbsenceBlocksPerTeacherViewSet
 
 from rest_framework.routers import DefaultRouter
 
@@ -18,6 +19,8 @@ router.register(r'hour_per_teacher_in_class', HoursPerTeacherInClassViewSet, bas
 router.register(r'assignments', AssignmentViewSet, basename='assignments')
 router.register(r'teacher_assignments/(?P<teacher_pk>[0-9]+)/(?P<school_year_pk>[0-9]+)', TeacherAssignmentsViewSet,
                 basename='teacher_assignments')
+router.register(r'teacher_absence_block/(?P<teacher_pk>[0-9]+)/(?P<school_year_pk>[0-9]+)',
+                AbsenceBlocksPerTeacherViewSet, basename='teacher_absence_blocks')
 # router.register(r'absence_blocks', AbsenceBlockViewSet)
 
 
