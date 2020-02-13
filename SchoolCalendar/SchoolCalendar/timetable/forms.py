@@ -148,9 +148,28 @@ class AbsenceBlockForm(BaseFormWithTeacherAndSchoolCheck):
     """
     It actually inherits the clean_school method, but doesn't have the school field. It shouldn't be a problem.
     """
+    def __init__(self, user, *args, **kwargs):
+        """
+        Add hour_slot selection based on the current school, and ordered by week_day and starts_at
+        :param user: the user logged, the school is retrieved by her.
+        """
+        super(AbsenceBlockForm, self).__init__(user, *args, **kwargs)
+        self.fields['hour_slot'] = forms.ModelChoiceField(
+            queryset=HourSlot.objects.filter(school__id=get_school_from_user(self.user).id).order_by('day_of_week',
+                                                                                                     'starts_at'))
+
     class Meta:
         model = AbsenceBlock
         fields = ['teacher', 'hour_slot', 'school_year']
+
+    def clean_hour_slot(self):
+        """
+        We need to check whether the hour_slot belongs to the correct school
+        :return:
+        """
+        if self.cleaned_data['hour_slot'].school != get_school_from_user(self.user):
+            self.add_error(None, forms.ValidationError(_('The current school has no such hour slot!')))
+        return self.cleaned_data['hour_slot']
 
 
 class HolidayForm(BaseFormWithSchoolCheck):
