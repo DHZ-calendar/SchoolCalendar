@@ -41,9 +41,9 @@
             </select>
         </div>
     </div>
-    <div class="row py-3">
+    <div class="row">
         <div class="col-10">
-            <div class="row">                
+            <div class="row py-3">                
                 <div class="col text-left">
                     <button type="button" class="btn btn-secondary btn-sm" onclick="goPrevWeek()"><- {% trans 'Previous week'%}</button>
                 </div>
@@ -179,7 +179,7 @@
             $('#teachers_list').empty();
             for(let tea of data){
                 let html = `
-                    <li class="list-group-item list-teachers">
+                    <li class="list-group-item list-teachers" onclick="teacherClick(this, ${tea.teacher.id})">
                         <b>${tea.teacher.first_name} ${tea.teacher.last_name}</b> - ${tea.subject.name}<br/>
                         <span>{% trans 'Hours of theaching' %}: ${tea.hours} - {% trans 'B.E.S.' %}: ${tea.hours_bes}</span><br/>
                         <span>{% trans 'Missing hours' %}: ${tea.missing_hours} - {% trans 'B.E.S.' %}: ${tea.missing_hours_bes}</span><br/>
@@ -248,6 +248,49 @@
                 while(start <= end) {
                     timetable.lockDay(start.weekday() - 1, day.name);
                     start.add(1, 'days');
+                }
+            }
+        });
+    }
+
+    function teacherClick(btn, teacherId){
+        btn = $(btn);
+
+        if(!btn.hasClass('active')){
+            btn.addClass('active');
+
+            for(let blk of Object.keys(timetable.blocks)){
+                timetable.getBlock(blk).setStateAvailable();
+            }
+
+            setLockedBlocksTeacher(teacherId);
+        }
+        else{
+            btn.removeClass('active');
+
+            timetable.resetAllBlocksStates();
+        }
+    }
+
+    function setLockedBlocksTeacher(teacherId){
+        let school_year = $('#school_year').val();
+        let startDate = currentDate;
+        let endDate = moment(startDate).add(6, 'days').toDate();
+
+        let url = "/timetable/api/teacher_assignments/" + teacherId + "/" + school_year;
+        let data = {
+            'school_year': school_year,
+            'from_date': formatDate(startDate),
+            'to_date': formatDate(endDate)
+        };
+        $.get(url, data=data, function(data) {
+            for(let block of data){
+                if(block.hour_slot !== undefined){
+                    timetable.getBlock(block.hour_slot).setStateDenied();
+                }
+                else{
+                    //TODO: insert in a non standard block
+                    console.log(block);
                 }
             }
         });
