@@ -77,12 +77,16 @@
         //find the first day of the week        
         currentDate = moment().day(1).toDate();
 
-        getBlocks();
         loadData();
         getClassYears();
     });
 
     function loadData(){
+        timetable.deleteAllEvents();
+        timetable.deleteAllBlocks();
+        getBlocks();
+
+
         let startDate = currentDate;
         let endDate = moment(startDate).add(6, 'days').toDate();
 
@@ -220,10 +224,11 @@
         };
         $.get(url, data=data, function(data) {
             for(let day of data){
+                console.log(day);
                 let start = moment(day.start);
                 let end = moment(day.end);
                 while(start <= end) {
-                    timetable.lockDay(start.weekday(), day.name);
+                    timetable.lockDay(start.weekday() - 1, day.name);
                     start.add(1, 'days');
                 }
             }
@@ -239,10 +244,11 @@
         };
         $.get(url, data=data, function(data) {
             for(let day of data){
+                console.log(day);
                 let start = moment(day.start);
                 let end = moment(day.end);
                 while(start <= end) {
-                    timetable.lockDay(start.weekday(), day.name);
+                    timetable.lockDay(start.weekday() - 1, day.name);
                     start.add(1, 'days');
                 }
             }
