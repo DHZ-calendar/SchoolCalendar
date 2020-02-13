@@ -224,7 +224,6 @@
         };
         $.get(url, data=data, function(data) {
             for(let day of data){
-                console.log(day);
                 let start = moment(day.start);
                 let end = moment(day.end);
                 while(start <= end) {
@@ -244,7 +243,6 @@
         };
         $.get(url, data=data, function(data) {
             for(let day of data){
-                console.log(day);
                 let start = moment(day.start);
                 let end = moment(day.end);
                 while(start <= end) {

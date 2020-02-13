@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -20,6 +21,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-timepicker/0.5.2/css/bootstrap-timepicker.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-timepicker/0.5.2/js/bootstrap-timepicker.min.js"></script>
 
+    <link rel="stylesheet" href="{% static 'sidebar.css' %}" />
+
     {% block head %}
     {% endblock %}
 
@@ -29,6 +32,88 @@
     </style>
 </head>
 <body>
+    <nav id="sidebar">
+        <div id="dismiss">
+            X
+        </div>
+
+        <div class="sidebar-header">
+            <h3>School Calendar</h3>
+        </div>
+
+        <ul class="list-unstyled components">
+            <p>Name of the user</p> <!-- TODO: change -->
+
+            <li>
+                <a href="{% url 'timetable-view' %}">{% trans 'Timetable' %}</a>
+            </li>
+            <li>
+                <a href="#adminSubmenu" data-toggle="collapse" aria-expanded="false">+ Admin</a>
+                <ul class="collapse list-unstyled" id="adminSubmenu">
+                    <li>
+                        <a href="{% url 'school_year-add' %}">{% trans 'Add new year' %}</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'teacher-add' %}">{% trans 'Add teacher' %}</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'absenceblock-add' %}">{% trans 'Add absence block' %}</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'course-add' %}">{% trans 'Add course' %}</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'hours_per_teacher_in_class-add' %}">{% trans 'Add hours per teacher' %}</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'hourslot-add' %}">{% trans 'Add hour-slot' %}</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'holiday-add' %}">{% trans 'Add holiday' %}</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'stage-add' %}">{% trans 'Add stage' %}</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'subject-add' %}">{% trans 'Add subject' %}</a>
+                    </li>
+                    
+                </ul>
+            </li>
+            <li>
+                <a href="#superadminSubmenu" data-toggle="collapse" aria-expanded="false">+ Super Admin</a>
+                <ul class="collapse list-unstyled" id="superadminSubmenu">
+                    <li>
+                        <a href="{% url 'school-add' %}">{% trans 'Add school' %}</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'school-add' %}">{% trans 'Add school' %}</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    <button type="button" id="sidebarCollapse" class="btn">
+        <span>&#9776;</span>
+    </button>
+
+    <script>
+    $(document).ready(() => {
+        $('#dismiss, .overlay').on('click', function () {
+            $('#sidebar').removeClass('active');
+            $('.overlay').removeClass('active');
+        });
+
+        $('#sidebarCollapse').on('click', function () {
+            $('#sidebar').addClass('active');
+            $('.overlay').addClass('active');
+            $('.collapse.in').toggleClass('in');
+            $('a[aria-expanded=true]').attr('aria-expanded', 'false');
+        });
+    });
+    </script>
+
     {% block body %}
     {% endblock %}
 
