@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import TemplateView
 from django.urls import reverse_lazy
@@ -203,5 +204,32 @@ class AssignmentViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin,
     filterset_class = AssignmentFilter
 
 
-class TeacherBlockedViewSet(ViewSet):
-    pass
+class TeacherAssignmentsViewSet(ListModelMixin, GenericViewSet):
+    queryset = Assignment.objects.all()
+    serializer_class = AssignmentSerializer
+    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool,)
+    filterset_class = AssignmentFilter   # Here you should not specify any course
+    # TODO: probably the school_year is useless, there is already the period
+    lookup_url_kwarg = ['teacher_pk', 'school_year_pk']
+
+    def get_queryset(self, *args, **kwargs):
+        """
+        Get all assignments for the given teacher, in the given time period.
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        teacher_pk = self.kwargs.get(self.lookup_url_kwarg[0])
+        school_year_pk = self.kwargs.get(self.lookup_url_kwarg[1])
+        try:
+            teacher = Teacher.objects.get(id=teacher_pk)  # Used to retrieve other absences and assignments
+            school_year = SchoolYear.objects.get(id=school_year_pk)
+
+        except ObjectDoesNotExist:
+            # If trying to retrieve an invalid object:
+            return Assignment.objects.none()
+
+        return Assignment.objects.filter(teacher=teacher,
+                                         school_year=school_year)
+
+

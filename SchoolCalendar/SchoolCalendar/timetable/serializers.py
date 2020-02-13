@@ -237,4 +237,4 @@ class AssignmentSerializer(ModelSerializer):
     class Meta:
         model = Assignment
         fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'date', 'hour_start', 'hour_end',
-                  'bes', 'substitution', 'absent', 'hour_slot']
+                  'bes', 'substitution', 'absent', 'hour_slot', 'id']

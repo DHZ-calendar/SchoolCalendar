@@ -3,7 +3,7 @@ from timetable.views import SchoolCreate, TeacherCreate, AdminSchoolCreate, Scho
                             HourSlotCreate, AbsenceBlockCreate, HolidayCreate, StageCreate, SubjectCreate, \
                             HoursPerTeacherInClassCreate, AssignmentCreate, TimetableView, TeacherViewSet, \
                             CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
-                            HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet
+                            HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet
 
 from rest_framework.routers import DefaultRouter
 
@@ -16,6 +16,8 @@ router.register(r'stages', StageViewSet, basename='stage')
 router.register(r'hour_slots', HourSlotViewSet, basename='hour_slot')
 router.register(r'hour_per_teacher_in_class', HoursPerTeacherInClassViewSet, basename='hour_per_teacher_in_class')
 router.register(r'assignments', AssignmentViewSet, basename='assignments')
+router.register(r'teacher_assignments/(?P<teacher_pk>[0-9]+)/(?P<school_year_pk>[0-9]+)', TeacherAssignmentsViewSet,
+                basename='teacher_assignments')
 # router.register(r'absence_blocks', AbsenceBlockViewSet)
 
 
