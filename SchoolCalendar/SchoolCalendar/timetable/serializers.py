@@ -163,12 +163,20 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
         :param kwargs:
         :return:
         """
+        # Get start_date and end_date parameters from url
+        start_date = self.context.get('request').query_params.get('start_date')
+        end_date = self.context.get('request').query_params.get('end_date')
         assignments = Assignment.objects.filter(teacher=obj.teacher,
                                                 course=obj.course,
                                                 subject=obj.subject,
                                                 school=obj.school,
                                                 school_year=obj.school_year,
                                                 bes=False).values('date__week_day', 'hour_start', 'hour_end')
+        # Filter in a time interval
+        if start_date:
+            assignments = assignments.filter(date__gte=start_date)
+        if end_date:
+            assignments = assignments.filter(date__lte=end_date)
 
         for el in assignments:
             el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
@@ -188,12 +196,21 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
             :param kwargs:
             :return:
             """
+            start_date = self.context.get('request').query_params.get('start_date')
+            end_date = self.context.get('request').query_params.get('end_date')
+
             assignments = Assignment.objects.filter(teacher=obj.teacher,
                                                     course=obj.course,
                                                     subject=obj.subject,
                                                     school=obj.school,
                                                     school_year=obj.school_year,
                                                     bes=True).values('date__week_day', 'hour_start', 'hour_end')
+
+            # Filter in a time interval
+            if start_date:
+                assignments = assignments.filter(date__gte=start_date)
+            if end_date:
+                assignments = assignments.filter(date__lte=end_date)
 
             for el in assignments:
                 el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])

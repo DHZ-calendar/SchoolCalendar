@@ -187,7 +187,12 @@ class HourSlotViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, L
     filterset_class = HourSlotFilter
 
 
-class HoursPerTeacherInClassViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
+class HoursPerTeacherInClassViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin,
+                                    GenericViewSet):
+    """
+    Can accept as parameter in the url (start_date, end_date) a period of time where to compute
+    the total hour missing for a teacher.
+    """
     queryset = HoursPerTeacherInClass.objects.all()
     serializer_class = HoursPerTeacherInClassSerializer
     permission_classes = [IsAuthenticated]

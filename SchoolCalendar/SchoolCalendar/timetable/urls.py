@@ -15,7 +15,7 @@ router.register(r'section_only_course', CourseSectionOnlyListViewSet, basename='
 router.register(r'holidays', HolidayViewSet, basename='holiday')
 router.register(r'stages', StageViewSet, basename='stage')
 router.register(r'hour_slots', HourSlotViewSet, basename='hour_slot')
-router.register(r'hour_per_teacher_in_class', HoursPerTeacherInClassViewSet, basename='hour_per_teacher_in_class')
+router.register(r'hour_per_teacher_in_class/?(start_date=\d\d\d\d-\d\d-\d\d)?(end_date=\d\d\d\d-\d\d-\d\d)?', HoursPerTeacherInClassViewSet, basename='hour_per_teacher_in_class')
 router.register(r'assignments', AssignmentViewSet, basename='assignments')
 router.register(r'teacher_assignments/(?P<teacher_pk>[0-9]+)/(?P<school_year_pk>[0-9]+)', TeacherAssignmentsViewSet,
                 basename='teacher_assignments')
