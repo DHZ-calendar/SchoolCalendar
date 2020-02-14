@@ -4,7 +4,7 @@ from timetable.views import SchoolCreate, TeacherCreate, AdminSchoolCreate, Scho
     HoursPerTeacherInClassCreate, AssignmentCreate, TimetableView, TeacherViewSet, \
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
-    AbsenceBlocksPerTeacherViewSet
+    AbsenceBlocksPerTeacherViewSet, ReplicateAssignmentViewSet
 
 from rest_framework.routers import DefaultRouter
 
@@ -21,6 +21,9 @@ router.register(r'teacher_assignments/(?P<teacher_pk>[0-9]+)/(?P<school_year_pk>
                 basename='teacher_assignments')
 router.register(r'teacher_absence_block/(?P<teacher_pk>[0-9]+)/(?P<school_year_pk>[0-9]+)',
                 AbsenceBlocksPerTeacherViewSet, basename='teacher_absence_blocks')
+router.register(
+    r'replicated_assignment/(?P<assignment_pk>[0-9]+)/(?P<from>\d\d\d\d-\d\d-\d\d)/(?P<to>\d\d\d\d-\d\d-\d\d)',
+    ReplicateAssignmentViewSet, basename='replicate_assignment')
 # router.register(r'absence_blocks', AbsenceBlockViewSet)
 
 

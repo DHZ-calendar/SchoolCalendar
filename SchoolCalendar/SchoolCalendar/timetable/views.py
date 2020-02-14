@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -262,3 +263,30 @@ class AbsenceBlocksPerTeacherViewSet(ListModelMixin, GenericViewSet):
 
         return AbsenceBlock.objects.filter(teacher=teacher,
                                            school_year=school_year)
+
+
+class ReplicateAssignmentViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
+    queryset = Assignment.objects.all()
+    serializer_class = AssignmentSerializer
+    filter_backends = (DjangoFilterBackend,)
+    lookup_url_kwarg = ['assignment_pk', 'from', 'to']
+
+    def get_queryset(self):
+        try:
+            a = Assignment.objects.get(pk=self.kwargs.get('assignment_pk'))
+            from_date = self.kwargs.get('from')
+            to_date = self.kwargs.get('to')
+            # Return all assignments from the same course or teacher that would collide in the future.
+            # excluding the assignment in the url.
+            return Assignment.objects.filter(school_year=a.school_year,
+                                             # __week_day returns dates Sun-Sat (1,7), while weekday (Mon, Sun) (0,6)
+                                             date__week_day=(a.date.weekday()+2) % 7,
+                                             hour_start=a.hour_start)\
+                                     .filter(Q(teacher=a.teacher) | Q(course=a.course))\
+                                     .filter(date__gte=from_date, date__lte=to_date)\
+                                     .exclude(id=a.pk)
+        except ObjectDoesNotExist:
+            return Assignment.objects.none()
+
+
+
