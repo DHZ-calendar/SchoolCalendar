@@ -145,6 +145,28 @@
         return date.getFullYear() + "-" + frm(date.getMonth() + 1) + "-" + frm(date.getDate());
     }
 
+    function extraBlockExists(date, hourStart, hourEnd){
+        let starts_at = parseStringTime(hourStart);
+        let ends_at = parseStringTime(hourEnd);
+        let day_of_week = moment(date).day();
+        let blockId = day_of_week + hourStart + hourEnd;
+
+        let block = timetable.getBlock(blockId);
+        return block !== undefined;
+    }
+    function createExtraBlock(date, hourStart, hourEnd){
+        let starts_at = parseStringTime(hourStart);
+        let ends_at = parseStringTime(hourEnd);
+        let day_of_week = moment(date).day();
+        let blockId = day_of_week + hourStart + hourEnd;
+
+        let block = timetable.getBlock(blockId);
+        if(block === undefined){
+            block = new Block(blockId, "{% trans 'Extra lecture' %}", day_of_week, starts_at, ends_at);
+            timetable.addBlock(block);
+        }
+        return block;
+    }
     function getBlocks(){
         let url = "{% url 'hour_slot-list' %}";
         let data = {
@@ -225,17 +247,17 @@
         timetable.deleteAllEvents();
         $.get(url, data=data, function(data) {
             for(let assign of data){
-                if(assign.hour_slot !== undefined){
-                    let teacher = assign.teacher.first_name + " " + assign.teacher.last_name;
-                    let customEvent = new Event(assign.hour_slot, teacher, assign.subject.name);
-                    let clickEvent = (event) => {
-                        alert("Lecture " + event.lecture + ", teacher " + event.teacher);
-                    };
-                    timetable.addEvent(customEvent, assign.hour_slot, clickEvent);
+                let blockId = assign.hour_slot;
+                if(blockId === null){
+                    blockId = createExtraBlock(assign.date, assign.hour_start, assign.hour_end).id;
                 }
-                else{
-                    //TODO: assign custom id and create block if missing
-                }
+
+                let teacher = assign.teacher.first_name + " " + assign.teacher.last_name;
+                let customEvent = new Event(blockId, teacher, assign.subject.name);
+                let clickEvent = (event) => {
+                    alert("Lecture " + event.lecture + ", teacher " + event.teacher);
+                };
+                timetable.addEvent(customEvent, blockId, clickEvent);
             }
         });
     }
@@ -311,13 +333,15 @@
         };
         $.get(url, data=data, function(data) {
             for(let block of data){
-                if(block.hour_slot !== undefined){
-                    timetable.getBlock(block.hour_slot).setState('conflict');
+                let blockId = block.hour_slot;
+                let create = true;
+                if(blockId === null){
+                    if(!extraBlockExists(block.date, block.hour_start, block.hour_end))
+                       create = false; 
                 }
-                else{
-                    //TODO: insert in a non standard block
-                    console.log(block);
-                }
+
+                if(create)
+                    timetable.getBlock(blockId).setState('conflict');
             }
         });
     }
@@ -335,13 +359,15 @@
         };
         $.get(url, data=data, function(data) {
             for(let block of data){
-                if(block.hour_slot !== undefined){
-                    timetable.getBlock(block.hour_slot).setState('absence');
+                let blockId = block.hour_slot;
+                let create = true;
+                if(blockId === null){
+                    if(!extraBlockExists(block.date, block.hour_start, block.hour_end))
+                       create = false; 
                 }
-                else{
-                    //TODO: insert in a non standard block
-                    console.log(block);
-                }
+
+                if(create)
+                    timetable.getBlock(blockId).setState('absence');
             }
         });
     }
