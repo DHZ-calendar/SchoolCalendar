@@ -16,6 +16,13 @@
     border-color: #007bff;
     cursor: pointer;
 }
+
+.cal-block-absence {
+    background-color: darkgray;
+}
+.cal-block-conflict {
+    background-color: lightsalmon;
+}
 {% endblock %}
 
 {% block body %}
@@ -76,6 +83,13 @@
     $(document).ready(() => {
         let cal = $("#calendar");
         timetable = new Timetable(cal, 7, 23);
+
+        let blockStates = {
+            'available': 'cal-block-available',
+            'absence': 'cal-block-absence',
+            'conflict': 'cal-block-conflict'
+        };
+        timetable.setMapOfBlockStates(blockStates);
 
         //find the first day of the week        
         currentDate = moment().day(1).toDate();
@@ -271,10 +285,11 @@
             btn.addClass('active');
 
             for(let blk of Object.keys(timetable.blocks)){
-                timetable.getBlock(blk).setStateAvailable();
+                timetable.getBlock(blk).setState('available');
             }
 
             setLockedBlocksTeacher(teacherId);
+            setLockedBlocksAbsenceTeacher(teacherId);
         }
         else{
             btn.removeClass('active');
@@ -297,7 +312,31 @@
         $.get(url, data=data, function(data) {
             for(let block of data){
                 if(block.hour_slot !== undefined){
-                    timetable.getBlock(block.hour_slot).setStateDenied();
+                    timetable.getBlock(block.hour_slot).setState('conflict');
+                }
+                else{
+                    //TODO: insert in a non standard block
+                    console.log(block);
+                }
+            }
+        });
+    }
+
+    function setLockedBlocksAbsenceTeacher(teacherId){
+        let school_year = $('#school_year').val();
+        let startDate = currentDate;
+        let endDate = moment(startDate).add(6, 'days').toDate();
+
+        let url = "/timetable/api/teacher_absence_block/" + teacherId + "/" + school_year;
+        let data = {
+            'school_year': school_year,
+            'from_date': formatDate(startDate),
+            'to_date': formatDate(endDate)
+        };
+        $.get(url, data=data, function(data) {
+            for(let block of data){
+                if(block.hour_slot !== undefined){
+                    timetable.getBlock(block.hour_slot).setState('absence');
                 }
                 else{
                     //TODO: insert in a non standard block
