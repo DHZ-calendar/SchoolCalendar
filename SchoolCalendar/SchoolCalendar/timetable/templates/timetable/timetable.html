@@ -40,6 +40,9 @@
             <select id="course_section" onchange="getTeachers()">
             </select>
         </div>
+        <div class="col">
+            <button type="button" class="btn btn-primary btn-sm">{% trans 'Add extra lecture'%}</button>            
+        </div>
     </div>
     <div class="row">
         <div class="col-10">
@@ -82,6 +85,8 @@
     });
 
     function loadData(){
+        resetTeacherState();
+
         timetable.deleteAllEvents();
         timetable.deleteAllBlocks();
         getBlocks();
@@ -104,6 +109,12 @@
     function goPrevWeek(){
         currentDate = moment(currentDate).subtract(7, 'days').toDate();
         loadData();
+    }
+
+    function resetTeacherState(){
+        for(let tea of $('#teachers_list').children()){
+            $(tea).removeClass('active');
+        }
     }
 
     function parseStringTime(time){
