@@ -258,7 +258,6 @@ class AssignmentSerializer(ModelSerializer):
 
 class AbsenceBlockSerializer(ModelSerializer):
     teacher = TeacherSerializer()
-    hour_slot = HourSlotSerializer()
 
     class Meta:
         model = AbsenceBlock
