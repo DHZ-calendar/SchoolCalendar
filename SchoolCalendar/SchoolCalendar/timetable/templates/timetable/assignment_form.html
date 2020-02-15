@@ -9,9 +9,14 @@
         <input type="submit" value="Submit">
     </form>
 
+    <input id="id_assignment">
+    <input id="from_date" class="datepicker">
+    <input id='to_date' class="datepicker">
+    <button id="test"> click here </button>
+
 
     <script>
-        $(".datepicker").datepicker();
+        $(".datepicker").datepicker({ dateFormat: 'dd-mm-yy' });
         $('.timepicker').timepicker({
                 minuteStep: 1,
                 appendWidgetTo: 'body',
@@ -19,5 +24,19 @@
                 showMeridian: false,
                 defaultTime: false
             });
+        $('#test').click(function(){
+            $.post({
+                url: '{% url 'multiple_assignment-add' "999999"  '20-01-2001' '20-01-2101' %}'.
+                            replace('999999', $('#id_assignment')[0].value).
+                            replace('20-01-2001', $('#from_date')[0].value.replace(/\//g, '-')).
+                            replace('20-01-2101', $('#to_date')[0].value.replace(/\//g, '-')),
+                data:{
+                    csrfmiddlewaretoken:'{{csrf_token}}'
+                },
+                success: function(data){
+                    console.log(data);
+                }
+            });
+        })
     </script>
 {% endblock %}

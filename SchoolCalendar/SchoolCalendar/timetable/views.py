@@ -1,16 +1,22 @@
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import TemplateView
 from django.urls import reverse_lazy
+from django.views import View
 from django.contrib.auth.models import User
+from django.utils.translation import gettext as _
 
 from rest_framework.viewsets import ModelViewSet, ViewSet, GenericViewSet
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, \
     UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+
+import datetime
+from pprint import pprint
 
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday,\
                              Stage, Subject, HoursPerTeacherInClass, Assignment
@@ -265,7 +271,7 @@ class AbsenceBlocksPerTeacherViewSet(ListModelMixin, GenericViewSet):
                                            school_year=school_year)
 
 
-class ReplicateAssignmentViewSet(ListModelMixin, CreateModelMixin, GenericViewSet):
+class ReplicateAssignmentViewSet(ListModelMixin, GenericViewSet):
     queryset = Assignment.objects.all()
     serializer_class = AssignmentSerializer
     filter_backends = (DjangoFilterBackend,)
@@ -289,4 +295,52 @@ class ReplicateAssignmentViewSet(ListModelMixin, CreateModelMixin, GenericViewSe
             return Assignment.objects.none()
 
 
+class CreateMultipleAssignmentsView(View):
+    def post(self, request, *args, **kwargs):
+        """
+        Create multiple instances of one assignments in a given time period
 
+        :param request:
+        :return:
+        """
+        assignment_pk = kwargs.get('assignment_pk')
+        try:
+            from_date = datetime.datetime.strptime(kwargs.get('from'), '%m-%d-%Y').date()
+            to_date = datetime.datetime.strptime(kwargs.get('to'), '%m-%d-%Y').date()
+            if from_date > to_date:
+                # From date should be smaller than to_date
+                return HttpResponse('The beginning of the period is bigger then the end of the period', 400)
+        except ValueError:
+            # Wrong format of date: yyyy-mm-dd
+            return HttpResponse('Wrong format of date: dd-mm-yyyy', 400)
+
+        try:
+            a = Assignment.objects.get(id=assignment_pk)
+            # Repeat the assignment every week:
+            d = from_date
+            assignments_list = []
+            while d <= to_date:
+                # Up to now it doesn't check if there is already some other course in that period,
+                # apart from the date of the assignment id itself.
+                if d != a.date and d.weekday() == a.date.weekday():
+                    new_a = Assignment(
+                        teacher=a.teacher,
+                        course=a.course,
+                        subject=a.subject,
+                        school_year=a.school_year,
+                        school=a.school,
+                        hour_start=a.hour_start,
+                        hour_end=a.hour_end,
+                        bes=a.bes,
+                        substitution=a.substitution,
+                        absent=a.absent,
+                        date=d
+                    )
+                    assignments_list.append(new_a)
+                d += datetime.timedelta(days=1)
+
+            pprint(assignments_list)
+            Assignment.objects.bulk_create(assignments_list)
+            return HttpResponse('result', 201)
+        except ObjectDoesNotExist:
+            return HttpResponse(_("The Assignment Specified doesn't exist"), 201)
