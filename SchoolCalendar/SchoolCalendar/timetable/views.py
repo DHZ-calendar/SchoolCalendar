@@ -1,5 +1,5 @@
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -9,6 +9,7 @@ from django.views import View
 from django.contrib.auth.models import User
 from django.utils.translation import gettext as _
 
+from rest_framework.renderers import JSONRenderer
 from rest_framework.viewsets import ModelViewSet, ViewSet, GenericViewSet
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, \
     UpdateModelMixin
@@ -296,6 +297,7 @@ class ReplicateAssignmentViewSet(ListModelMixin, GenericViewSet):
 
 
 class CreateMultipleAssignmentsView(View):
+
     def post(self, request, *args, **kwargs):
         """
         Create multiple instances of one assignments in a given time period
@@ -307,40 +309,58 @@ class CreateMultipleAssignmentsView(View):
         try:
             from_date = datetime.datetime.strptime(kwargs.get('from'), '%m-%d-%Y').date()
             to_date = datetime.datetime.strptime(kwargs.get('to'), '%m-%d-%Y').date()
-            if from_date > to_date:
-                # From date should be smaller than to_date
-                return HttpResponse('The beginning of the period is bigger then the end of the period', 400)
+
         except ValueError:
             # Wrong format of date: yyyy-mm-dd
             return HttpResponse('Wrong format of date: dd-mm-yyyy', 400)
 
+        if from_date > to_date:
+            # From date should be smaller than to_date
+            return HttpResponse('The beginning of the period is bigger then the end of the period', 400)
         try:
             a = Assignment.objects.get(id=assignment_pk)
-            # Repeat the assignment every week:
-            d = from_date
-            assignments_list = []
-            while d <= to_date:
-                # Up to now it doesn't check if there is already some other course in that period,
-                # apart from the date of the assignment id itself.
-                if d != a.date and d.weekday() == a.date.weekday():
-                    new_a = Assignment(
-                        teacher=a.teacher,
-                        course=a.course,
-                        subject=a.subject,
-                        school_year=a.school_year,
-                        school=a.school,
-                        hour_start=a.hour_start,
-                        hour_end=a.hour_end,
-                        bes=a.bes,
-                        substitution=a.substitution,
-                        absent=a.absent,
-                        date=d
-                    )
-                    assignments_list.append(new_a)
-                d += datetime.timedelta(days=1)
-
-            pprint(assignments_list)
-            Assignment.objects.bulk_create(assignments_list)
-            return HttpResponse('result', 201)
         except ObjectDoesNotExist:
-            return HttpResponse(_("The Assignment Specified doesn't exist"), 201)
+            return HttpResponse(_("The Assignment Specified doesn't exist"), 404)
+        # Repeat the assignment every week:
+        d = from_date
+        assignments_list = []
+        # There can't be conflicts among the newly created assignments and the teaching hours of the same teacher!
+        # The same is not true for conflicts of the same class.
+        conflicts = Assignment.objects.filter(school=a.school,
+                                              teacher=a.teacher,
+                                              school_year=a.school_year,
+                                              hour_start=a.hour_start,
+                                              hour_end=a.hour_end,
+                                              date__week_day=((a.date.weekday()+2) % 7),
+                                              date__gte=from_date,
+                                              date__lte=to_date).\
+                                        exclude(id=a.id)
+        if conflicts:
+            # There are conflicts!
+            return JsonResponse(
+                AssignmentSerializer(conflicts, context={'request': request}, many=True).data,
+                safe=False,
+                status=400)
+
+        while d <= to_date:
+            if d != a.date and d.weekday() == a.date.weekday():
+                # Found the correct day of the week when to duplicate the assignment
+                new_a = Assignment(
+                    teacher=a.teacher,
+                    course=a.course,
+                    subject=a.subject,
+                    school_year=a.school_year,
+                    school=a.school,
+                    hour_start=a.hour_start,
+                    hour_end=a.hour_end,
+                    bes=a.bes,
+                    substitution=a.substitution,
+                    absent=a.absent,
+                    date=d
+                )
+                assignments_list.append(new_a)
+            d += datetime.timedelta(days=1)
+
+        # Create with one single query.
+        Assignment.objects.bulk_create(assignments_list)
+        return HttpResponse(status=201)

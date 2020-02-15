@@ -35,6 +35,10 @@
                 },
                 success: function(data){
                     console.log(data);
+                },
+                error: function(e){
+                    console.log("Error!")
+                    console.log(e.responseJSON);
                 }
             });
         })
