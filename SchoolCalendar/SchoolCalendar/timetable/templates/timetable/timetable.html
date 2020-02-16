@@ -10,14 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
 {% endblock %}
 
-{% block style %}  
-.list-teachers:hover{
-    /*color: #fff;
-    background-color: #007bff;
-    border-color: #007bff;
-    cursor: pointer;*/
-}
-
+{% block style %}
 .cal-block-absence {
     background-color: darkgray;
 }
@@ -27,6 +20,12 @@
 
 .cal-event-bes {
     background-color: #ffb554;
+}
+
+.list-teachers hr {
+    margin-top: 3px;
+    margin-bottom: 3px;
+    color: black;
 }
 {% endblock %}
 
@@ -236,8 +235,23 @@
                 let html = `
                     <li class="list-group-item list-teachers">
                         <b>${tea.teacher.first_name} ${tea.teacher.last_name}</b> - ${tea.subject.name}<br/>
-                        <span>{% trans 'Hours of theaching' %}: ${tea.hours} - {% trans 'B.E.S.' %}: ${tea.hours_bes}</span><br/>
-                        <span>{% trans 'Missing hours' %}: ${tea.missing_hours} - {% trans 'B.E.S.' %}: ${tea.missing_hours_bes}</span><br/>
+                        <div class="row font-italic">
+                            <span class="col-9">{% trans 'Hours of theaching' %}:</span>
+                            <span class="col">${tea.hours}</span>
+                        </div>
+                        <div class="row font-italic">
+                            <span class="col-9">{% trans 'B.E.S.' %}</span>
+                            <span class="col">${tea.hours_bes}</span>
+                        </div>
+                        <hr/>
+                        <div class="row font-italic">
+                            <span class="col-9">{% trans 'Missing hours' %}:</span>
+                            <span class="col">${tea.missing_hours}</span>
+                        </div>
+                        <div class="row font-italic">
+                            <span class="col-9">{% trans 'B.E.S.' %}</span>
+                            <span class="col">${tea.missing_hours_bes}</span>
+                        </div>
                         <div class="row">
                             <button type="button" class="col-6 btn cal-event" onclick="teacherClick($(this).parent().parent(), ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false)">Assign lecture</button>
                             <button type="button" class="col-6 btn cal-event-bes" onclick="teacherClick($(this).parent().parent(), ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, true)">Assign B.E.S.</button>
