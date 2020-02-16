@@ -253,8 +253,8 @@
                             <span class="col">${tea.missing_hours_bes}</span>
                         </div>
                         <div class="row">
-                            <button type="button" class="col-6 btn cal-event" onclick="teacherClick($(this).parent().parent(), ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false)">Assign lecture</button>
-                            <button type="button" class="col-6 btn cal-event-bes" onclick="teacherClick($(this).parent().parent(), ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, true)">Assign B.E.S.</button>
+                            <button type="button" class="col-6 btn cal-event" onclick="teacherClick($(this).parent().parent(), ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false)">{% trans 'Assign lecture' %}</button>
+                            <button type="button" class="col-6 btn cal-event-bes" onclick="teacherClick($(this).parent().parent(), ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, true)">{% trans 'Assign B.E.S.' %}</button>
                         </div>
                     </li>`;
                 $('#teachers_list').append(html);
