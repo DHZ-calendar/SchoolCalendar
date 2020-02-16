@@ -12,10 +12,10 @@
 
 {% block style %}  
 .list-teachers:hover{
-    color: #fff;
+    /*color: #fff;
     background-color: #007bff;
     border-color: #007bff;
-    cursor: pointer;
+    cursor: pointer;*/
 }
 
 .cal-block-absence {
@@ -23,6 +23,10 @@
 }
 .cal-block-conflict {
     background-color: lightsalmon;
+}
+
+.cal-event-bes {
+    background-color: #ffb554;
 }
 {% endblock %}
 
@@ -230,10 +234,14 @@
             $('#teachers_list').empty();
             for(let tea of data){
                 let html = `
-                    <li class="list-group-item list-teachers" onclick="teacherClick(this, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school})">
+                    <li class="list-group-item list-teachers">
                         <b>${tea.teacher.first_name} ${tea.teacher.last_name}</b> - ${tea.subject.name}<br/>
                         <span>{% trans 'Hours of theaching' %}: ${tea.hours} - {% trans 'B.E.S.' %}: ${tea.hours_bes}</span><br/>
                         <span>{% trans 'Missing hours' %}: ${tea.missing_hours} - {% trans 'B.E.S.' %}: ${tea.missing_hours_bes}</span><br/>
+                        <div class="row">
+                            <button type="button" class="col-6 btn cal-event" onclick="teacherClick($(this).parent().parent(), ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false)">Assign lecture</button>
+                            <button type="button" class="col-6 btn cal-event-bes" onclick="teacherClick($(this).parent().parent(), ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, true)">Assign B.E.S.</button>
+                        </div>
                     </li>`;
                 $('#teachers_list').append(html);
             }
@@ -262,6 +270,10 @@
                     alert("Lecture " + event.lecture + ", teacher " + event.teacher);
                 };
                 timetable.addEvent(customEvent, blockId, clickEvent, deleteAssignment);
+
+                if(assign.bes){
+                    customEvent.htmlElement.addClass('cal-event-bes');
+                }
             }
         });
     }
@@ -304,7 +316,7 @@
         });
     }
 
-    function teacherClick(btn, teacherId, subjId, schoolId){
+    function teacherClick(btn, teacherId, subjId, schoolId, bes){
         btn = $(btn);
 
         if(!btn.hasClass('active')){
@@ -312,7 +324,7 @@
 
             for(let blk of Object.keys(timetable.blocks)){
                 timetable.getBlock(blk).setState('available');
-                timetable.getBlock(blk).setOnClick((blk) => addAssignment(teacherId, subjId, schoolId, blk));
+                timetable.getBlock(blk).setOnClick((blk) => addAssignment(teacherId, subjId, schoolId, blk, bes));
             }
 
             setLockedBlocksTeacher(teacherId);
@@ -381,7 +393,7 @@
         });
     }
 
-    function addAssignment(teacherId, subjId, schoolId, block){
+    function addAssignment(teacherId, subjId, schoolId, block, bes){
         let url = "{% url 'assignments-list' %}";
 
         let date = moment(currentDate).add(block.day, 'days').format('YYYY-MM-DD');
@@ -395,7 +407,7 @@
             date: date,
             hour_start: block.startTime.hours + ':' + block.startTime.min,
             hour_end: block.endTime.hours + ':' + block.endTime.min,
-            bes: false,
+            bes: bes,
             substitution: false,
             absent: false
         };
