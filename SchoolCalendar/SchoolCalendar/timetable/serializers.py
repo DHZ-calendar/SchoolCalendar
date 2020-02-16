@@ -1,4 +1,6 @@
 from django.contrib.auth.models import User
+from django.utils.translation import gettext as _
+
 from rest_framework.serializers import HyperlinkedModelSerializer, ModelSerializer, Serializer, IntegerField, CharField,\
     DateField, SerializerMethodField, ValidationError, PrimaryKeyRelatedField
 
@@ -229,9 +231,15 @@ class AssignmentSerializer(ModelSerializer):
     """
     Serializer for teachers
     """
-    teacher = TeacherSerializer()
-    subject = SubjectSerializer()
-    hour_slot = SerializerMethodField()
+    teacher = TeacherSerializer(read_only=True)
+    teacher_id = PrimaryKeyRelatedField(write_only=True, queryset=Teacher.objects.all(), source='teacher')
+    subject = SubjectSerializer(read_only=True)
+    subject_id = PrimaryKeyRelatedField(write_only=True, queryset=Subject.objects.all(), source='subject')
+    hour_slot = SerializerMethodField(read_only=True)
+
+    def __init__(self, *args, **kwargs):
+        super(AssignmentSerializer, self).__init__(*args, **kwargs)
+        self.user = self.context['request'].user
 
     def get_hour_slot(self, obj, *args, **kwargs):
         """
@@ -252,10 +260,67 @@ class AssignmentSerializer(ModelSerializer):
             return el[0].id
         return None
 
+    def validate(self, attrs):
+        """
+        Check whether the hour_start is <= hour_end
+        :param attrs: the values to validate
+        :return: attrs or raises ValidationError
+        """
+        if attrs['hour_start'] > attrs['hour_end']:
+            raise ValidationError(_('The start hour field can\'t be later than the end hour'))
+        return attrs
+
+    def validate_subject_id(self, value):
+        """
+        Check whether the course is in the school of the user logged.
+        Somewhere else we should check that the user logged has enough permissions to do anything with a course.
+        :return:
+        """
+        if utils.get_school_from_user(self.user) != value.school:
+            raise ValidationError(_("The subject {} is not taught in the School ({}).").format(
+                value, utils.get_school_from_user(self.user)
+            ))
+        return value
+
+    def validate_course(self, value):
+        """
+        Check whether the course is in the school of the user logged.
+        Somewhere else we should check that the user logged has enough permissions to do anything with a course.
+        :return:
+        """
+        if utils.get_school_from_user(self.user) != value.school:
+            raise ValidationError(_('The course {} is not in the School ({}).').format(
+                value, utils.get_school_from_user(self.user)
+            ))
+        return value
+
+    def validate_school(self, value):
+        """
+        Check whether the school is the correct one for the admin user logged.
+        :param value:
+        :return:
+        """
+        if utils.get_school_from_user(self.user) != value:
+            raise ValidationError(_('The school {} is not a valid choice.').format(
+                value
+            ))
+        return value
+
+    def validate_teacher(self, value):
+        """
+        Check whether the teacher is in the school of the user logged.
+        Somewhere else we should check that the user logged has enough permissions to do anything with a teacher.
+        :return:
+        """
+        if utils.get_school_from_user(self.user) != value.school:
+            raise ValidationError(_('The teacher {} is not in the School ({}).'.format(
+                value, value.school
+            )))
+        return value
+
     class Meta:
         model = Assignment
-        fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'date', 'hour_start', 'hour_end',
-                  'bes', 'substitution', 'absent', 'hour_slot', 'id']
+        fields = '__all__'
 
 
 class AbsenceBlockSerializer(ModelSerializer):

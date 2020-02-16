@@ -30,8 +30,8 @@ from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodF
     StagePeriodFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
     AssignmentFilter
 from timetable import utils
-from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer,\
-    HolidaySerializer, StageSerializer, HourSlotSerializer, HoursPerTeacherInClassSerializer, AssignmentSerializer,\
+from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer, \
+    HolidaySerializer, StageSerializer, HourSlotSerializer, HoursPerTeacherInClassSerializer, AssignmentSerializer, \
     AbsenceBlockSerializer
 
 
@@ -208,7 +208,8 @@ class HoursPerTeacherInClassViewSet(RetrieveModelMixin, UpdateModelMixin, Destro
     filterset_class = HoursPerTeacherInClassFilter
 
 
-class AssignmentViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
+class AssignmentViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, CreateModelMixin,
+                        GenericViewSet):
     queryset = Assignment.objects.all()
     serializer_class = AssignmentSerializer
     permission_classes = [IsAuthenticated]
