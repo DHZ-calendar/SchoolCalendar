@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
-from rest_framework.serializers import HyperlinkedModelSerializer, ModelSerializer, Serializer
-from rest_framework.serializers import IntegerField, CharField, DateField, SerializerMethodField
+from rest_framework.serializers import HyperlinkedModelSerializer, ModelSerializer, Serializer, IntegerField, CharField,\
+    DateField, SerializerMethodField, ValidationError, PrimaryKeyRelatedField
+
 import datetime
 
 from timetable.models import Teacher, Holiday, Stage, AbsenceBlock, Assignment, HoursPerTeacherInClass, HourSlot, \
@@ -147,7 +148,8 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
                     el['hour_end'] in map_hour_slots[el['date__week_day']][el['hour_start']]:
                 el['legal_duration'] = map_hour_slots[el['date__week_day']][el['hour_start']][el['hour_end']]
             else:
-                el['legal_duration'] = el['hour_end'] - el['hour_start']
+                el['legal_duration'] = datetime.combine(datetime.date.min, el['hour_end']) -\
+                                       datetime.combine(datetime.date.min, el['hour_start'])
 
         total = datetime.timedelta(0)
         for el in assignments:
