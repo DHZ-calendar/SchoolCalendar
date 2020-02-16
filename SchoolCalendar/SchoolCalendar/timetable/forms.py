@@ -119,6 +119,15 @@ class SchoolYearForm(ModelForm):
         model = SchoolYear
         fields = ['year_start', 'date_start']
 
+    def clean(self):
+        """
+        Of course, the date_start must be included in the year_start
+        :return:
+        """
+        if self.cleaned_data['year_start'] != self.cleaned_data['date_start'].year:
+            self.add_error(None, forms.ValidationError(_('The date_start must be in year_start!')))
+        return self.cleaned_data
+    
 
 class CourseForm(BaseFormWithSchoolCheck):
     year = forms.IntegerField(help_text="This is the class number, for class IA for instance it is 1.")
