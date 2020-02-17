@@ -219,12 +219,19 @@ class AssignmentViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin,
     filterset_class = AssignmentFilter
 
 
-class TeacherAssignmentsViewSet(ListModelMixin, GenericViewSet):
+class TeacherAssignmentsViewSet(UserPassesTestMixin, ListModelMixin, GenericViewSet):
     queryset = Assignment.objects.all()
     serializer_class = AssignmentSerializer
     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool,)
     filterset_class = AssignmentFilter  # Here you should not specify any course
     lookup_url_kwarg = ['teacher_pk', 'school_year_pk']
+
+    def test_func(self):
+        """
+        :return: the teacher must be in the same school as the user in the request.
+        """
+        teacher = Teacher.objects.filter(id=self.kwargs['teacher_pk']).first()
+        return teacher and teacher.school == utils.get_school_from_user(self.request.user)
 
     def get_queryset(self, *args, **kwargs):
         """
