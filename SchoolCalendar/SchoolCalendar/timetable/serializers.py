@@ -348,7 +348,10 @@ class TeacherSubstitutionSerializer(ModelSerializer):
                   'last_name']
 
     def get_substitutions_made_so_far(self, obj, *args, **kwargs):
-        return 42
+        return Assignment.objects.filter(teacher=obj.id,
+                                         school=obj.school,
+                                         school_year=self.assignment_to_substitute,
+                                         substitution=True).count()
 
     def get_has_hour_after(self, obj, *args, **kwargs):
         related_hour_slot = HourSlot.objects.filter(starts_at=self.assignment_to_substitute.hour_start,
