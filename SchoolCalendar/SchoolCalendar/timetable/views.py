@@ -32,7 +32,7 @@ from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodF
 from timetable import utils
 from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer, \
     HolidaySerializer, StageSerializer, HourSlotSerializer, HoursPerTeacherInClassSerializer, AssignmentSerializer, \
-    AbsenceBlockSerializer
+    AbsenceBlockSerializer, TeacherSubstitutionSerializer
 
 
 class CreateViewWithUser(CreateView):
@@ -365,3 +365,26 @@ class CreateMultipleAssignmentsView(View):
         # Create with one single query.
         Assignment.objects.bulk_create(assignments_list)
         return HttpResponse(status=201)
+
+
+class TeacherSubstitutionViewSet(ListModelMixin, GenericViewSet):
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherSubstitutionSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = (DjangoFilterBackend, )
+    lookup_url_kwarg = 'assignment_pk'
+
+    def dispatch(self, request, *args, **kwargs):
+        request.assignment_pk = kwargs.get('assignment_pk')
+        return super(TeacherSubstitutionViewSet, self).dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        # Return all teachers for a certain school.
+        # May need to add only teachers for which there is at least one hour_per_teacher_in_class instance in
+        # the given school_year
+        if not Assignment.objects.filter(id=self.kwargs.get('assignment_pk')).exists():
+            return Teacher.objects.none()
+        a = Assignment.objects.get(id=self.kwargs.get('assignment_pk'))
+
+        return Teacher.objects.filter(school=utils.get_school_from_user(self.request.user)).exclude(id=a.teacher.id)\
+                    .filter(hoursperteacherinclass__school_year=a.school_year).distinct()

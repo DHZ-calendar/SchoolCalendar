@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext as _
 
 from rest_framework.serializers import HyperlinkedModelSerializer, ModelSerializer, Serializer, IntegerField, CharField,\
-    DateField, SerializerMethodField, ValidationError, PrimaryKeyRelatedField
+    DateField, SerializerMethodField, ValidationError, PrimaryKeyRelatedField, BooleanField
 
 import datetime
 
@@ -329,3 +329,56 @@ class AbsenceBlockSerializer(ModelSerializer):
     class Meta:
         model = AbsenceBlock
         fields = ['teacher', 'hour_slot', 'school_year', 'id']
+
+
+class TeacherSubstitutionSerializer(ModelSerializer):
+    has_hour_before = SerializerMethodField()
+    has_hour_after = SerializerMethodField()
+    substitutions_made_so_far = SerializerMethodField()
+
+    def __init__(self, *args, **kwargs):
+        super(TeacherSubstitutionSerializer, self).__init__(*args, **kwargs)
+        self.user = self.context['request'].user
+        # We have already checked in view .get_queryset whether the Assignment exists.
+        self.assignment_to_substitute = Assignment.objects.get(id=self.context['request'].assignment_pk)
+
+    class Meta:
+        model = Teacher
+        fields = ['school', 'notes', 'has_hour_before', 'has_hour_after', 'substitutions_made_so_far', 'first_name',
+                  'last_name']
+
+    def get_substitutions_made_so_far(self, obj, *args, **kwargs):
+        return 42
+
+    def get_has_hour_after(self, obj, *args, **kwargs):
+        return False
+
+    def get_has_hour_before(self, obj, *args, **kwargs):
+        print(obj)
+        print(self.assignment_to_substitute)
+        related_hour_slot = HourSlot.objects.filter(starts_at=self.assignment_to_substitute.hour_start,
+                                                    ends_at=self.assignment_to_substitute.hour_end,
+                                                    day_of_week=self.assignment_to_substitute.date.weekday(),
+                                                    school=obj.school,
+                                                    school_year=self.assignment_to_substitute.school_year).first()
+        if not related_hour_slot:
+            # If there is not a related hour slot, then we are talking about a non standard assignment.
+            # We return False by default
+            return False
+        if related_hour_slot.hour_number == 1:
+            # It is the first hour of the day, the teacher can't be at school before.
+            return False
+        previous_hour_slot = HourSlot.objects.filter(school=obj.school,
+                                                     school_year=self.assignment_to_substitute.school_year,
+                                                     hour_number=related_hour_slot.hour_number-1,
+                                                     day_of_week=self.assignment_to_substitute.date.weekday()).first()
+        if not previous_hour_slot:
+            # There is no previous hour slot, therefore we can't say.
+            return False
+
+        return Assignment.objects.filter(teacher=obj,
+                                         date=self.assignment_to_substitute.date,
+                                         school=obj.school,
+                                         school_year=self.assignment_to_substitute.school_year,
+                                         hour_start=previous_hour_slot.starts_at,
+                                         hour_end=previous_hour_slot.ends_at).exists()
