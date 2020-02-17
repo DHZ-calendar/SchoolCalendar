@@ -21,8 +21,7 @@
 }
 
 #sidebarCollapse{
-    background: #6d7fcc;
-    border-color: #6d7fcc;
+    border: 2px solid #4791ff;
     margin-left: 15px;
     margin-top: 10px;
 }
@@ -41,7 +40,6 @@
     background: #e2e2e2;
     color: #fff;
     transition: all 0.3s;
-    overflow-y: scroll;
     box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.2);
 }
 
@@ -54,19 +52,19 @@
     height: 35px;
     line-height: 35px;
     text-align: center;
-    background: #7386D5;
-    position: absolute;
+    background: #4791ff;
     top: 10px;
     right: 10px;
     cursor: pointer;
     -webkit-transition: all 0.3s;
     -o-transition: all 0.3s;
     transition: all 0.3s;
+    float: right;
 }
 
 #dismiss:hover {
     background: #fff;
-    color: #7386D5;
+    color: #4791ff;
 }
 
 .overlay {
@@ -84,9 +82,13 @@
     opacity: 1;
 }
 
+#sidebar .username{
+    font-size: small;
+}
+
 #sidebar .sidebar-header {
     padding: 20px;
-    background: #6d7fcc;
+    background: #4791ff;
 }
 
 #sidebar ul.components {
@@ -98,6 +100,11 @@
     padding: 10px;
 }
 
+
+#sidebar ul li {
+    border-bottom: 1px solid #4791ff;
+}
+
 #sidebar ul li a {
     padding: 10px;
     font-size: 1.1em;
@@ -105,14 +112,15 @@
 }
 
 #sidebar ul li a:hover {
-    color: #7386D5;
     background: #fff;
+    color: #4791ff;
+    text-decoration: none;
 }
 
 #sidebar ul li.active>a,
 a[aria-expanded="true"] {
     color: #fff;
-    background: #6d7fcc;
+    background: #4791ff;
 }
 
 a[data-toggle="collapse"] {

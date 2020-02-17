@@ -33,16 +33,15 @@
 </head>
 <body>
     <nav id="sidebar">
-        <div id="dismiss">
-            X
-        </div>
-
         <div class="sidebar-header">
+            <div id="dismiss">
+                X
+            </div>
             <h3>School Calendar</h3>
         </div>
 
         <ul class="list-unstyled components">
-            <p>Name of the user</p> <!-- TODO: change -->
+            <p class="username">Name of the user</p> <!-- TODO: change -->
 
             <li>
                 <a href="{% url 'timetable-view' %}">{% trans 'Timetable' %}</a>
@@ -95,7 +94,7 @@
     </nav>
 
     <button type="button" id="sidebarCollapse" class="btn">
-        <span>&#9776;</span>
+        <span>&#9776; {% trans 'Menu' %}</span>
     </button>
 
     <script>
