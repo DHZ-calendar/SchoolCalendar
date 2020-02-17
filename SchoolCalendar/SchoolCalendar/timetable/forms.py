@@ -152,6 +152,16 @@ class HourSlotForm(BaseFormWithSchoolCheck):
         model = HourSlot
         fields = ["hour_number", 'starts_at', 'ends_at', 'school', 'school_year', 'day_of_week', 'legal_duration']
 
+    def clean(self):
+        """
+        Of course, the starts_at must be smaller than ends_at
+        :return:
+        """
+        if self.cleaned_data['starts_at'] >= self.cleaned_data['ends_at']:
+            self.add_error(None, forms.ValidationError(_('The start hour must be strictly smaller that the '
+                                                         'end hour.')))
+        return self.cleaned_data
+
 
 class AbsenceBlockForm(BaseFormWithTeacherAndSchoolCheck):
     """
