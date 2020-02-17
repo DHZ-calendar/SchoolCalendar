@@ -351,11 +351,38 @@ class TeacherSubstitutionSerializer(ModelSerializer):
         return 42
 
     def get_has_hour_after(self, obj, *args, **kwargs):
-        return False
+        related_hour_slot = HourSlot.objects.filter(starts_at=self.assignment_to_substitute.hour_start,
+                                                    ends_at=self.assignment_to_substitute.hour_end,
+                                                    day_of_week=self.assignment_to_substitute.date.weekday(),
+                                                    school=obj.school,
+                                                    school_year=self.assignment_to_substitute.school_year).first()
+        if not related_hour_slot:
+            # If there is not a related hour slot, then we are talking about a non standard assignment.
+            # We return False by default
+            return False
+        if related_hour_slot.hour_number == max(HourSlot.objects.filter(
+                                                    day_of_week=self.assignment_to_substitute.date.weekday(),
+                                                    school=obj.school,
+                                                    school_year=self.assignment_to_substitute.school_year)
+                                                        .values_list('hour_number')[0]):
+            # It is the last hour of the day, the teacher can't be at school after.
+            return False
+        later_hour_slot = HourSlot.objects.filter(school=obj.school,
+                                                  school_year=self.assignment_to_substitute.school_year,
+                                                  hour_number=related_hour_slot.hour_number + 1,
+                                                  day_of_week=self.assignment_to_substitute.date.weekday()).first()
+        if not later_hour_slot:
+            # There is no later hour slot, therefore we can't say.
+            return False
+
+        return Assignment.objects.filter(teacher=obj,
+                                         date=self.assignment_to_substitute.date,
+                                         school=obj.school,
+                                         school_year=self.assignment_to_substitute.school_year,
+                                         hour_start=later_hour_slot.starts_at,
+                                         hour_end=later_hour_slot.ends_at).exists()
 
     def get_has_hour_before(self, obj, *args, **kwargs):
-        print(obj)
-        print(self.assignment_to_substitute)
         related_hour_slot = HourSlot.objects.filter(starts_at=self.assignment_to_substitute.hour_start,
                                                     ends_at=self.assignment_to_substitute.hour_end,
                                                     day_of_week=self.assignment_to_substitute.date.weekday(),
