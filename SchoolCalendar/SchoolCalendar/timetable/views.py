@@ -19,6 +19,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 import datetime
 from pprint import pprint
 
+from timetable.permissions import SchoolAdminCanWriteDelete
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday,\
                              Stage, Subject, HoursPerTeacherInClass, Assignment
 
@@ -166,7 +167,7 @@ class CourseYearOnlyListViewSet(ListModelMixin, GenericViewSet):
 class CourseSectionOnlyListViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
     serializer_class = CourseSectionOnlySerializer
     queryset = Course.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filterset_class = CourseSectionOnlyFilter
     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
 
@@ -174,7 +175,7 @@ class CourseSectionOnlyListViewSet(RetrieveModelMixin, UpdateModelMixin, Destroy
 class HolidayViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
     queryset = Holiday.objects.all()
     serializer_class = HolidaySerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
     filterset_class = HolidayPeriodFilter
 
@@ -182,7 +183,7 @@ class HolidayViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, Li
 class StageViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
     queryset = Stage.objects.all()
     serializer_class = StageSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
     filterset_class = StagePeriodFilter
 
@@ -190,7 +191,7 @@ class StageViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, List
 class HourSlotViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
     queryset = HourSlot.objects.all()
     serializer_class = HourSlotSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool,)
     filterset_class = HourSlotFilter
 
@@ -203,7 +204,7 @@ class HoursPerTeacherInClassViewSet(RetrieveModelMixin, UpdateModelMixin, Destro
     """
     queryset = HoursPerTeacherInClass.objects.all()
     serializer_class = HoursPerTeacherInClassSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool,)
     filterset_class = HoursPerTeacherInClassFilter
 
@@ -212,7 +213,7 @@ class AssignmentViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin,
                         GenericViewSet):
     queryset = Assignment.objects.all()
     serializer_class = AssignmentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool,)
     filterset_class = AssignmentFilter
 
