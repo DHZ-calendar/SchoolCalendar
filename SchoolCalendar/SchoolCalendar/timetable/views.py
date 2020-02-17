@@ -247,11 +247,21 @@ class TeacherAssignmentsViewSet(ListModelMixin, GenericViewSet):
                                          school_year=school_year)
 
 
-class AbsenceBlocksPerTeacherViewSet(ListModelMixin, GenericViewSet):
+class AbsenceBlocksPerTeacherViewSet(UserPassesTestMixin, ListModelMixin, GenericViewSet):
     queryset = AbsenceBlock.objects.all()
     serializer_class = AbsenceBlockSerializer
     filter_backends = (DjangoFilterBackend,)
     lookup_url_kwarg = ['teacher_pk', 'school_year_pk']
+
+    def test_func(self):
+        """
+        The teacher requested is in the same school as the user doing the request.
+        Actually when the teacher doesn't exist it should return 404, now instead it returns 403.
+        :return:
+        """
+        teacher_pk = self.kwargs.get('teacher_pk')
+        return Teacher.objects.filter(id=teacher_pk).exists() and \
+                Teacher.objects.get(id=teacher_pk).school == utils.get_school_from_user(self.request.user)
 
     def get_queryset(self, *args, **kwargs):
         """
