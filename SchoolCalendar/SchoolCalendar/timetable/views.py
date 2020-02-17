@@ -143,7 +143,7 @@ class TimetableView(TemplateView):
 class TeacherViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filter_backends = [TeacherFromSameSchoolFilterBackend]
 
 
