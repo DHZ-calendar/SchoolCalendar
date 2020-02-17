@@ -150,8 +150,8 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
                     el['hour_end'] in map_hour_slots[el['date__week_day']][el['hour_start']]:
                 el['legal_duration'] = map_hour_slots[el['date__week_day']][el['hour_start']][el['hour_end']]
             else:
-                el['legal_duration'] = datetime.combine(datetime.date.min, el['hour_end']) -\
-                                       datetime.combine(datetime.date.min, el['hour_start'])
+                el['legal_duration'] = datetime.datetime.combine(datetime.date.min, el['hour_end']) -\
+                                       datetime.datetime.combine(datetime.date.min, el['hour_start'])
 
         total = datetime.timedelta(0)
         for el in assignments:
