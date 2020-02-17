@@ -152,21 +152,21 @@
     function extraBlockExists(date, hourStart, hourEnd){
         let starts_at = parseStringTime(hourStart);
         let ends_at = parseStringTime(hourEnd);
-        let day_of_week = moment(date).day();
+        let day_of_week = moment(date).day() - 1;
         let blockId = day_of_week + hourStart + hourEnd;
 
         let block = timetable.getBlock(blockId);
         return block !== undefined;
     }
-    function createExtraBlock(date, hourStart, hourEnd){
+    function createExtraBlock(date, hourStart, hourEnd, deletable=false){
         let starts_at = parseStringTime(hourStart);
         let ends_at = parseStringTime(hourEnd);
-        let day_of_week = moment(date).day();
+        let day_of_week = moment(date).day() - 1;
         let blockId = day_of_week + hourStart + hourEnd;
 
         let block = timetable.getBlock(blockId);
         if(block === undefined){
-            block = new Block(blockId, "{% trans 'Extra lecture' %}", day_of_week, starts_at, ends_at);
+            block = new Block(blockId, "{% trans 'Extra lecture' %}", day_of_week, starts_at, ends_at, deletable);
             timetable.addBlock(block);
         }
         return block;
