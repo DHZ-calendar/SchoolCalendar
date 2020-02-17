@@ -275,11 +275,16 @@ class AbsenceBlocksPerTeacherViewSet(ListModelMixin, GenericViewSet):
                                            school_year=school_year)
 
 
-class ReplicateAssignmentViewSet(ListModelMixin, GenericViewSet):
+class ReplicateAssignmentViewSet(UserPassesTestMixin, ListModelMixin, GenericViewSet):
     queryset = Assignment.objects.all()
     serializer_class = AssignmentSerializer
     filter_backends = (DjangoFilterBackend,)
     lookup_url_kwarg = ['assignment_pk', 'from', 'to']
+
+    def test_func(self):
+        assignment_pk = self.kwargs.get('assignment_pk')
+        return utils.is_adminschool(self.request.user) and Assignment.objects.filter(id=assignment_pk).exists() and \
+               Assignment.objects.get(id=assignment_pk).school == utils.get_school_from_user(self.request.user)
 
     def get_queryset(self):
         try:
