@@ -32,7 +32,7 @@ from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodF
 from timetable import utils
 from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer, \
     HolidaySerializer, StageSerializer, HourSlotSerializer, HoursPerTeacherInClassSerializer, AssignmentSerializer, \
-    AbsenceBlockSerializer
+    AbsenceBlockSerializer, TeacherSubstitutionSerializer
 
 
 class CreateViewWithUser(CreateView):
@@ -365,3 +365,44 @@ class CreateMultipleAssignmentsView(View):
         # Create with one single query.
         Assignment.objects.bulk_create(assignments_list)
         return HttpResponse(status=201)
+
+
+class TeacherSubstitutionViewSet(ListModelMixin, GenericViewSet):
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherSubstitutionSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = (DjangoFilterBackend, )
+    lookup_url_kwarg = 'assignment_pk'
+
+    def dispatch(self, request, *args, **kwargs):
+        request.assignment_pk = kwargs.get('assignment_pk')
+        return super(TeacherSubstitutionViewSet, self).dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        # Return all teachers for a certain school.
+        # May need to add only teachers for which there is at least one hour_per_teacher_in_class instance in
+        # the given school_year
+        if not Assignment.objects.filter(id=self.kwargs.get('assignment_pk')).exists():
+            return Teacher.objects.none()
+        a = Assignment.objects.get(id=self.kwargs.get('assignment_pk'))
+
+        teachers_list = Teacher.objects.filter(school=utils.get_school_from_user(self.request.user))\
+            .exclude(id=a.teacher.id)\
+            .filter(hoursperteacherinclass__school_year=a.school_year).distinct()
+
+        # Remove all teachers who already have assignments in that hour
+        teachers_list = teachers_list.exclude(assignment__date=a.date,
+                                              assignment__hour_start=a.hour_start,
+                                              assignment__hour_end=a.hour_end).distinct()
+
+        # Remove all teachers who have an absence block there.
+        hour_slot = HourSlot.objects.filter(school=a.school,
+                                            school_year=a.school_year,
+                                            starts_at=a.hour_start,
+                                            ends_at=a.hour_end).first()
+        if hour_slot:
+            # If there is the hour_slot, then exclude all teachers that have an absence block in that period.
+            # TODO: do some tests with absence blocks!!
+            teachers_list = teachers_list.exclude(absenceblock__hour_slot=hour_slot)
+
+        return teachers_list
