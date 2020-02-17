@@ -140,11 +140,11 @@
         //find the first day of the week        
         currentDate = moment().day(1).toDate();
 
-        loadData();
+        loadData(false);
         getClassYears();
     });
 
-    function loadData(){
+    function loadData(loadAssign=true){
         resetTeacherState();
 
         timetable.deleteAllEvents();
@@ -159,7 +159,8 @@
 
         getHolidays(startDate, endDate);
         getStages(startDate, endDate);
-        getAssignments(startDate, endDate);
+        if(loadAssign)
+            getAssignments(startDate, endDate);
     }
 
     function goNextWeek(){
