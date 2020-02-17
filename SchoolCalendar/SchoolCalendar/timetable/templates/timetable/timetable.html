@@ -52,7 +52,7 @@
             </select>
         </div>
         <div class="col">
-            <button type="button" class="btn btn-primary btn-sm">{% trans 'Add extra lecture'%}</button>            
+            <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalExtraLecture">{% trans 'Add extra lecture'%}</button>            
         </div>
     </div>
     <div class="row">
@@ -77,6 +77,40 @@
     </div>
 </div>
 
+<!-- Modal extra lecture -->
+<div class="modal fade" id="modalExtraLecture" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">{% trans 'Add extra lecture slot' %}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {% trans 'Day of week' %}:
+                <select class="custom-select" id="day_of_week">
+                    <option value="0">{% trans 'Monday' %}</option>
+                    <option value="1">{% trans 'Tuesday' %}</option>
+                    <option value="2">{% trans 'Wednesday' %}</option>
+                    <option value="3">{% trans 'Thursday' %}</option>
+                    <option value="4">{% trans 'Friday' %}</option>
+                    <option value="5">{% trans 'Saturday' %}</option>
+                </select>
+
+                {% trans 'Hour start' %}:
+                <input type="text" id="hour_start" class="form-control timepicker" />
+
+                {% trans 'Hour end' %}:
+                <input type="text" id="hour_end" class="form-control timepicker" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans 'Close' %}</button>
+                <button type="button" class="btn btn-success" onclick="addExtraBlock()">{% trans 'Add' %}</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
 
@@ -85,6 +119,14 @@
     let timetable;
     let currentDate;
     $(document).ready(() => {
+        $('.timepicker').timepicker({
+            minuteStep: 1,
+            appendWidgetTo: 'body',
+            showSeconds: false,
+            showMeridian: false,
+            defaultTime: false
+        });
+
         let cal = $("#calendar");
         timetable = new Timetable(cal, 7, 23);
 
@@ -127,6 +169,14 @@
     function goPrevWeek(){
         currentDate = moment(currentDate).subtract(7, 'days').toDate();
         loadData();
+    }
+
+    function addExtraBlock(){
+        let date = moment(currentDate).add($('#day_of_week').val(), 'days').toDate();
+        let hourStart = $('#hour_start').val();
+        let hourEnd = $('#hour_end').val();
+        let block = createExtraBlock(date, hourStart, hourEnd, true);
+        $('#modalExtraLecture').modal('hide');
     }
 
     function resetTeacherState(){
