@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
@@ -20,12 +21,12 @@ import datetime
 from pprint import pprint
 
 from timetable.permissions import SchoolAdminCanWriteDelete
-from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday,\
-                             Stage, Subject, HoursPerTeacherInClass, Assignment
+from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
+    Stage, Subject, HoursPerTeacherInClass, Assignment
 
 from timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYearForm, CourseForm, HourSlotForm, \
-                            AbsenceBlockForm, HolidayForm, StageForm, SubjectForm, HoursPerTeacherInClassForm,\
-                            AssignmentForm
+    AbsenceBlockForm, HolidayForm, StageForm, SubjectForm, HoursPerTeacherInClassForm, \
+    AssignmentForm
 
 from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
     StagePeriodFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
@@ -148,9 +149,8 @@ class TeacherViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, Li
 
 
 class CourseYearOnlyListViewSet(ListModelMixin, GenericViewSet):
-
     serializer_class = CourseYearOnlySerializer
-    queryset = Course.objects.all()   # I think it gets overridden by get_queryset
+    queryset = Course.objects.all()  # I think it gets overridden by get_queryset
     permission_classes = [IsAuthenticated]
     filterset_class = CourseYearOnlyFilter
     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
@@ -164,7 +164,8 @@ class CourseYearOnlyListViewSet(ListModelMixin, GenericViewSet):
             return Course.objects.filter(school=school).values('year').distinct()
 
 
-class CourseSectionOnlyListViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
+class CourseSectionOnlyListViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin,
+                                   GenericViewSet):
     serializer_class = CourseSectionOnlySerializer
     queryset = Course.objects.all()
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
@@ -222,7 +223,7 @@ class TeacherAssignmentsViewSet(ListModelMixin, GenericViewSet):
     queryset = Assignment.objects.all()
     serializer_class = AssignmentSerializer
     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool,)
-    filterset_class = AssignmentFilter   # Here you should not specify any course
+    filterset_class = AssignmentFilter  # Here you should not specify any course
     lookup_url_kwarg = ['teacher_pk', 'school_year_pk']
 
     def get_queryset(self, *args, **kwargs):
@@ -263,7 +264,7 @@ class AbsenceBlocksPerTeacherViewSet(ListModelMixin, GenericViewSet):
         school_year_pk = self.kwargs.get(self.lookup_url_kwarg[1])
         try:
             #  Return the teacher, but only among the ones in the school of the currently logged in user
-            teacher = Teacher.objects.get(id=teacher_pk, school=utils.get_school_from_user(self.request.user))  
+            teacher = Teacher.objects.get(id=teacher_pk, school=utils.get_school_from_user(self.request.user))
             school_year = SchoolYear.objects.get(id=school_year_pk)
 
         except ObjectDoesNotExist:
@@ -289,16 +290,26 @@ class ReplicateAssignmentViewSet(ListModelMixin, GenericViewSet):
             # excluding the assignment in the url.
             return Assignment.objects.filter(school_year=a.school_year,
                                              # __week_day returns dates Sun-Sat (1,7), while weekday (Mon, Sun) (0,6)
-                                             date__week_day=(a.date.weekday()+2) % 7,
-                                             hour_start=a.hour_start)\
-                                     .filter(Q(teacher=a.teacher) | Q(course=a.course))\
-                                     .filter(date__gte=from_date, date__lte=to_date)\
-                                     .exclude(id=a.pk)
+                                             date__week_day=(a.date.weekday() + 2) % 7,
+                                             hour_start=a.hour_start) \
+                .filter(Q(teacher=a.teacher) | Q(course=a.course)) \
+                .filter(date__gte=from_date, date__lte=to_date) \
+                .exclude(id=a.pk)
         except ObjectDoesNotExist:
             return Assignment.objects.none()
 
 
-class CreateMultipleAssignmentsView(View):
+class CreateMultipleAssignmentsView(UserPassesTestMixin, View):
+
+    def test_func(self):
+        """
+        Returns True only when the user logged is an admin, and it is replicating an assignment that
+        is in the correct school
+        :return:
+        """
+        assignment_pk = self.kwargs.get('assignment_pk')
+        return utils.is_adminschool(self.request.user) and Assignment.objects.filter(id=assignment_pk).exists() and \
+               Assignment.objects.get(id=assignment_pk).school == utils.get_school_from_user(self.request.user)
 
     def post(self, request, *args, **kwargs):
         """
@@ -333,10 +344,10 @@ class CreateMultipleAssignmentsView(View):
                                               school_year=a.school_year,
                                               hour_start=a.hour_start,
                                               hour_end=a.hour_end,
-                                              date__week_day=((a.date.weekday()+2) % 7),
+                                              date__week_day=((a.date.weekday() + 2) % 7),
                                               date__gte=from_date,
-                                              date__lte=to_date).\
-                                        exclude(id=a.id)
+                                              date__lte=to_date). \
+            exclude(id=a.id)
         if conflicts:
             # There are conflicts!
             return JsonResponse(
@@ -372,7 +383,7 @@ class TeacherSubstitutionViewSet(ListModelMixin, GenericViewSet):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSubstitutionSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = (DjangoFilterBackend, )
+    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
     lookup_url_kwarg = 'assignment_pk'
 
     def dispatch(self, request, *args, **kwargs):
@@ -383,12 +394,14 @@ class TeacherSubstitutionViewSet(ListModelMixin, GenericViewSet):
         # Return all teachers for a certain school.
         # May need to add only teachers for which there is at least one hour_per_teacher_in_class instance in
         # the given school_year
-        if not Assignment.objects.filter(id=self.kwargs.get('assignment_pk')).exists():
+        if not Assignment.objects.filter(id=self.kwargs.get('assignment_pk'),
+                                         school=utils.get_school_from_user(self.request.user).id).exists():
             return Teacher.objects.none()
-        a = Assignment.objects.get(id=self.kwargs.get('assignment_pk'))
+        a = Assignment.objects.get(id=self.kwargs.get('assignment_pk'),
+                                   school=utils.get_school_from_user(self.request.user).id)
 
-        teachers_list = Teacher.objects.filter(school=utils.get_school_from_user(self.request.user))\
-            .exclude(id=a.teacher.id)\
+        teachers_list = Teacher.objects.filter(school=utils.get_school_from_user(self.request.user)) \
+            .exclude(id=a.teacher.id) \
             .filter(hoursperteacherinclass__school_year=a.school_year).distinct()
 
         # Remove all teachers who already have assignments in that hour

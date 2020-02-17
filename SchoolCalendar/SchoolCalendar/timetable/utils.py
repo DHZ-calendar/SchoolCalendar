@@ -38,3 +38,11 @@ def convert_weekday_into_1_7_format(day):
 
 def get_closest_smaller_Monday():
     return datetime.datetime.now().date() - datetime.timedelta(days=datetime.datetime.now().date().weekday())
+
+
+def is_adminschool(user):
+    """
+    :param user:
+    :return: True when the user is an AdminSchool corresponding to the given user
+    """
+    return AdminSchool.objects.filter(id=user.id).exists()
