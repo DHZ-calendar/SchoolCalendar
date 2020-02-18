@@ -1,1 +1,1 @@
-web: gunicorn SchoolCalendar/SchoolCalendar/SchoolCalendar.wsgi
+web: gunicorn SchoolCalendar.SchoolCalendar.SchoolCalendar.wsgi
