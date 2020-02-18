@@ -343,12 +343,12 @@ class CreateMultipleAssignmentsView(UserPassesTestMixin, View):
         """
         assignment_pk = kwargs.get('assignment_pk')
         try:
-            from_date = datetime.datetime.strptime(kwargs.get('from'), '%m-%d-%Y').date()
-            to_date = datetime.datetime.strptime(kwargs.get('to'), '%m-%d-%Y').date()
+            from_date = datetime.datetime.strptime(kwargs.get('from'), '%Y-%m-%d').date()
+            to_date = datetime.datetime.strptime(kwargs.get('to'), '%Y-%m-%d').date()
 
         except ValueError:
             # Wrong format of date: yyyy-mm-dd
-            return HttpResponse('Wrong format of date: dd-mm-yyyy', 400)
+            return HttpResponse('Wrong format of date: yyyy-mm-dd', 400)
 
         if from_date > to_date:
             # From date should be smaller than to_date

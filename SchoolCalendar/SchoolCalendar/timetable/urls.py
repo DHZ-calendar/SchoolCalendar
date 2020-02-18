@@ -47,7 +47,7 @@ urlpatterns = [
     path('hours_per_teacher_in_class/add/', HoursPerTeacherInClassCreate.as_view(),
          name='hours_per_teacher_in_class-add'),
     path('assignment/add/', AssignmentCreate.as_view(), name='assignment-add'),
-    re_path('multiple_assignments/add/(?P<assignment_pk>[0-9]+)/(?P<from>\d\d-\d\d-\d\d\d\d)/(?P<to>\d\d-\d\d-\d\d\d\d)'
+    re_path(r'multiple_assignments/add/(?P<assignment_pk>[0-9]+)/(?P<from>\d\d\d\d-\d\d-\d\d)/(?P<to>\d\d\d\d-\d\d-\d\d)'
             , CreateMultipleAssignmentsView.as_view(), name='multiple_assignment-add')
     # path('author/<int:pk>/', AuthorUpdate.as_view(), name='author-update'),
     # path('author/<int:pk>/delete/', AuthorDelete.as_view(), name='author-delete'),

@@ -31,6 +31,10 @@
 .btn-functions{
     white-space: normal;
 }
+
+li.conflicts-content{
+    padding: 0px;
+}
 {% endblock %}
 
 {% block body %}
@@ -59,7 +63,7 @@
             <button type="button" class="btn btn-primary btn-functions" data-toggle="modal" data-target="#modalExtraLecture">{% trans 'Add extra lecture'%}</button>            
         </div>
         <div class="col-1">
-            <button type="button" class="btn btn-danger btn-functions">{% trans 'Replicate week'%}</button>            
+            <button type="button" class="btn btn-danger btn-functions" data-toggle="modal" data-target="#modalReplicateWeek">{% trans 'Replicate week'%}</button>            
         </div>
     </div>
     <div class="row">
@@ -119,6 +123,36 @@
     </div>
 </div>
 
+<!-- Modal replicate lectures -->
+<div class="modal fade" id="modalReplicateWeek" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">{% trans 'Replicate lectures of this week' %}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {% trans 'Date start' %}:
+                <input type="text" id="date_start" class="form-control datepicker" />
+
+                {% trans 'Date end' %}:
+                <input type="text" id="date_end" class="form-control datepicker" />
+                <hr/>
+                <div id="replicateResult">
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans 'Close' %}</button>
+                <button type="button" class="btn btn-info" onclick="checkReplicateWeek()">{% trans 'Check conflicts' %}</button>
+                <button type="button" class="btn btn-success" onclick="replicateWeek()">{% trans 'Replicate lectures' %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 
@@ -133,6 +167,7 @@
             showMeridian: false,
             defaultTime: false
         });
+        $('.datepicker').datepicker();
 
         let cal = $("#calendar");
         timetable = new Timetable(cal, 7, 23);
@@ -198,6 +233,13 @@
         let hours = parseInt(arr[0]);
         let min = parseInt(arr[1]);
         return { hours: hours, min: min };
+    }
+    function formatStringTime(time){
+        let frm = (x) => ("0" + x).slice(-2);
+
+        let hours = frm(time.hours);
+        let min = frm(time.min);
+        return hours + ":" + min;
     }
     function formatDate(date){
         if(date === undefined)
@@ -511,5 +553,95 @@
             });
         }
         return res;
+    }
+
+    function checkReplicationAssignment(assign, startDate, endDate, resultList){
+        let url = "{% url 'replicate_assignment-list' 12345 '0000-00-00' '9999-99-99' %}"
+            .replace("12345", assign.id)
+            .replace("0000-00-00", formatDate(startDate))
+            .replace("9999-99-99", formatDate(endDate));
+        $.get(url, function(data) {
+            let listConflict = ``;
+            for(let conflict of data){
+                listConflict += `
+                    <li>
+                        <b>${conflict.teacher.first_name} ${conflict.teacher.last_name}</b> - ${conflict.subject.name}
+                        ${conflict.hour_start}-${conflict.hour_end}
+                    </li>`;
+            }
+
+            let date = moment(startDate).add(assign.block.day, 'days').toDate();
+            date = formatDate(date);
+
+            resultList.append(`
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span href="#submenu${assign.id}" data-toggle="collapse" aria-expanded="false">
+                        <b>${assign.teacher}</b> - ${assign.lecture} ${date}
+                        ${formatStringTime(assign.block.startTime)}-${formatStringTime(assign.block.endTime)}
+                    </span>
+                    <span class="badge badge-danger badge-pill">${data.length}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center conflicts-content">
+                    <ul class="collapse" id="submenu${assign.id}">
+                        ${listConflict}
+                    </ul>
+                </li>
+            `);
+        });        
+    }
+    function checkReplicateWeek(){
+        let startDate = moment($('#date_start').val(), "MM/DD/YYYY").toDate();
+        let endDate = moment($('#date_end').val(), "MM/DD/YYYY").toDate();
+
+        let resultBox = $("#replicateResult");
+        resultBox.empty();
+        resultBox.append(`
+            <b>Result:</b>
+            <ul class="list-group">
+            </ul>
+        `);
+
+        let resultList = resultBox.find('ul');
+
+        for (let block of Object.keys(timetable.blocks)){
+            for(let event of timetable.getBlock(block).events){
+                checkReplicationAssignment(event, startDate, endDate, resultList);
+            }
+        }
+    }
+
+    function replicateAssignment(assign, startDate, endDate){
+        let url = "{% url 'multiple_assignment-add' 12345 '0000-00-00' '9999-99-99' %}"
+            .replace("12345", assign.id)
+            .replace("0000-00-00", formatDate(startDate))
+            .replace("9999-99-99", formatDate(endDate));
+        let data = {
+            csrfmiddlewaretoken: Cookies.get('csrftoken')
+        }
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: data,
+            statusCode: {
+                201: function(xhr) {
+                    console.log("res OK");
+                },
+                400: function(xhr) {
+                    let data = xhr.responseJSON;
+                    console.error(data);
+                    alert("{% trans 'Conflict on date' %} " + data[0].date);                    
+                }
+            }
+        });
+    }
+    function replicateWeek(){
+        let startDate = moment($('#date_start').val(), "MM/DD/YYYY").toDate();
+        let endDate = moment($('#date_end').val(), "MM/DD/YYYY").toDate();
+
+        for (let block of Object.keys(timetable.blocks)){
+            for(let event of timetable.getBlock(block).events){
+                replicateAssignment(event, startDate, endDate);
+            }
+        }
     }
 {% endblock %}
