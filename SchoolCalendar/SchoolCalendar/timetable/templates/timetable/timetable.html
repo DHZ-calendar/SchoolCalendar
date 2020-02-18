@@ -415,7 +415,8 @@
         let startDate = currentDate;
         let endDate = moment(startDate).add(6, 'days').toDate();
 
-        let url = "/timetable/api/teacher_assignments/" + teacherId + "/" + school_year;
+        let url = "{% url 'teacher_assignments-list' 12345 99999 %}"
+            .replace("12345", teacherId).replace("99999", school_year);
         let data = {
             'school_year': school_year,
             'from_date': formatDate(startDate),
@@ -443,7 +444,8 @@
         let startDate = currentDate;
         let endDate = moment(startDate).add(6, 'days').toDate();
 
-        let url = "/timetable/api/teacher_absence_block/" + teacherId + "/" + school_year;
+        let url = "{% url 'teacher_absence_blocks-list' 12345 99999 %}"
+            .replace("12345", teacherId).replace("99999", school_year);
         let data = {
             'school_year': school_year,
             'from_date': formatDate(startDate),
