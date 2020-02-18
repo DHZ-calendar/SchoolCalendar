@@ -311,13 +311,15 @@ class ReplicateAssignmentViewSet(UserPassesTestMixin, ListModelMixin, GenericVie
             to_date = self.kwargs.get('to')
             # Return all assignments from the same course or teacher that would collide in the future.
             # excluding the assignment in the url.
-            return Assignment.objects.filter(school_year=a.school_year,
-                                             # __week_day returns dates Sun-Sat (1,7), while weekday (Mon, Sun) (0,6)
-                                             date__week_day=(a.date.weekday() + 2) % 7,
-                                             hour_start=a.hour_start) \
+            conflicts = Assignment.objects.filter(school_year=a.school_year,
+                                                  # _week_day returns dates Sun-Sat (1,7), while weekday (Mon, Sun) (0,6)
+                                                  date__week_day=(a.date.weekday() + 2) % 7,
+                                                  hour_start=a.hour_start) \
                 .filter(Q(teacher=a.teacher) | Q(course=a.course)) \
                 .filter(date__gte=from_date, date__lte=to_date) \
                 .exclude(id=a.pk)
+
+            return conflicts
         except ObjectDoesNotExist:
             return Assignment.objects.none()
 
@@ -379,7 +381,16 @@ class CreateMultipleAssignmentsView(UserPassesTestMixin, View):
                 status=400)
 
         while d <= to_date:
-            if d != a.date and d.weekday() == a.date.weekday():
+            if d != a.date and d.weekday() == a.date.weekday() and not \
+                    Holiday.objects.filter(school=a.school,
+                                           school_year=a.school_year,
+                                           date_end__gte=d,
+                                           date_start__lte=d).exists() and not \
+                    Stage.objects.filter(school=a.school,
+                                         school_year=a.school_year,
+                                         date_start__lte=d,
+                                         date_end__gte=d,
+                                         course=a.course):
                 # Found the correct day of the week when to duplicate the assignment
                 new_a = Assignment(
                     teacher=a.teacher,
