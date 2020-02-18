@@ -45,4 +45,6 @@ def is_adminschool(user):
     :param user:
     :return: True when the user is an AdminSchool corresponding to the given user
     """
+    if not user:
+        return False
     return AdminSchool.objects.filter(id=user.id).exists()

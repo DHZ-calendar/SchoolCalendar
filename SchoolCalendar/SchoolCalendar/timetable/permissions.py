@@ -21,4 +21,3 @@ class SchoolAdminCanWriteDelete(BasePermission):
             # Check permissions for write request
             # Only if the logged in user is an admin.
             return AdminSchool.objects.filter(id=request.user.id).exists()
-
