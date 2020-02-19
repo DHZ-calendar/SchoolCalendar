@@ -25,7 +25,9 @@ SECRET_KEY = '+xqb9fvu^c%0cnjaqma3d(=$=&+e7l6l0qa)b#h11=qa)13gio'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'schoolcalendardemo.herokuapp.com'
+]
 
 
 # Application definition
