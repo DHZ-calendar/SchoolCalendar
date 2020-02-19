@@ -43,7 +43,7 @@ li.conflicts-content{
         <h3 class="col text-center">{% trans 'Plan a timetable' %}</h3>
     </div>
     <div class="row">
-        <div class="col-5">
+        <div class="col-3">
             {% trans 'School year:' %}
             <select id="school_year" onchange="getClassYears()">
                 {% for year in school_years %}
@@ -51,13 +51,20 @@ li.conflicts-content{
                 {% endfor %}
             </select>
         </div>
-        <div class="col-5">
+        <div class="col-3">
             {% trans 'Choose a class:' %}
             <select id="course_year" onchange="getClassSections()">
             </select>
             {% trans 'section:' %}
             <select id="course_section" onchange="getTeachers()">
             </select>
+        </div>
+        <div class="col-4 row">
+            <div class="col-12"><b>{% trans 'Legend' %}:</b></div>
+            <div class="col-6"><span class="cal-event">Lecture</span></div>
+            <div class="col-6"><span class="cal-event-bes">B.E.S.</span></div>
+            <div class="col-6"><span class="cal-block-conflict">Collision with other lectures</span></div>
+            <div class="col-6"><span class="cal-block-absence">Absence of the teacher</span></div>
         </div>
         <div class="col-1">
             <button type="button" class="btn btn-primary btn-functions" data-toggle="modal" data-target="#modalExtraLecture">{% trans 'Add extra lecture'%}</button>            
