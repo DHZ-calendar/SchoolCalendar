@@ -35,8 +35,8 @@ class AbstractTimePeriodSerializer(ModelSerializer):
     For instance, if the model has a period from 4th January and 15th January, and the filtered period is 7-20th of
     January, then start and end are 7-15th of January.
     """
-    start = SerializerMethodField(verbose_name=_("start"))
-    end = SerializerMethodField(verbose_name=_("end"))
+    start = SerializerMethodField()
+    end = SerializerMethodField()
 
     def get_start(self, obj, *args, **kwargs):
         """
@@ -112,10 +112,10 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
     """
     Serializer for teachers
     """
-    missing_hours = SerializerMethodField(verbose_name=_("missing hours"))
-    missing_hours_bes = SerializerMethodField(verbose_name=_("missing bes hours"))
-    teacher = TeacherSerializer(verbose_name=_("teacher"))
-    subject = SubjectSerializer(verbose_name=_("subject"))
+    missing_hours = SerializerMethodField()
+    missing_hours_bes = SerializerMethodField()
+    teacher = TeacherSerializer()
+    subject = SubjectSerializer()
 
     class Meta:
         model = HoursPerTeacherInClass
@@ -231,13 +231,11 @@ class AssignmentSerializer(ModelSerializer):
     """
     Serializer for teachers
     """
-    teacher = TeacherSerializer(read_only=True, verbose_name=_("teacher"))
-    teacher_id = PrimaryKeyRelatedField(write_only=True, queryset=Teacher.objects.all(), source='teacher',
-                                        verbose_name=_("teacher ID"))
-    subject = SubjectSerializer(read_only=True, verbose_name=_("subject"))
-    subject_id = PrimaryKeyRelatedField(write_only=True, queryset=Subject.objects.all(), source='subject',
-                                        verbose_name=_("subject ID"))
-    hour_slot = SerializerMethodField(read_only=True, verbose_name=_("hour slot"))
+    teacher = TeacherSerializer(read_only=True)
+    teacher_id = PrimaryKeyRelatedField(write_only=True, queryset=Teacher.objects.all(), source='teacher')
+    subject = SubjectSerializer(read_only=True)
+    subject_id = PrimaryKeyRelatedField(write_only=True, queryset=Subject.objects.all(), source='subject')
+    hour_slot = SerializerMethodField(read_only=True)
 
     def __init__(self, *args, **kwargs):
         super(AssignmentSerializer, self).__init__(*args, **kwargs)
@@ -326,7 +324,7 @@ class AssignmentSerializer(ModelSerializer):
 
 
 class AbsenceBlockSerializer(ModelSerializer):
-    teacher = TeacherSerializer(verbose_name=_("teacher"))
+    teacher = TeacherSerializer()
 
     class Meta:
         model = AbsenceBlock
@@ -334,9 +332,9 @@ class AbsenceBlockSerializer(ModelSerializer):
 
 
 class TeacherSubstitutionSerializer(ModelSerializer):
-    has_hour_before = SerializerMethodField(verbose_name=_("has class before"))
-    has_hour_after = SerializerMethodField(verbose_name=_("has class after"))
-    substitutions_made_so_far = SerializerMethodField(verbose_name=_("substitutions made so far"))
+    has_hour_before = SerializerMethodField()
+    has_hour_after = SerializerMethodField()
+    substitutions_made_so_far = SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
         super(TeacherSubstitutionSerializer, self).__init__(*args, **kwargs)
