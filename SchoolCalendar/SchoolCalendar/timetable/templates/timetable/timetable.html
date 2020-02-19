@@ -21,6 +21,12 @@
 .cal-event-bes {
     background-color: #ffb554;
 }
+.cal-event-absent {
+    background-color: #cda7eb;
+}
+.cal-event-substitution {
+    background-color: #bafff6;
+}
 
 .list-teachers hr {
     margin-top: 3px;
@@ -61,10 +67,12 @@ li.conflicts-content{
         </div>
         <div class="col-4 row">
             <div class="col-12"><b>{% trans 'Legend' %}:</b></div>
-            <div class="col-6"><span class="cal-event">Lecture</span></div>
-            <div class="col-6"><span class="cal-event-bes">B.E.S.</span></div>
-            <div class="col-6"><span class="cal-block-conflict">Collision with other lectures</span></div>
-            <div class="col-6"><span class="cal-block-absence">Absence of the teacher</span></div>
+            <div class="col-6"><span class="cal-event">{% trans 'Lecture' %}</span></div>
+            <div class="col-6"><span class="cal-event-bes">{% trans 'B.E.S.' %}</span></div>
+            <div class="col-6"><span class="cal-event-absent">{% trans 'Absence of the teacher' %}</span></div>
+            <div class="col-6"><span class="cal-event-substitution">{% trans 'Substitution lecture' %}</span></div>
+            <div class="col-6"><span class="cal-block-conflict">{% trans 'Collision with other lectures' %}</span></div>
+            <div class="col-6"><span class="cal-block-absence">{% trans 'Hours blocked for a teacher' %}</span></div>
         </div>
         <div class="col-1">
             <button type="button" class="btn btn-primary btn-functions" data-toggle="modal" data-target="#modalExtraLecture">{% trans 'Add extra lecture'%}</button>            
@@ -396,6 +404,12 @@ li.conflicts-content{
                 if(assign.bes){
                     customEvent.htmlElement.addClass('cal-event-bes');
                 }
+                else if(assign.absent){
+                    customEvent.htmlElement.addClass('cal-event-absent');
+                }
+                else if(assign.substitution){
+                    customEvent.htmlElement.addClass('cal-event-substitution');
+                }                
             }
         });
     }
