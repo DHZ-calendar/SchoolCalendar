@@ -60,9 +60,6 @@ class TeacherCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
 
 
 class AdminSchoolCreate(SuperUserPermissionMixin, CreateViewWithUser):
-    """
-    TODO: This should be made only by other admin_schools and superusers
-    """
     model = AdminSchool
     form_class = AdminSchoolForm
     template_name = 'timetable/adminschool_form.html'
@@ -278,8 +275,8 @@ class AbsenceBlocksPerTeacherViewSet(UserPassesTestMixin, ListModelMixin, Generi
         :param kwargs:
         :return:
         """
-        teacher_pk = self.kwargs.get(self.lookup_url_kwarg[0])
-        school_year_pk = self.kwargs.get(self.lookup_url_kwarg[1])
+        teacher_pk = self.kwargs.get('teacher_pk')
+        school_year_pk = self.kwargs.get('school_year_pk')
         try:
             #  Return the teacher, but only among the ones in the school of the currently logged in user
             teacher = Teacher.objects.get(id=teacher_pk, school=utils.get_school_from_user(self.request.user))
@@ -350,11 +347,11 @@ class CreateMultipleAssignmentsView(UserPassesTestMixin, View):
 
         except ValueError:
             # Wrong format of date: yyyy-mm-dd
-            return HttpResponse('Wrong format of date: yyyy-mm-dd', 400)
+            return HttpResponse(_('Wrong format of date: yyyy-mm-dd'), 400)
 
         if from_date > to_date:
             # From date should be smaller than to_date
-            return HttpResponse('The beginning of the period is bigger then the end of the period', 400)
+            return HttpResponse(_('The beginning of the period is greater then the end of the period'), 400)
         try:
             a = Assignment.objects.get(id=assignment_pk)
         except ObjectDoesNotExist:

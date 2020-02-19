@@ -27,7 +27,7 @@ class BaseFormWithSchoolCheck(ModelForm):
 
     def clean_school(self):
         if get_school_from_user(self.user) != self.cleaned_data['school']:
-            self.add_error(None, forms.ValidationError(_('The school is not a valid choice.')))
+            self.add_error(None, forms.ValidationError(_('The school selected is not a valid choice.')))
         return self.cleaned_data['school']
 
 
@@ -47,7 +47,7 @@ class BaseFormWithTeacherAndSchoolCheck(BaseFormWithSchoolCheck):
         :return:
         """
         if get_school_from_user(self.user) != self.cleaned_data['teacher'].school:
-            self.add_error(None, forms.ValidationError(_('The teacher {} is not in the School ({}).'.format(
+            self.add_error(None, forms.ValidationError(_('The teacher {} is not in the school ({}).'.format(
                 self.cleaned_data['teacher'], self.cleaned_data['teacher'].school
             ))))
         return self.cleaned_data['teacher']
@@ -69,7 +69,7 @@ class BaseFormWithCourseTeacherAndSchoolCheck(BaseFormWithTeacherAndSchoolCheck)
         :return:
         """
         if get_school_from_user(self.user) != self.cleaned_data['course'].school:
-            self.add_error(None, forms.ValidationError(_('The course {} is not in the School ({}).'.format(
+            self.add_error(None, forms.ValidationError(_('The course {} is not in the school ({}).'.format(
                 self.cleaned_data['course'], self.cleaned_data['course'].school
             ))))
         return self.cleaned_data['course']
@@ -92,7 +92,7 @@ class BaseFormWithSubjectCourseTeacherAndSchoolCheck(BaseFormWithCourseTeacherAn
         :return:
         """
         if get_school_from_user(self.user) != self.cleaned_data['subject'].school:
-            self.add_error(None, forms.ValidationError(_('The subject {} is not taught in the School ({}).'.format(
+            self.add_error(None, forms.ValidationError(_('The subject {} is not taught in the school ({}).'.format(
                 self.cleaned_data['subject'], self.cleaned_data['subject'].school
             ))))
         return self.cleaned_data['subject']
@@ -125,12 +125,12 @@ class SchoolYearForm(ModelForm):
         :return:
         """
         if self.cleaned_data['year_start'] != self.cleaned_data['date_start'].year:
-            self.add_error(None, forms.ValidationError(_('The date_start must be in year_start!')))
+            self.add_error(None, forms.ValidationError(_('The start date must belong to the start year!')))
         return self.cleaned_data
 
 
 class CourseForm(BaseFormWithSchoolCheck):
-    year = forms.IntegerField(help_text="This is the class number, for class IA for instance it is 1.")
+    year = forms.IntegerField(help_text=_("This is the class number, for class IA for instance it is 1."))
 
     class Meta:
         model = Course
@@ -210,7 +210,7 @@ class HolidayForm(BaseFormWithSchoolCheck):
         :return:
         """
         if self.cleaned_data['date_start'] > self.cleaned_data['date_end']:
-            self.add_error(None, forms.ValidationError(_('The date_start field can\'t be later than the end date')))
+            self.add_error(None, forms.ValidationError(_('The date_start field can\'t be greater than the end date')))
         return self.cleaned_data
 
 
@@ -245,7 +245,7 @@ class StageForm(BaseFormWithCourseTeacherAndSchoolCheck):
         :return:
         """
         if self.cleaned_data['date_start'] > self.cleaned_data['date_end']:
-            self.add_error(None, forms.ValidationError(_('The date_start field can\'t be later than the end date')))
+            self.add_error(None, forms.ValidationError(_('The date_start field can\'t be greater than the end date')))
 
         return self.cleaned_data
 
@@ -288,7 +288,7 @@ class AssignmentForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck):
         :return:
         """
         if self.cleaned_data['hour_start'] > self.cleaned_data['hour_end']:
-            self.add_error(None, forms.ValidationError(_('The start time field can\'t be later than the end time')))
+            self.add_error(None, forms.ValidationError(_('The start time field can\'t be greater than the end time')))
 
         if not self.cleaned_data['substitution']:
             # We need to check for the existence of a related HourPerTeacherInClass
@@ -301,7 +301,7 @@ class AssignmentForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck):
             if not hours_teacher_in_class:
 
                 self.add_error(None, forms.ValidationError(_('There is not a related '
-                                                                            'HourPerTeacherInClass instance.')))
+                                                             'teacher in class instance.')))
             elif self.cleaned_data['bes'] and hours_teacher_in_class.first().hours_bes == 0:
                 self.add_error(None, forms.ValidationError(_('The teacher doesn\'t have bes hours '
                                                              'in this course.')))
