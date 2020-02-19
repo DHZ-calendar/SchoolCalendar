@@ -41,6 +41,11 @@
 li.conflicts-content{
     padding: 0px;
 }
+
+.form-control-custom{
+    width: auto;
+    display: initial;
+}
 {% endblock %}
 
 {% block body %}
@@ -51,7 +56,7 @@ li.conflicts-content{
     <div class="row">
         <div class="col-3">
             {% trans 'School year:' %}
-            <select id="school_year" onchange="getClassYears()">
+            <select id="school_year" class="form-control form-control-custom" onchange="getClassYears()">
                 {% for year in school_years %}
                     <option value="{{ year.id }}">{{ year }}</option>
                 {% endfor %}
@@ -59,10 +64,10 @@ li.conflicts-content{
         </div>
         <div class="col-3">
             {% trans 'Choose a class:' %}
-            <select id="course_year" onchange="getClassSections()">
+            <select id="course_year" class="form-control form-control-custom" onchange="getClassSections()">
             </select>
             {% trans 'section:' %}
-            <select id="course_section" onchange="getTeachers()">
+            <select id="course_section" class="form-control form-control-custom" onchange="getTeachers()">
             </select>
         </div>
         <div class="col-4 row">
@@ -85,10 +90,10 @@ li.conflicts-content{
         <div class="col-10">
             <div class="row py-3">                
                 <div class="col text-left">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="goPrevWeek()"><- {% trans 'Previous week'%}</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="goPrevWeek()">&lArr; {% trans 'Previous week'%}</button>
                 </div>
                 <div class="col text-right">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="goNextWeek()">{% trans 'Next week'%} -></button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="goNextWeek()">{% trans 'Next week'%} &rArr;</button>
                 </div>
             </div>
             <table class="container-fluid" id="calendar">
