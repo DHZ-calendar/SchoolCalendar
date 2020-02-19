@@ -414,7 +414,17 @@ li.conflicts-content{
                 }
                 else if(assign.substitution){
                     customEvent.htmlElement.addClass('cal-event-substitution');
-                }                
+                }
+
+                customEvent.htmlElement.tooltip({
+                    title: `
+                        <b>${teacher}</b><br/>
+                        ${assign.subject.name}<br/>
+                        ${assign.hour_start.slice(0, -3)} - ${assign.hour_end.slice(0, -3)}
+                    `,
+                    html: true,
+                    boundary: 'window' 
+                })
             }
         });
     }
