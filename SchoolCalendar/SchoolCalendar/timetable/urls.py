@@ -5,7 +5,7 @@ from timetable.views import SchoolCreate, TeacherCreate, AdminSchoolCreate, Scho
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
     AbsenceBlocksPerTeacherViewSet, ReplicateAssignmentViewSet, CreateMultipleAssignmentsView, \
-    TeacherSubstitutionViewSet
+    TeacherSubstitutionViewSet, SubstituteTeacherView
 
 from rest_framework.routers import DefaultRouter
 
@@ -32,6 +32,7 @@ router.register(r'teacher_can_substitute/(?P<assignment_pk>\d+)', TeacherSubstit
 
 urlpatterns = [
     path('', TimetableView.as_view(), name='timetable-view'),
+    path('substitute_teacher', SubstituteTeacherView.as_view(), name='substitute_teacher-view'),
     re_path(r'^api-auth/', include('rest_framework.urls')),    # Django Rest Framework
     re_path(r'^api/', include(router.urls)),
     path('school/add/', SchoolCreate.as_view(), name='school-add'),

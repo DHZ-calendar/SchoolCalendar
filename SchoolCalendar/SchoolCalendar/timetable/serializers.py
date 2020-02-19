@@ -345,12 +345,12 @@ class TeacherSubstitutionSerializer(ModelSerializer):
     class Meta:
         model = Teacher
         fields = ['school', 'notes', 'has_hour_before', 'has_hour_after', 'substitutions_made_so_far', 'first_name',
-                  'last_name']
+                  'last_name', 'id']
 
     def get_substitutions_made_so_far(self, obj, *args, **kwargs):
         return Assignment.objects.filter(teacher=obj.id,
                                          school=obj.school,
-                                         school_year=self.assignment_to_substitute,
+                                         school_year=self.assignment_to_substitute.school_year,
                                          substitution=True).count()
 
     def get_has_hour_after(self, obj, *args, **kwargs):

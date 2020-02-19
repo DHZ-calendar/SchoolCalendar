@@ -138,6 +138,15 @@ class TimetableView(TemplateView):
         context['school_years'] = SchoolYear.objects.all()
         return context
 
+class SubstituteTeacherView(TemplateView):
+    template_name = 'timetable/substitute_teacher.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['school_years'] = SchoolYear.objects.all()
+        return context
+
 
 class TeacherViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
     queryset = Teacher.objects.all()
@@ -249,6 +258,7 @@ class TeacherAssignmentsViewSet(UserPassesTestMixin, ListModelMixin, GenericView
             return Assignment.objects.none()
 
         return Assignment.objects.filter(teacher=teacher,
+                                         absent=False,
                                          school_year=school_year)
 
 
