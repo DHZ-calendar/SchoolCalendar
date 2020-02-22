@@ -21,6 +21,12 @@
 .cal-event-bes {
     background-color: #ffb554;
 }
+.cal-event-absent {
+    background-color: #cda7eb;
+}
+.cal-event-substitution {
+    background-color: #bafff6;
+}
 
 .list-teachers hr {
     margin-top: 3px;
@@ -35,6 +41,11 @@
 li.conflicts-content{
     padding: 0px;
 }
+
+.form-control-custom{
+    width: auto;
+    display: initial;
+}
 {% endblock %}
 
 {% block body %}
@@ -43,21 +54,30 @@ li.conflicts-content{
         <h3 class="col text-center">{% trans 'Plan a timetable' %}</h3>
     </div>
     <div class="row">
-        <div class="col-5">
+        <div class="col-3">
             {% trans 'School year:' %}
-            <select id="school_year" onchange="getClassYears()">
+            <select id="school_year" class="form-control form-control-custom" onchange="getClassYears()">
                 {% for year in school_years %}
                     <option value="{{ year.id }}">{{ year }}</option>
                 {% endfor %}
             </select>
         </div>
-        <div class="col-5">
+        <div class="col-3">
             {% trans 'Choose a class:' %}
-            <select id="course_year" onchange="getClassSections()">
+            <select id="course_year" class="form-control form-control-custom" onchange="getClassSections()">
             </select>
             {% trans 'section:' %}
-            <select id="course_section" onchange="getTeachers()">
+            <select id="course_section" class="form-control form-control-custom" onchange="getTeachers()">
             </select>
+        </div>
+        <div class="col-4 row">
+            <div class="col-12"><b>{% trans 'Legend' %}:</b></div>
+            <div class="col-6"><span class="cal-event">{% trans 'Lecture' %}</span></div>
+            <div class="col-6"><span class="cal-event-bes">{% trans 'B.E.S.' %}</span></div>
+            <div class="col-6"><span class="cal-event-absent">{% trans 'Absence of the teacher' %}</span></div>
+            <div class="col-6"><span class="cal-event-substitution">{% trans 'Substitution lecture' %}</span></div>
+            <div class="col-6"><span class="cal-block-conflict">{% trans 'Collision with other lectures' %}</span></div>
+            <div class="col-6"><span class="cal-block-absence">{% trans 'Hours blocked for a teacher' %}</span></div>
         </div>
         <div class="col-1">
             <button type="button" class="btn btn-primary btn-functions" data-toggle="modal" data-target="#modalExtraLecture">{% trans 'Add extra lecture'%}</button>            
@@ -70,10 +90,10 @@ li.conflicts-content{
         <div class="col-10">
             <div class="row py-3">                
                 <div class="col text-left">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="goPrevWeek()"><- {% trans 'Previous week'%}</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="goPrevWeek()">&lArr; {% trans 'Previous week'%}</button>
                 </div>
                 <div class="col text-right">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="goNextWeek()">{% trans 'Next week'%} -></button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="goNextWeek()">{% trans 'Next week'%} &rArr;</button>
                 </div>
             </div>
             <table class="container-fluid" id="calendar">
@@ -389,6 +409,22 @@ li.conflicts-content{
                 if(assign.bes){
                     customEvent.htmlElement.addClass('cal-event-bes');
                 }
+                else if(assign.absent){
+                    customEvent.htmlElement.addClass('cal-event-absent');
+                }
+                else if(assign.substitution){
+                    customEvent.htmlElement.addClass('cal-event-substitution');
+                }
+
+                customEvent.htmlElement.tooltip({
+                    title: `
+                        <b>${teacher}</b><br/>
+                        ${assign.subject.name}<br/>
+                        ${assign.hour_start.slice(0, -3)} - ${assign.hour_end.slice(0, -3)}
+                    `,
+                    html: true,
+                    boundary: 'window' 
+                })
             }
         });
     }
