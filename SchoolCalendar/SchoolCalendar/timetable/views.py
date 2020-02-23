@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
@@ -129,7 +129,7 @@ class AssignmentCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
     success_url = reverse_lazy('assignment-add')
 
 
-class TimetableView(TemplateView):
+class TimetableView(LoginRequiredMixin, TemplateView):
     template_name = 'timetable/timetable.html'
 
     def get_context_data(self, **kwargs):
@@ -138,7 +138,8 @@ class TimetableView(TemplateView):
         context['school_years'] = SchoolYear.objects.all()
         return context
 
-class SubstituteTeacherView(TemplateView):
+
+class SubstituteTeacherView(LoginRequiredMixin, TemplateView):
     template_name = 'timetable/substitute_teacher.html'
 
     def get_context_data(self, **kwargs):
