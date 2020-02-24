@@ -448,7 +448,7 @@ li.conflicts-content{
         });
     }
     function getStages(startDate, endDate){
-        let url = "{% url 'stage-list' %}";
+        let url = "{% url 'stage-list' 999999 %}".replace('999999', $('#course_section').val());
         let data = {
             'school_year': $('#school_year').val(),
             'course': $('#course_section').val(),
