@@ -4,5 +4,6 @@ django-durationwidget==1.0.5
 djangorestframework==3.11.0
 Markdown==3.2
 django-filter==2.2.0
+numpy==1.18.1
 
 
