@@ -36,6 +36,8 @@
 
 .btn-functions{
     white-space: normal;
+    height: 100%;
+    width: 100%;
 }
 
 li.conflicts-content{
@@ -46,6 +48,11 @@ li.conflicts-content{
     width: auto;
     display: initial;
 }
+
+.col-teacher-list{
+    height: calc(100vh - 95px);
+    overflow-y: scroll;
+}
 {% endblock %}
 
 {% block body %}
@@ -54,55 +61,60 @@ li.conflicts-content{
         <h3 class="col text-center">{% trans 'Plan a timetable' %}</h3>
     </div>
     <div class="row">
-        <div class="col-3">
-            {% trans 'School year:' %}
-            <select id="school_year" class="form-control form-control-custom" onchange="getClassYears()">
-                {% for year in school_years %}
-                    <option value="{{ year.id }}">{{ year }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-3">
-            {% trans 'Choose a class:' %}
-            <select id="course_year" class="form-control form-control-custom" onchange="getClassSections()">
-            </select>
-            {% trans 'section:' %}
-            <select id="course_section" class="form-control form-control-custom" onchange="getTeachers()">
-            </select>
-        </div>
-        <div class="col-4 row">
-            <div class="col-12"><b>{% trans 'Legend' %}:</b></div>
-            <div class="col-6"><span class="cal-event">{% trans 'Lecture' %}</span></div>
-            <div class="col-6"><span class="cal-event-bes">{% trans 'B.E.S.' %}</span></div>
-            <div class="col-6"><span class="cal-event-absent">{% trans 'Absence of the teacher' %}</span></div>
-            <div class="col-6"><span class="cal-event-substitution">{% trans 'Substitution lecture' %}</span></div>
-            <div class="col-6"><span class="cal-block-conflict">{% trans 'Collision with other lectures' %}</span></div>
-            <div class="col-6"><span class="cal-block-absence">{% trans 'Hours blocked for a teacher' %}</span></div>
-        </div>
-        <div class="col-1">
-            <button type="button" class="btn btn-primary btn-functions" data-toggle="modal" data-target="#modalExtraLecture">{% trans 'Add extra lecture'%}</button>            
-        </div>
-        <div class="col-1">
-            <button type="button" class="btn btn-danger btn-functions" data-toggle="modal" data-target="#modalReplicateWeek">{% trans 'Replicate week'%}</button>            
-        </div>
-    </div>
-    <div class="row">
         <div class="col-10">
-            <div class="row py-3">                
-                <div class="col text-left">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="goPrevWeek()">&lArr; {% trans 'Previous week'%}</button>
+            <div class="row">
+                <div class="col-5">
+                    <div class="col">
+                        {% trans 'School year:' %}
+                        <select id="school_year" class="form-control form-control-custom" onchange="getClassYears()">
+                            {% for year in school_years %}
+                                <option value="{{ year.id }}">{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col mt-2">
+                        {% trans 'Choose a class:' %}
+                        <select id="course_year" class="form-control form-control-custom" onchange="getClassSections()">
+                        </select>
+                        {% trans 'section:' %}
+                        <select id="course_section" class="form-control form-control-custom" onchange="getTeachers()">
+                        </select>
+                    </div>
                 </div>
-                <div class="col text-right">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="goNextWeek()">{% trans 'Next week'%} &rArr;</button>
+                <div class="col-5 row">
+                    <div class="col-12"><b>{% trans 'Legend' %}:</b></div>
+                    <div class="col-6"><span class="cal-event">{% trans 'Lecture' %}</span></div>
+                    <div class="col-6"><span class="cal-event-bes">{% trans 'B.E.S.' %}</span></div>
+                    <div class="col-6"><span class="cal-event-absent">{% trans 'Absence of the teacher' %}</span></div>
+                    <div class="col-6"><span class="cal-event-substitution">{% trans 'Substitution lecture' %}</span></div>
+                    <div class="col-6"><span class="cal-block-conflict">{% trans 'Collision with other lectures' %}</span></div>
+                    <div class="col-6"><span class="cal-block-absence">{% trans 'Hours blocked for a teacher' %}</span></div>
+                </div>
+                <div class="col-1">
+                    <button type="button" class="btn btn-primary btn-functions" data-toggle="modal" data-target="#modalExtraLecture">{% trans 'Add extra lecture'%}</button>            
+                </div>
+                <div class="col-1">
+                    <button type="button" class="btn btn-danger btn-functions" data-toggle="modal" data-target="#modalReplicateWeek">{% trans 'Replicate week'%}</button>            
                 </div>
             </div>
-            <table class="container-fluid" id="calendar">
-            </table>
+            <div class="row">
+                <div class="col-12">
+                    <div class="row py-3">                
+                        <div class="col text-left">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="goPrevWeek()">&lArr; {% trans 'Previous week'%}</button>
+                        </div>
+                        <div class="col text-right">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="goNextWeek()">{% trans 'Next week'%} &rArr;</button>
+                        </div>
+                    </div>
+                    <table class="container-fluid" id="calendar">
+                    </table>
+                </div>        
+            </div>
         </div>
-        <div class="col-2 pt-3">
+        <div class="col-2 col-teacher-list">
             {% trans 'List of teachers:' %}
-            <ul class="list-group" id="teachers_list">
-                                
+            <ul class="list-group" id="teachers_list">                                
             </ul>
         </div>
     </div>
@@ -358,20 +370,20 @@ li.conflicts-content{
                         <b>${tea.teacher.first_name} ${tea.teacher.last_name}</b> - ${tea.subject.name}<br/>
                         <div class="row font-italic">
                             <span class="col-9">{% trans 'Hours of theaching' %}:</span>
-                            <span class="col">${tea.hours}</span>
+                            <span class="col-3">${tea.hours}</span>
                         </div>
                         <div class="row font-italic">
                             <span class="col-9">{% trans 'B.E.S.' %}</span>
-                            <span class="col">${tea.hours_bes}</span>
+                            <span class="col-3">${tea.hours_bes}</span>
                         </div>
                         <hr/>
                         <div class="row font-italic">
                             <span class="col-9">{% trans 'Missing hours' %}:</span>
-                            <span class="col">${tea.missing_hours}</span>
+                            <span class="col-3">${tea.missing_hours}</span>
                         </div>
                         <div class="row font-italic">
                             <span class="col-9">{% trans 'B.E.S.' %}</span>
-                            <span class="col">${tea.missing_hours_bes}</span>
+                            <span class="col-3">${tea.missing_hours_bes}</span>
                         </div>
                         <div class="row">
                             <button type="button" class="col-6 btn cal-event" onclick="teacherClick($(this).parent().parent(), ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false)">{% trans 'Assign lecture' %}</button>
@@ -660,7 +672,7 @@ li.conflicts-content{
             data: data,
             statusCode: {
                 201: function(xhr) {
-                    console.log("res OK");
+                    alert("{% trans 'Week replicated!' %}");
                 },
                 400: function(xhr) {
                     let data = xhr.responseJSON;
