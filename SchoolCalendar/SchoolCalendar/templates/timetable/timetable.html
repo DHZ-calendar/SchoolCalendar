@@ -77,7 +77,7 @@ li.conflicts-content{
                         <select id="course_year" class="form-control form-control-custom" onchange="getClassSections()">
                         </select>
                         {% trans 'section:' %}
-                        <select id="course_section" class="form-control form-control-custom" onchange="getTeachers()">
+                        <select id="course_section" class="form-control form-control-custom" onchange="loadData()">
                         </select>
                     </div>
                 </div>
@@ -220,6 +220,7 @@ li.conflicts-content{
 
     function loadData(loadAssign=true){
         resetTeacherState();
+        getTeachers();
 
         timetable.deleteAllEvents();
         timetable.deleteAllBlocks();
@@ -346,7 +347,7 @@ li.conflicts-content{
             }
 
             //update list of teachers
-            getTeachers();
+            //getTeachers();
 
             let startDate = currentDate;
             let endDate = moment(startDate).add(6, 'days').toDate();
@@ -597,6 +598,7 @@ li.conflicts-content{
                 },
                 success: function(result) {
                     console.log(result, "OK");
+                    getTeachers();
                 }
             });
         }
