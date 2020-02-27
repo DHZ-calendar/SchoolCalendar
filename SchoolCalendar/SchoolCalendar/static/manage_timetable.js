@@ -461,13 +461,17 @@ function checkReplicationAssignment(assign, startDate, endDate, resultList){
         let date = moment(startDate).add(assign.block.day, 'days').toDate();
         date = formatDate(date);
 
+        let badge = '';
+        if(data.length > 0)
+            badge = `<span class="badge badge-danger badge-pill">${data.length}</span>`;
+
         resultList.append(`
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <span href="#submenu${assign.id}" data-toggle="collapse" aria-expanded="false">
                     <b>${assign.teacher}</b> - ${assign.lecture} ${date}
                     ${formatStringTime(assign.block.startTime)}-${formatStringTime(assign.block.endTime)}
                 </span>
-                <span class="badge badge-danger badge-pill">${data.length}</span>
+                ${badge}
             </li>
             <li class="list-group-item d-flex justify-content-between align-items-center conflicts-content">
                 <ul class="collapse" id="submenu${assign.id}">
@@ -512,6 +516,7 @@ function replicateAssignment(assign, startDate, endDate){
         data: data,
         statusCode: {
             201: function(xhr) {
+                $('#modalReplicateWeek').modal('hide');
                 alert(_TRANS['week_replicated_msg']);
             },
             400: function(xhr) {
