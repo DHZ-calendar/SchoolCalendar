@@ -1,6 +1,15 @@
 from django.contrib.auth.mixins import UserPassesTestMixin
 
+from timetable.models import Teacher
 from timetable import utils
+
+
+class TeacherPermissionMixin(UserPassesTestMixin):
+    """
+    Only the logged teacher user can pass the test.
+    """
+    def test_func(self):
+        return self.request.user and Teacher.objects.filter(id=self.request.user.id).exists()
 
 
 class AdminSchoolPermissionMixin(UserPassesTestMixin):

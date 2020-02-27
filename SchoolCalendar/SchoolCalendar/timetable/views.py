@@ -20,7 +20,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 import datetime
 from pprint import pprint
 
-from timetable.mixins import AdminSchoolPermissionMixin, SuperUserPermissionMixin
+from timetable.mixins import AdminSchoolPermissionMixin, SuperUserPermissionMixin, TeacherPermissionMixin
 from timetable.permissions import SchoolAdminCanWriteDelete, TeacherCanView
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
     Stage, Subject, HoursPerTeacherInClass, Assignment
@@ -129,7 +129,7 @@ class AssignmentCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
     success_url = reverse_lazy('assignment-add')
 
 
-class TimetableView(LoginRequiredMixin, TemplateView):
+class TimetableView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateView):
     template_name = 'timetable/timetable.html'
 
     def get_context_data(self, **kwargs):
@@ -139,7 +139,7 @@ class TimetableView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class SubstituteTeacherView(LoginRequiredMixin, TemplateView):
+class SubstituteTeacherView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateView):
     template_name = 'timetable/substitute_teacher.html'
 
     def get_context_data(self, **kwargs):

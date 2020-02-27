@@ -2,9 +2,6 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from rest_framework.permissions import BasePermission
 from rest_framework import permissions
 
-from timetable.models import AdminSchool
-
-
 from timetable.models import Teacher, AdminSchool
 
 
