@@ -2,4 +2,6 @@
 
 {% block content %}
 <p>{% trans "Logged out" %}</p>
+
+<a href="{% url 'login' %}">{% trans 'Log in' %}</a>
 {% endblock %}
