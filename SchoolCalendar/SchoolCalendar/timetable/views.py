@@ -506,3 +506,12 @@ class TeacherTimetableViewSet(ListModelMixin, GenericViewSet):
         assignments = Assignment.objects.filter(teacher_id=self.request.user.id)
         return assignments
 
+
+class TeacherTimetableView(LoginRequiredMixin, TeacherPermissionMixin, TemplateView):
+    template_name = 'timetable/teacher_timetable.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['school_years'] = SchoolYear.objects.all()
+        return context

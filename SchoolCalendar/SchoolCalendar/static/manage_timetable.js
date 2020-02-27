@@ -18,13 +18,33 @@ function loadData(loadAssign=true){
         getAssignments(startDate, endDate);
 }
 
-function goNextWeek(){
-    currentDate = moment(currentDate).add(7, 'days').toDate();
-    loadData();
+function loadTeacherData(){
+    timetable.deleteAllEvents();
+    timetable.deleteAllBlocks();
+    getBlocks();
+
+    let startDate = currentDate;
+    let endDate = moment(startDate).add(6, 'days').toDate();
+
+    timetable.setDays(new Date(startDate));
+
+    getHolidays(startDate, endDate);
+    getTeacherAssignments(startDate, endDate);
 }
-function goPrevWeek(){
+
+function goNextWeek(teacher=false){
+    currentDate = moment(currentDate).add(7, 'days').toDate();
+    if(teacher)
+        loadTeacherData();
+    else
+        loadData();
+}
+function goPrevWeek(teacher=false){
     currentDate = moment(currentDate).subtract(7, 'days').toDate();
-    loadData();
+    if(teacher)
+        loadTeacherData();
+    else
+        loadData();
 }
 
 function addExtraBlock(){
@@ -174,6 +194,51 @@ function getAssignments(startDate, endDate){
     let data = {
         'school_year': $('#school_year').val(),
         'course': $('#course_section').val(),
+        'from_date': formatDate(startDate),
+        'to_date': formatDate(endDate)
+    };
+    timetable.deleteAllEvents();
+    $.get(url, data=data, function(data) {
+        for(let assign of data){
+            let blockId = assign.hour_slot;
+            if(blockId === null){
+                blockId = createExtraBlock(assign.date, assign.hour_start, assign.hour_end).id;
+            }
+
+            let teacher = assign.teacher.first_name + " " + assign.teacher.last_name;
+            let customEvent = new Event(assign.id, teacher, assign.subject.name);
+            let clickEvent = (event) => {
+                alert("Lecture " + event.lecture + ", teacher " + event.teacher);
+            };
+            timetable.addEvent(customEvent, blockId, clickEvent, deleteAssignment);
+
+            if(assign.bes){
+                customEvent.htmlElement.addClass('cal-event-bes');
+            }
+            else if(assign.absent){
+                customEvent.htmlElement.addClass('cal-event-absent');
+            }
+            else if(assign.substitution){
+                customEvent.htmlElement.addClass('cal-event-substitution');
+            }
+
+            customEvent.htmlElement.tooltip({
+                title: `
+                    <b>${teacher}</b><br/>
+                    ${assign.subject.name}<br/>
+                    ${assign.hour_start.slice(0, -3)} - ${assign.hour_end.slice(0, -3)}
+                `,
+                html: true,
+                boundary: 'window' 
+            })
+        }
+    });
+}
+
+function getTeacherAssignments(startDate, endDate){
+    let url = _URL['teacher_timetable'];
+    let data = {
+        'school_year': $('#school_year').val(),
         'from_date': formatDate(startDate),
         'to_date': formatDate(endDate)
     };
