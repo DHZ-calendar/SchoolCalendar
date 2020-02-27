@@ -1,10 +1,11 @@
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect, reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import TemplateView
+from django.views.generic.base import RedirectView
 from django.urls import reverse_lazy
 from django.views import View
 from django.contrib.auth.models import User
@@ -515,3 +516,11 @@ class TeacherTimetableView(LoginRequiredMixin, TeacherPermissionMixin, TemplateV
 
         context['school_years'] = SchoolYear.objects.all()
         return context
+
+
+class LoggedUserRedirectView(LoginRequiredMixin, RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        if utils.is_adminschool(self.request.user):
+            return reverse('timetable-view')
+        else:
+            return reverse('teacher_timetable-view')

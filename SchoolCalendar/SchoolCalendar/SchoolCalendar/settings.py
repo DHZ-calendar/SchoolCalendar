@@ -105,7 +105,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'timetable-view'
+LOGIN_REDIRECT_URL = 'user_redirect-view'
 
 
 # Internationalization
