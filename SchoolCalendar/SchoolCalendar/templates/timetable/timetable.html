@@ -1,0 +1,250 @@
+{% extends 'timetable/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block head %}
+<!-- TODO: change using git submodule -->
+<link rel="stylesheet" href="https://raw.githack.com/DHZ-calendar/timetable.js/develop/timetable.css"/>
+<script src="https://raw.githack.com/DHZ-calendar/timetable.js/develop/timetable.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
+
+<script src="{% static 'manage_timetable.js' %}"></script>
+{% endblock %}
+
+{% block style %}
+.cal-block-absence {
+    background-color: darkgray;
+}
+.cal-block-conflict {
+    background-color: lightsalmon;
+}
+
+.cal-event-bes {
+    background-color: #ffb554;
+}
+.cal-event-absent {
+    background-color: #cda7eb;
+}
+.cal-event-substitution {
+    background-color: #bafff6;
+}
+
+.list-teachers hr {
+    margin-top: 3px;
+    margin-bottom: 3px;
+    color: black;
+}
+
+.btn-functions{
+    white-space: normal;
+    height: 100%;
+    width: 100%;
+}
+
+li.conflicts-content{
+    padding: 0px;
+}
+
+.form-control-custom{
+    width: auto;
+    display: initial;
+}
+
+.col-teacher-list{
+    height: calc(100vh - 95px);
+    overflow-y: scroll;
+}
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <h3 class="col text-center">{% trans 'Plan a timetable' %}</h3>
+    </div>
+    <div class="row">
+        <div class="col-10 col-teacher-list">
+            <div class="row">
+                <div class="col-5">
+                    <div class="col">
+                        {% trans 'School year:' %}
+                        <select id="school_year" class="form-control form-control-custom" onchange="getClassYears()">
+                            {% for year in school_years %}
+                                <option value="{{ year.id }}">{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col mt-2">
+                        {% trans 'Choose a class:' %}
+                        <select id="course_year" class="form-control form-control-custom" onchange="getClassSections()">
+                        </select>
+                        {% trans 'section:' %}
+                        <select id="course_section" class="form-control form-control-custom" onchange="loadData()">
+                        </select>
+                    </div>
+                </div>
+                <div class="col-5 row">
+                    <div class="col-12"><b>{% trans 'Legend' %}:</b></div>
+                    <div class="col-6"><span class="cal-event">{% trans 'Lecture' %}</span></div>
+                    <div class="col-6"><span class="cal-event-bes">{% trans 'B.E.S.' %}</span></div>
+                    <div class="col-6"><span class="cal-event-absent">{% trans 'Absence of the teacher' %}</span></div>
+                    <div class="col-6"><span class="cal-event-substitution">{% trans 'Substitution lecture' %}</span></div>
+                    <div class="col-6"><span class="cal-block-conflict">{% trans 'Collision with other lectures' %}</span></div>
+                    <div class="col-6"><span class="cal-block-absence">{% trans 'Hours blocked for a teacher' %}</span></div>
+                </div>
+                <div class="col-1">
+                    <button type="button" class="btn btn-primary btn-functions" data-toggle="modal" data-target="#modalExtraLecture">{% trans 'Add extra lecture'%}</button>            
+                </div>
+                <div class="col-1">
+                    <button type="button" class="btn btn-danger btn-functions" data-toggle="modal" data-target="#modalReplicateWeek">{% trans 'Replicate week'%}</button>            
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="row py-3">                
+                        <div class="col text-left">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="goPrevWeek()">&lArr; {% trans 'Previous week'%}</button>
+                        </div>
+                        <div class="col text-right">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="goNextWeek()">{% trans 'Next week'%} &rArr;</button>
+                        </div>
+                    </div>
+                    <table class="container-fluid" id="calendar">
+                    </table>
+                </div>        
+            </div>
+        </div>
+        <div class="col-2 col-teacher-list">
+            {% trans 'List of teachers:' %}
+            <ul class="list-group" id="teachers_list">                                
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Modal extra lecture -->
+<div class="modal fade" id="modalExtraLecture" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">{% trans 'Add extra lecture slot' %}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {% trans 'Day of week' %}:
+                <select class="custom-select" id="day_of_week">
+                    <option value="0">{% trans 'Monday' %}</option>
+                    <option value="1">{% trans 'Tuesday' %}</option>
+                    <option value="2">{% trans 'Wednesday' %}</option>
+                    <option value="3">{% trans 'Thursday' %}</option>
+                    <option value="4">{% trans 'Friday' %}</option>
+                    <option value="5">{% trans 'Saturday' %}</option>
+                </select>
+
+                {% trans 'Hour start' %}:
+                <input type="text" id="hour_start" class="form-control timepicker" />
+
+                {% trans 'Hour end' %}:
+                <input type="text" id="hour_end" class="form-control timepicker" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans 'Close' %}</button>
+                <button type="button" class="btn btn-success" onclick="addExtraBlock()">{% trans 'Add' %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal replicate lectures -->
+<div class="modal fade" id="modalReplicateWeek" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">{% trans 'Replicate lectures of this week' %}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {% trans 'Date start' %}:
+                <input type="text" id="date_start" class="form-control datepicker" />
+
+                {% trans 'Date end' %}:
+                <input type="text" id="date_end" class="form-control datepicker" />
+                <hr/>
+                <div id="replicateResult">
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans 'Close' %}</button>
+                <button type="button" class="btn btn-info" onclick="checkReplicateWeek()">{% trans 'Check conflicts' %}</button>
+                <button type="button" class="btn btn-success" onclick="replicateWeek()">{% trans 'Replicate lectures' %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block script %}
+    let timetable;
+    let currentDate;
+    $(document).ready(() => {
+        $('.timepicker').timepicker({
+            minuteStep: 1,
+            appendWidgetTo: 'body',
+            showSeconds: false,
+            showMeridian: false,
+            defaultTime: false
+        });
+        $('.datepicker').datepicker();
+
+        let cal = $("#calendar");
+        timetable = new Timetable(cal, 7, 23);
+
+        let blockStates = {
+            'available': 'cal-block-available',
+            'absence': 'cal-block-absence',
+            'conflict': 'cal-block-conflict'
+        };
+        timetable.setMapOfBlockStates(blockStates);
+
+        //find the first day of the week        
+        currentDate = moment().day(1).toDate();
+
+        loadData(false);
+        getClassYears();
+    });
+
+    _TRANS = {
+        'extra_block_title': "{% trans 'Extra lecture' %}",
+        'lecture_title': "° {% trans 'lecture' %}",
+        'hours_teaching': "{% trans 'Hours of theaching' %}",
+        'hours_bes': "{% trans 'B.E.S.' %}",
+        'missing_hours': "{% trans 'Missing hours' %}",
+        'assign_lecture': "{% trans 'Assign lecture' %}",
+        'assign_bes': "{% trans 'Assign B.E.S.' %}",
+        'delete_lecture_msg': "{% trans 'Are you sure to delete this lecture?' %}",
+        'week_replicated_msg': "{% trans 'Week replicated!' %}",
+        'conflict_dates_msg': "{% trans 'Conflict on date' %}"
+    };
+
+    _URL = {
+        'hour_slot': "{% url 'hour_slot-list' %}",
+        'year_only_course': "{% url 'year_only_course-list' %}",
+        'section_only_course': "{% url 'section_only_course-list' %}",
+        'hour_per_teacher_in_class': "{% url 'hour_per_teacher_in_class-list' %}",
+        'assignments': "{% url 'assignments-list' %}",
+        'holiday': "{% url 'holiday-list' %}",
+        'stage': "{% url 'stage-list' 999999 %}",
+        'teacher_assignments': "{% url 'teacher_assignments-list' 12345 99999 %}",
+        'teacher_absence_blocks': "{% url 'teacher_absence_blocks-list' 12345 99999 %}",
+        'replicate_assignment': "{% url 'replicate_assignment-list' 12345 '0000-00-00' '9999-99-99' %}",
+        'multiple_assignment': "{% url 'multiple_assignment-add' 12345 '0000-00-00' '9999-99-99' %}",
+    };
+{% endblock %}

@@ -5,7 +5,8 @@ from timetable.views import SchoolCreate, TeacherCreate, AdminSchoolCreate, Scho
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
     AbsenceBlocksPerTeacherViewSet, ReplicateAssignmentViewSet, CreateMultipleAssignmentsView, \
-    TeacherSubstitutionViewSet, SubstituteTeacherView
+    TeacherSubstitutionViewSet, SubstituteTeacherView, TeacherTimetableViewSet, TeacherTimetableView, \
+    LoggedUserRedirectView
 
 from rest_framework.routers import DefaultRouter
 
@@ -14,7 +15,7 @@ router.register(r'teachers', TeacherViewSet, basename='teacher')
 router.register(r'year_only_course', CourseYearOnlyListViewSet, basename='year_only_course')
 router.register(r'section_only_course', CourseSectionOnlyListViewSet, basename='section_only_course')
 router.register(r'holidays', HolidayViewSet, basename='holiday')
-router.register(r'stages', StageViewSet, basename='stage')
+router.register(r'stages/(?P<course_pk>[0-9]+)', StageViewSet, basename='stage')
 router.register(r'hour_slots', HourSlotViewSet, basename='hour_slot')
 router.register(r'hour_per_teacher_in_class/?(start_date=\d\d\d\d-\d\d-\d\d)?(end_date=\d\d\d\d-\d\d-\d\d)?', HoursPerTeacherInClassViewSet, basename='hour_per_teacher_in_class')
 router.register(r'assignments', AssignmentViewSet, basename='assignments')
@@ -27,12 +28,15 @@ router.register(
     ReplicateAssignmentViewSet, basename='replicate_assignment')
 router.register(r'teacher_can_substitute/(?P<assignment_pk>\d+)', TeacherSubstitutionViewSet,
                 basename='teacher_substitution')
+router.register(r'teacher_timetable', TeacherTimetableViewSet, basename='teacher_timetable')
 # router.register(r'absence_blocks', AbsenceBlockViewSet)
 
 
 urlpatterns = [
-    path('', TimetableView.as_view(), name='timetable-view'),
+    path('', LoggedUserRedirectView.as_view(), name='user_redirect-view'),
+    path('admin_school', TimetableView.as_view(), name='timetable-view'),
     path('substitute_teacher', SubstituteTeacherView.as_view(), name='substitute_teacher-view'),
+    path('teacher_view', TeacherTimetableView.as_view(), name='teacher_timetable-view'),
     re_path(r'^api-auth/', include('rest_framework.urls')),    # Django Rest Framework
     re_path(r'^api/', include(router.urls)),
     path('school/add/', SchoolCreate.as_view(), name='school-add'),

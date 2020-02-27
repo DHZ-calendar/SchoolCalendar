@@ -41,7 +41,8 @@
         </div>
 
         <ul class="list-unstyled components">
-            <p class="username">Name of the user</p> <!-- TODO: change -->
+            <span class="username">{{ user.get_full_name }}</span>
+            <a href="{% url 'logout' %}" class="btn btn-primary btn-sm active float-right" role="button">{% trans 'Logout' %}</a>
 
             <li>
                 <a href="{% url 'timetable-view' %}">{% trans 'Timetable' %}</a>

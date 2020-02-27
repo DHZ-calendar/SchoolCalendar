@@ -1,10 +1,11 @@
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect, reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import TemplateView
+from django.views.generic.base import RedirectView
 from django.urls import reverse_lazy
 from django.views import View
 from django.contrib.auth.models import User
@@ -20,8 +21,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 import datetime
 from pprint import pprint
 
-from timetable.mixins import AdminSchoolPermissionMixin, SuperUserPermissionMixin
-from timetable.permissions import SchoolAdminCanWriteDelete
+from timetable.mixins import AdminSchoolPermissionMixin, SuperUserPermissionMixin, TeacherPermissionMixin
+from timetable.permissions import SchoolAdminCanWriteDelete, TeacherCanView
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
     Stage, Subject, HoursPerTeacherInClass, Assignment
 
@@ -129,7 +130,7 @@ class AssignmentCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
     success_url = reverse_lazy('assignment-add')
 
 
-class TimetableView(TemplateView):
+class TimetableView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateView):
     template_name = 'timetable/timetable.html'
 
     def get_context_data(self, **kwargs):
@@ -138,7 +139,8 @@ class TimetableView(TemplateView):
         context['school_years'] = SchoolYear.objects.all()
         return context
 
-class SubstituteTeacherView(TemplateView):
+
+class SubstituteTeacherView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateView):
     template_name = 'timetable/substitute_teacher.html'
 
     def get_context_data(self, **kwargs):
@@ -188,12 +190,42 @@ class HolidayViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, Li
     filterset_class = HolidayPeriodFilter
 
 
-class StageViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
+class StageViewSet(UserPassesTestMixin, ListModelMixin, GenericViewSet):
     queryset = Stage.objects.all()
     serializer_class = StageSerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
     filterset_class = StagePeriodFilter
+    lookup_url_kwarg = 'course_pk'
+
+    def dispatch(self, request, *args, **kwargs):
+        request.course_pk = kwargs.get('course_pk')
+        return super(StageViewSet, self).dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        """
+        Select only the stages of the given course.
+        Need to check whether the course is from the same course of the user making the request.
+        :return:
+        """
+        try:
+            course = Course.objects.get(pk=self.request.course_pk)
+        except ObjectDoesNotExist:
+            return Stage.objects.none()
+
+        result = Stage.objects.filter(course=course)
+        return result
+
+    def test_func(self):
+        """
+        Returnt True only when the user and the course are in the same school
+        :return:
+        """
+        try:
+            course = Course.objects.get(pk=self.request.course_pk)
+        except ObjectDoesNotExist:
+            return False
+        return utils.get_school_from_user(self.request.user) == course.school
 
 
 class HourSlotViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
@@ -461,3 +493,34 @@ class TeacherSubstitutionViewSet(ListModelMixin, GenericViewSet):
             teachers_list = teachers_list.exclude(absenceblock__hour_slot=hour_slot)
 
         return teachers_list
+
+
+class TeacherTimetableViewSet(ListModelMixin, GenericViewSet):
+    queryset = Assignment.objects.all()
+    serializer_class = AssignmentSerializer
+    permission_classes = [IsAuthenticated, TeacherCanView]
+    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
+    filterset_class = AssignmentFilter
+
+    def get_queryset(self):
+        # Return all assignments for a teacher in a given time period
+        assignments = Assignment.objects.filter(teacher_id=self.request.user.id)
+        return assignments
+
+
+class TeacherTimetableView(LoginRequiredMixin, TeacherPermissionMixin, TemplateView):
+    template_name = 'timetable/teacher_timetable.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['school_years'] = SchoolYear.objects.all()
+        return context
+
+
+class LoggedUserRedirectView(LoginRequiredMixin, RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        if utils.is_adminschool(self.request.user):
+            return reverse('timetable-view')
+        else:
+            return reverse('teacher_timetable-view')
