@@ -54,9 +54,6 @@
                 <a href="#adminSubmenu" data-toggle="collapse" aria-expanded="false">+ Admin</a>
                 <ul class="collapse list-unstyled" id="adminSubmenu">
                     <li>
-                        <a href="{% url 'school_year-add' %}">{% trans 'Add new year' %}</a>
-                    </li>
-                    <li>
                         <a href="{% url 'teacher-add' %}">{% trans 'Add teacher' %}</a>
                     </li>
                     <li>
@@ -86,6 +83,9 @@
             <li>
                 <a href="#superadminSubmenu" data-toggle="collapse" aria-expanded="false">+ Super Admin</a>
                 <ul class="collapse list-unstyled" id="superadminSubmenu">
+                    <li>
+                        <a href="{% url 'school_year-add' %}">{% trans 'Add new year' %}</a>
+                    </li>
                     <li>
                         <a href="{% url 'school-add' %}">{% trans 'Add school' %}</a>
                     </li>

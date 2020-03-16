@@ -2,11 +2,19 @@
 {% load i18n %}
 
 {% block body %}
-    <h1>{% trans 'Course' %}</h1>
-    <form action="{% url 'course-add' %}" method="post">
-        {% csrf_token %}
-        {{ form }}
-        <input type="submit" value="Submit">
-    </form>
-
+<div class="container">
+    <div class="row">
+        <h1 class="col text-center">{% trans 'Course' %}</h1>
+    </div>
+    <div class="row">
+        <form action="{% url 'course-add' %}" method="post" class="form-group col text-center">
+            {% csrf_token %}
+            {{ form }}
+            <br/>
+            <br/>
+            <br/>
+            <input type="submit" class="btn btn-success" value="Submit">
+        </form>
+    </div>
+</div>
 {% endblock %}

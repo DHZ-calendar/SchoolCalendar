@@ -25,6 +25,10 @@ class BaseFormWithSchoolCheck(ModelForm):
         self.fields['school'] = forms.ModelChoiceField(
             queryset=School.objects.filter(id=get_school_from_user(self.user).id))
 
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+
+
     def clean_school(self):
         if get_school_from_user(self.user) != self.cleaned_data['school']:
             self.add_error(None, forms.ValidationError(_('The school selected is not a valid choice.')))
