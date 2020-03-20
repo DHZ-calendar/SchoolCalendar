@@ -194,7 +194,7 @@ li.conflicts-content{
 {% block script %}
     let timetable;
     let currentDate;
-    $(document).ready(() => {
+    $(document).ready(async () => {
         $('.timepicker').timepicker({
             minuteStep: 1,
             appendWidgetTo: 'body',
@@ -217,8 +217,8 @@ li.conflicts-content{
         //find the first day of the week        
         currentDate = moment().day(1).toDate();
 
-        loadData(false);
-        getClassYears();
+        await loadData(false);
+        await getClassYears();
     });
 
     _TRANS = {

@@ -106,7 +106,7 @@ li.conflicts-content{
 {% block script %}
     let timetable;
     let currentDate;
-    $(document).ready(() => {
+    $(document).ready(async () => {
         let cal = $("#calendar");
         timetable = new Timetable(cal, 7, 23);
 
@@ -120,7 +120,7 @@ li.conflicts-content{
         //find the first day of the week        
         currentDate = moment().day(1).toDate();
 
-        loadTeacherData();
+        await loadTeacherData();
     });
 
     _TRANS = {
