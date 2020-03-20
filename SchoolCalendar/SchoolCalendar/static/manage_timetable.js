@@ -1,10 +1,10 @@
-function loadData(loadAssign=true){
+async function loadData(loadAssign=true){
     resetTeacherState();
-    getTeachers();
+    await getTeachers();
 
     timetable.deleteAllEvents();
     timetable.deleteAllBlocks();
-    getBlocks();
+    await getBlocks();
 
 
     let startDate = currentDate;
@@ -12,37 +12,37 @@ function loadData(loadAssign=true){
 
     timetable.setDays(new Date(startDate));
 
-    getHolidays(startDate, endDate);
-    getStages(startDate, endDate);
+    await getHolidays(startDate, endDate);
+    await getStages(startDate, endDate);
     if(loadAssign)
-        getAssignments(startDate, endDate);
+        await getAssignments(startDate, endDate);
 }
 
-function loadTeacherData(){
+async function loadTeacherData(){
     timetable.deleteAllEvents();
     timetable.deleteAllBlocks();
-    getBlocks();
+    await getBlocks();
 
     let startDate = currentDate;
     let endDate = moment(startDate).add(6, 'days').toDate();
 
     timetable.setDays(new Date(startDate));
 
-    getHolidays(startDate, endDate);
-    getTeacherAssignments(startDate, endDate);
+    await getHolidays(startDate, endDate);
+    await getTeacherAssignments(startDate, endDate);
 }
 
-function goNextWeek(teacher=false){
+async function goNextWeek(teacher=false){
     currentDate = moment(currentDate).add(7, 'days').toDate();
     if(teacher)
-        loadTeacherData();
+        await loadTeacherData();
     else
         loadData();
 }
-function goPrevWeek(teacher=false){
+async function goPrevWeek(teacher=false){
     currentDate = moment(currentDate).subtract(7, 'days').toDate();
     if(teacher)
-        loadTeacherData();
+        await loadTeacherData();
     else
         loadData();
 }
@@ -104,12 +104,13 @@ function createExtraBlock(date, hourStart, hourEnd, deletable=false){
     }
     return block;
 }
-function getBlocks(){
+async function getBlocks(){
     let url = _URL['hour_slot'];
     let data = {
         'school_year': $('#school_year').val()
     };
-    $.get(url, data=data, function(data) {
+    try{
+        data = await $.get(url, data=data);
         for(let slot of data){
             let starts_at = parseStringTime(slot.starts_at);
             let ends_at = parseStringTime(slot.ends_at);
@@ -117,47 +118,59 @@ function getBlocks(){
             let block = new Block(slot.id, slot.hour_number + _TRANS['lecture_title'], slot.day_of_week, starts_at, ends_at);
             timetable.addBlock(block);
         }
-    });
+    }
+    catch{
+        console.log("No blocks");
+    }
 }
-function getClassYears(){
+async function getClassYears(){
     let url = _URL['year_only_course'];
     let data = {
         'school_year': $('#school_year').val()
     };
     $('#course_year').empty();
-    $.get(url, data=data, function(data) {
+    try{
+        data = await $.get(url, data=data);
         for(let year of data){
             $('#course_year').append(`<option value="${year.year}">${year.year}</option>`);
         }
 
         //update section select
-        getClassSections();
-    });
+        await getClassSections();
+    }
+    catch{
+        console.log("No classYear");
+    }
 }
-function getClassSections(){
+async function getClassSections(){
     let url = _URL['section_only_course'];
     let data = {
         'school_year': $('#school_year').val(),
         'year': $('#course_year').val()
     };
     $('#course_section').empty();
-    $.get(url, data=data, function(data) {
+    try{
+        data = await $.get(url, data=data);
         for(let sect of data){
             $('#course_section').append(`<option value="${sect.id}">${sect.section}</option>`);
         }
 
-        $('#course_section').change()
-    });
+        $('#course_section').change();
+    }
+    catch{
+        console.log("No classSection");
+    }
 }
 
-function getTeachers(){
+async function getTeachers(){
     let url = _URL['hour_per_teacher_in_class'];
     let data = {
         'school_year': $('#school_year').val(),
         'course': $('#course_section').val()
     };
-    $.get(url, data=data, function(data) {
-        $('#teachers_list').empty();
+    $('#teachers_list').empty();
+    try{
+        data = await $.get(url, data=data);
         for(let tea of data){
             let html = `
                 <li class="list-group-item list-teachers">
@@ -186,10 +199,13 @@ function getTeachers(){
                 </li>`;
             $('#teachers_list').append(html);
         }
-    });
+    }
+    catch{
+        console.log("No teachers");
+    }
 }
 
-function getAssignments(startDate, endDate){
+async function getAssignments(startDate, endDate){
     let url = _URL['assignments'];
     let data = {
         'school_year': $('#school_year').val(),
@@ -198,7 +214,8 @@ function getAssignments(startDate, endDate){
         'to_date': formatDate(endDate)
     };
     timetable.deleteAllEvents();
-    $.get(url, data=data, function(data) {
+    try{
+        data = await $.get(url, data=data);
         for(let assign of data){
             let blockId = assign.hour_slot;
             if(blockId === null){
@@ -232,10 +249,13 @@ function getAssignments(startDate, endDate){
                 boundary: 'window' 
             })
         }
-    });
+    }
+    catch{
+        console.log("No assignments");
+    }
 }
 
-function getTeacherAssignments(startDate, endDate){
+async function getTeacherAssignments(startDate, endDate){
     let url = _URL['teacher_timetable'];
     let data = {
         'school_year': $('#school_year').val(),
@@ -243,7 +263,8 @@ function getTeacherAssignments(startDate, endDate){
         'to_date': formatDate(endDate)
     };
     timetable.deleteAllEvents();
-    $.get(url, data=data, function(data) {
+    try{
+        data = await $.get(url, data=data);
         for(let assign of data){
             let blockId = assign.hour_slot;
             if(blockId === null){
@@ -278,18 +299,22 @@ function getTeacherAssignments(startDate, endDate){
                 html: true,
                 boundary: 'window' 
             })
-        }
-    });
+        }        
+    }
+    catch{
+        console.log("No teacher assignments");
+    }
 }
 
-function getHolidays(startDate, endDate){
+async function getHolidays(startDate, endDate){
     let url = _URL['holiday'];
     let data = {
         'school_year': $('#school_year').val(),
         'from_date': formatDate(startDate),
         'to_date': formatDate(endDate)
     };
-    $.get(url, data=data, function(data) {
+    try{
+        data = await $.get(url, data=data);
         for(let day of data){
             let start = moment(day.start);
             let end = moment(day.end);
@@ -297,10 +322,13 @@ function getHolidays(startDate, endDate){
                 timetable.lockDay(start.weekday() - 1, day.name);
                 start.add(1, 'days');
             }
-        }
-    });
+        }    
+    }
+    catch{
+        console.log("No holidays");
+    }
 }
-function getStages(startDate, endDate){
+async function getStages(startDate, endDate){
     let url = _URL['stage'].replace('999999', $('#course_section').val());
     let data = {
         'school_year': $('#school_year').val(),
@@ -308,7 +336,8 @@ function getStages(startDate, endDate){
         'from_date': formatDate(startDate),
         'to_date': formatDate(endDate)
     };
-    $.get(url, data=data, function(data) {
+    try{
+        data = await $.get(url, data=data);
         for(let day of data){
             let start = moment(day.start);
             let end = moment(day.end);
@@ -317,10 +346,13 @@ function getStages(startDate, endDate){
                 start.add(1, 'days');
             }
         }
-    });
+    }
+    catch{
+        console.log("No stages");
+    }
 }
 
-function teacherClick(btn, teacherId, subjId, schoolId, bes){
+async function teacherClick(btn, teacherId, subjId, schoolId, bes){
     btn = $(btn);
 
     if(!btn.hasClass('active')){
@@ -331,8 +363,8 @@ function teacherClick(btn, teacherId, subjId, schoolId, bes){
             timetable.getBlock(blk).setOnClick((blk) => addAssignment(teacherId, subjId, schoolId, blk, bes));
         }
 
-        setLockedBlocksTeacher(teacherId);
-        setLockedBlocksAbsenceTeacher(teacherId);
+        await setLockedBlocksTeacher(teacherId);
+        await setLockedBlocksAbsenceTeacher(teacherId);
     }
     else{
         btn.removeClass('active');
@@ -341,7 +373,7 @@ function teacherClick(btn, teacherId, subjId, schoolId, bes){
     }
 }
 
-function setLockedBlocksTeacher(teacherId){
+async function setLockedBlocksTeacher(teacherId){
     let school_year = $('#school_year').val();
     let startDate = currentDate;
     let endDate = moment(startDate).add(6, 'days').toDate();
@@ -353,7 +385,8 @@ function setLockedBlocksTeacher(teacherId){
         'from_date': formatDate(startDate),
         'to_date': formatDate(endDate)
     };
-    $.get(url, data=data, function(data) {
+    try{
+        data = await $.get(url, data=data);
         for(let block of data){
             let blockId = block.hour_slot;
             let create = true;
@@ -366,11 +399,14 @@ function setLockedBlocksTeacher(teacherId){
                 timetable.getBlock(blockId).setState('conflict');
                 timetable.getBlock(blockId).setOnClick();
             }
-        }
-    });
+        }    
+    }
+    catch{
+        console.log("No locked blocks for teacher");
+    }
 }
 
-function setLockedBlocksAbsenceTeacher(teacherId){
+async function setLockedBlocksAbsenceTeacher(teacherId){
     let school_year = $('#school_year').val();
     let startDate = currentDate;
     let endDate = moment(startDate).add(6, 'days').toDate();
@@ -382,7 +418,8 @@ function setLockedBlocksAbsenceTeacher(teacherId){
         'from_date': formatDate(startDate),
         'to_date': formatDate(endDate)
     };
-    $.get(url, data=data, function(data) {
+    try{
+        data = await $.get(url, data=data);
         for(let block of data){
             let blockId = block.hour_slot;
             let create = true;
@@ -395,8 +432,11 @@ function setLockedBlocksAbsenceTeacher(teacherId){
                 timetable.getBlock(blockId).setState('absence');
                 timetable.getBlock(blockId).setOnClick();
             }
-        }
-    });
+        }    
+    }
+    catch{
+        console.log("No absence blocks for teacher");
+    }
 }
 
 function addAssignment(teacherId, subjId, schoolId, block, bes){
