@@ -101,6 +101,10 @@
         <span>&#9776; {% trans 'Menu' %}</span>
     </button>
 
+    <div id="loading" class="text-center" style="position: fixed;z-index: 200;width: 100vw;height: 100vh;left: 0;background-color: white; opacity: 0.8;">
+        <img src="{% static 'loading.gif' %}" />
+    </div>
+
     <script>
     $(document).ready(() => {
         $('#dismiss, .overlay').on('click', function () {
@@ -114,6 +118,15 @@
             $('.collapse.in').toggleClass('in');
             $('a[aria-expanded=true]').attr('aria-expanded', 'false');
         });
+    });
+
+    var $loading = $('#loading').hide();
+    $(document)
+    .ajaxStart(function () {
+        $loading.show();
+    })
+    .ajaxStop(function () {
+        $loading.hide();
     });
     </script>
 
