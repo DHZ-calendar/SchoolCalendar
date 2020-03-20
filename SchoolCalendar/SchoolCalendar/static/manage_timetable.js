@@ -251,7 +251,8 @@ function getTeacherAssignments(startDate, endDate){
             }
 
             let teacher = assign.teacher.first_name + " " + assign.teacher.last_name;
-            let customEvent = new Event(assign.id, teacher, assign.subject.name);
+            let subject = assign.subject.name + ` (${assign.course.year} ${assign.course.section})`;
+            let customEvent = new Event(assign.id, teacher, subject);
             let clickEvent = (event) => {
                 alert("Lecture " + event.lecture + ", teacher " + event.teacher);
             };
@@ -271,6 +272,7 @@ function getTeacherAssignments(startDate, endDate){
                 title: `
                     <b>${teacher}</b><br/>
                     ${assign.subject.name}<br/>
+                    ${assign.course.year} ${assign.course.section}<br/>
                     ${assign.hour_start.slice(0, -3)} - ${assign.hour_end.slice(0, -3)}
                 `,
                 html: true,
