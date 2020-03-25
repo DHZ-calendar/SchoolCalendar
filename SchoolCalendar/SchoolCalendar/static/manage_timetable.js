@@ -446,7 +446,7 @@ function addAssignment(teacherId, subjId, schoolId, block, bes){
     let data = {
         csrfmiddlewaretoken: Cookies.get('csrftoken'),
         teacher_id: teacherId,
-        course: $('#course_section').val(),
+        course_id: $('#course_section').val(),
         subject_id: subjId,
         school_year: $('#school_year').val(),
         school: schoolId,
