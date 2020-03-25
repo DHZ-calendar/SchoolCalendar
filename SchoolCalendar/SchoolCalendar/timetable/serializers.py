@@ -236,8 +236,9 @@ class AssignmentSerializer(ModelSerializer):
     subject = SubjectSerializer(read_only=True)
     subject_id = PrimaryKeyRelatedField(write_only=True, queryset=Subject.objects.all(), source='subject')
     hour_slot = SerializerMethodField(read_only=True)
-    course = CourseSerializer()
-
+    course_id = PrimaryKeyRelatedField(write_only=True, queryset=Course.objects.all(), source='course')
+    course = CourseSerializer(read_only=True)
+    
     def __init__(self, *args, **kwargs):
         super(AssignmentSerializer, self).__init__(*args, **kwargs)
         self.user = self.context['request'].user
