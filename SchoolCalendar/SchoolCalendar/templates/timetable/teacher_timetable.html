@@ -90,6 +90,12 @@ li.conflicts-content{
                 <div class="col text-left">
                     <button type="button" class="btn btn-secondary btn-sm" onclick="goPrevWeek(true)">&lArr; {% trans 'Previous week'%}</button>
                 </div>
+                <div class="col text-center">
+                    <input class="datepicker form-control form-control-custom form-control-sm" data-date-format='dd/mm/yyyy' type="text" id="navigation_date"></input>
+                    <button type="button" class="btn btn-sm btn-info" id="btn-go-date">
+                        {% trans 'Go'%}
+                    </button>            
+                </div>
                 <div class="col text-right">
                     <button type="button" class="btn btn-secondary btn-sm" onclick="goNextWeek(true)">{% trans 'Next week'%} &rArr;</button>
                 </div>
@@ -107,6 +113,8 @@ li.conflicts-content{
     let timetable;
     let currentDate;
     $(document).ready(async () => {
+        $('.datepicker').datepicker();
+
         let cal = $("#calendar");
         timetable = new Timetable(cal, 7, 23);
 
@@ -121,6 +129,13 @@ li.conflicts-content{
         currentDate = moment().day(1).toDate();
 
         await loadTeacherData();
+
+        $('#btn-go-date').click(async () => {
+            let date = $('#navigation_date').datepicker('getDate');
+            currentDate = moment(date).day(1).toDate();
+            await loadTeacherData();
+            $('#navigation_date').val('');
+        });
     });
 
     _TRANS = {
