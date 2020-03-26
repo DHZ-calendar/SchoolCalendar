@@ -544,7 +544,7 @@ function checkReplicateWeek(){
     }
 }
 
-function replicateAssignment(assign, startDate, endDate){
+async function replicateAssignment(assign, startDate, endDate){
     let url = _URL['multiple_assignment']
         .replace("12345", assign.id)
         .replace("0000-00-00", formatDate(startDate))
@@ -552,30 +552,43 @@ function replicateAssignment(assign, startDate, endDate){
     let data = {
         csrfmiddlewaretoken: Cookies.get('csrftoken')
     }
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: data,
-        statusCode: {
-            201: function(xhr) {
-                $('#modalReplicateWeek').modal('hide');
-                alert(_TRANS['week_replicated_msg']);
-            },
-            400: function(xhr) {
-                let data = xhr.responseJSON;
-                console.error(data);
-                alert(_TRANS['conflict_dates_msg'] + " " + data[0].date);                    
-            }
+    try {
+        let res = await $.ajax({
+            url: url,
+            type: 'POST',
+            data: data
+        });
+    }
+    catch(e){
+        if(e.status === 400){
+            let data = e.responseJSON;
+            return data[0];
         }
-    });
+    }
 }
-function replicateWeek(){
+async function replicateWeek(){
     let startDate = moment($('#date_start').val(), "MM/DD/YYYY").toDate();
     let endDate = moment($('#date_end').val(), "MM/DD/YYYY").toDate();
 
+    let results = [];
+
     for (let block of Object.keys(timetable.blocks)){
         for(let event of timetable.getBlock(block).events){
-            replicateAssignment(event, startDate, endDate);
+            let res = await replicateAssignment(event, startDate, endDate);
+            if(res !== undefined)
+                results.push(res);
         }
+    }
+
+    if(results.length === 0){
+        $('#modalReplicateWeek').modal('hide');
+        alert(_TRANS['week_replicated_msg']);
+    }
+    else{
+        let dates = '';
+        for(let d of results){
+            dates += d.date + ', ';
+        }
+        alert(_TRANS['conflict_dates_msg'] + " " + dates);
     }
 }
