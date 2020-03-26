@@ -1,6 +1,8 @@
-async function loadData(loadAssign=true){
+async function loadData(loadAssign=true, resetTeachers=true){
     resetTeacherState();
-    await getTeachers();
+    if(resetTeachers){
+        await getTeachers();
+    }
 
     timetable.deleteAllEvents();
     timetable.deleteAllBlocks();
@@ -173,24 +175,24 @@ async function getTeachers(){
         data = await $.get(url, data=data);
         for(let tea of data){
             let html = `
-                <li class="list-group-item list-teachers">
+                <li class="list-group-item list-teachers" data-teacher-id="${tea.teacher.id}">
                     <b>${tea.teacher.first_name} ${tea.teacher.last_name}</b> - ${tea.subject.name}<br/>
                     <div class="row font-italic">
                         <span class="col-9">${_TRANS['hours_teaching']}:</span>
-                        <span class="col-3">${tea.hours}</span>
+                        <span class="col-3 tea-hours">${tea.hours}</span>
                     </div>
                     <div class="row font-italic">
                         <span class="col-9">${_TRANS['hours_bes']}</span>
-                        <span class="col-3">${tea.hours_bes}</span>
+                        <span class="col-3 tea-hours_bes">${tea.hours_bes}</span>
                     </div>
                     <hr/>
                     <div class="row font-italic">
                         <span class="col-9">${_TRANS['missing_hours']}:</span>
-                        <span class="col-3">${tea.missing_hours}</span>
+                        <span class="col-3 tea-missing_hours">${tea.missing_hours}</span>
                     </div>
                     <div class="row font-italic">
                         <span class="col-9">${_TRANS['hours_bes']}</span>
-                        <span class="col-3">${tea.missing_hours_bes}</span>
+                        <span class="col-3 tea-missing_bes">${tea.missing_hours_bes}</span>
                     </div>
                     <div class="row">
                         <button type="button" class="col-6 btn cal-event" onclick="teacherClick($(this).parent().parent(), ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false)">${_TRANS['assign_lecture']}</button>
@@ -198,6 +200,28 @@ async function getTeachers(){
                     </div>
                 </li>`;
             $('#teachers_list').append(html);
+        }
+    }
+    catch{
+        console.log("No teachers");
+    }
+}
+
+async function refreshTeachers(){
+    let url = _URL['hour_per_teacher_in_class'];
+    let data = {
+        'school_year': $('#school_year').val(),
+        'course': $('#course_section').val()
+    };
+    try{
+        data = await $.get(url, data=data);
+        for(let tea of data){
+            let teaElement = $(`#teachers_list *[data-teacher-id=${tea.teacher.id}]`);
+
+            teaElement.find('.tea-hours').text(tea.hours);
+            teaElement.find('.tea-hours_bes').text(tea.hours_bes);
+            teaElement.find('.tea-missing_hours').text(tea.missing_hours);
+            teaElement.find('.tea-missing_bes').text(tea.missing_bes);
         }
     }
     catch{
@@ -439,7 +463,7 @@ async function setLockedBlocksAbsenceTeacher(teacherId){
     }
 }
 
-function addAssignment(teacherId, subjId, schoolId, block, bes){
+async function addAssignment(teacherId, subjId, schoolId, block, bes){
     let url = _URL['assignments'];
 
     let date = moment(currentDate).add(block.day, 'days').format('YYYY-MM-DD');
@@ -457,9 +481,16 @@ function addAssignment(teacherId, subjId, schoolId, block, bes){
         substitution: false,
         absent: false
     };
-    $.post(url, data=data, function(data) {
-        loadData();
-    });
+    try{
+        let res = await $.post(url, data=data);
+        await loadData(true, false);
+        await refreshTeachers();
+        await teacherClick($(`#teachers_list *[data-teacher-id=${teacherId}]`), teacherId, subjId, schoolId, bes);
+    }
+    catch(e){
+        console.log("Error adding an assignment");
+        console.error(e);
+    }
 }
 
 function deleteAssignment(assign){
@@ -544,7 +575,7 @@ function checkReplicateWeek(){
     }
 }
 
-function replicateAssignment(assign, startDate, endDate){
+async function replicateAssignment(assign, startDate, endDate){
     let url = _URL['multiple_assignment']
         .replace("12345", assign.id)
         .replace("0000-00-00", formatDate(startDate))
@@ -552,30 +583,43 @@ function replicateAssignment(assign, startDate, endDate){
     let data = {
         csrfmiddlewaretoken: Cookies.get('csrftoken')
     }
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: data,
-        statusCode: {
-            201: function(xhr) {
-                $('#modalReplicateWeek').modal('hide');
-                alert(_TRANS['week_replicated_msg']);
-            },
-            400: function(xhr) {
-                let data = xhr.responseJSON;
-                console.error(data);
-                alert(_TRANS['conflict_dates_msg'] + " " + data[0].date);                    
-            }
+    try {
+        let res = await $.ajax({
+            url: url,
+            type: 'POST',
+            data: data
+        });
+    }
+    catch(e){
+        if(e.status === 400){
+            let data = e.responseJSON;
+            return data[0];
         }
-    });
+    }
 }
-function replicateWeek(){
+async function replicateWeek(){
     let startDate = moment($('#date_start').val(), "MM/DD/YYYY").toDate();
     let endDate = moment($('#date_end').val(), "MM/DD/YYYY").toDate();
 
+    let results = [];
+
     for (let block of Object.keys(timetable.blocks)){
         for(let event of timetable.getBlock(block).events){
-            replicateAssignment(event, startDate, endDate);
+            let res = await replicateAssignment(event, startDate, endDate);
+            if(res !== undefined)
+                results.push(res);
         }
+    }
+
+    if(results.length === 0){
+        $('#modalReplicateWeek').modal('hide');
+        alert(_TRANS['week_replicated_msg']);
+    }
+    else{
+        let dates = '';
+        for(let d of results){
+            dates += d.date + ', ';
+        }
+        alert(_TRANS['conflict_dates_msg'] + " " + dates);
     }
 }
