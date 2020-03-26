@@ -463,7 +463,7 @@ async function setLockedBlocksAbsenceTeacher(teacherId){
     }
 }
 
-function addAssignment(teacherId, subjId, schoolId, block, bes){
+async function addAssignment(teacherId, subjId, schoolId, block, bes){
     let url = _URL['assignments'];
 
     let date = moment(currentDate).add(block.day, 'days').format('YYYY-MM-DD');
@@ -481,10 +481,16 @@ function addAssignment(teacherId, subjId, schoolId, block, bes){
         substitution: false,
         absent: false
     };
-    $.post(url, data=data, async function(data) {
+    try{
+        let res = await $.post(url, data=data);
         await loadData(true, false);
         await refreshTeachers();
-    });
+        await teacherClick($(`#teachers_list *[data-teacher-id=${teacherId}]`), teacherId, subjId, schoolId, bes);
+    }
+    catch(e){
+        console.log("Error adding an assignment");
+        console.error(e);
+    }
 }
 
 function deleteAssignment(assign){
