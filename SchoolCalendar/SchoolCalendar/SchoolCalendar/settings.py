@@ -136,3 +136,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
 }
+
+
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, "locale"),
+)
