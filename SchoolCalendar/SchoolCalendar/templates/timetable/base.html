@@ -1,6 +1,8 @@
 {% load i18n %}
 {% load static %}
 
+{% load is_adminschool %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,6 +49,7 @@
             <li>
                 <a href="{% url 'timetable-view' %}">{% trans 'Timetable' %}</a>
             </li>
+            {% if user|is_adminschool %}
             <li>
                 <a href="{% url 'substitute_teacher-view' %}">{% trans 'Substitute a teacher' %}</a>
             </li>
@@ -80,6 +83,8 @@
                     
                 </ul>
             </li>
+            {% endif %}
+            {% if user.is_superuser %}
             <li>
                 <a href="#superadminSubmenu" data-toggle="collapse" aria-expanded="false">+ Super Admin</a>
                 <ul class="collapse list-unstyled" id="superadminSubmenu">
@@ -94,6 +99,7 @@
                     </li>
                 </ul>
             </li>
+            {% endif %}
         </ul>
     </nav>
 
