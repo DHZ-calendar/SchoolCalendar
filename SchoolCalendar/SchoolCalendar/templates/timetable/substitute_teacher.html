@@ -94,7 +94,7 @@
                         <ul class="list-group col-12 my-2" id="sub_teachers-${assign.id}">
                         </ul>
                         <button type="button" class="btn btn-success" assignId="${assign.id}" teaId="${assign.teacher.id}" subId="${assign.subject.id}" date="${assign.date}" 
-                            hourStart="${assign.hour_start}" hourEnd="${assign.hour_end}" course="${assign.course}" schoolYear="${assign.school_year}" school="${assign.school}"
+                            hourStart="${assign.hour_start}" hourEnd="${assign.hour_end}" course="${assign.course.id}" schoolYear="${assign.school_year}" school="${assign.school}"
                             onclick="substituteTeacher($(this))">{% trans 'Make substitution' %}</button>
                     </div>
                 `);
@@ -131,7 +131,7 @@
         });
     }
 
-    function substituteTeacher(btn){
+    async function substituteTeacher(btn){
         let assignId = btn.attr("assignId");
         console.log(assignId)
         let teacherId = $("input[name=radio-" + assignId + "]:checked").val();
@@ -146,7 +146,7 @@
                 date: btn.attr("date"),
                 hour_start: btn.attr("hourStart"),
                 hour_end: btn.attr("hourEnd"),
-                course: btn.attr("course"),
+                course_id: btn.attr("course"),
                 school_year: btn.attr("schoolYear"),
                 school: btn.attr("school")
             }

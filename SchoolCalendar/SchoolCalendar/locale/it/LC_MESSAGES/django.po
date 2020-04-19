@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-26 20:11+0100\n"
+"POT-Creation-Date: 2020-03-27 21:00+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -77,69 +77,69 @@ msgstr "Admin della scuola"
 msgid "Assignment"
 msgstr "Assegnamento"
 
-#: templates/timetable/base.html:8
+#: templates/timetable/base.html:10
 msgid "SchoolCalendar"
 msgstr "SchoolCalendar"
 
-#: templates/timetable/base.html:45
+#: templates/timetable/base.html:47
 msgid "Logout"
 msgstr "Disconnetti"
 
-#: templates/timetable/base.html:48
+#: templates/timetable/base.html:50
 #: templates/timetable/teacher_timetable.html:64
 msgid "Timetable"
 msgstr "Calendario"
 
-#: templates/timetable/base.html:51
+#: templates/timetable/base.html:54
 #: templates/timetable/substitute_teacher.html:18
 msgid "Substitute a teacher"
 msgstr "Sostituisci un insegnante"
 
-#: templates/timetable/base.html:57
+#: templates/timetable/base.html:60
 msgid "Add teacher"
 msgstr "Aggiungi un insegnante"
 
-#: templates/timetable/base.html:60
+#: templates/timetable/base.html:63
 msgid "Add absence block"
 msgstr "Aggiungi un blocco di assenza"
 
-#: templates/timetable/base.html:63
+#: templates/timetable/base.html:66
 msgid "Add course"
 msgstr "Aggiungi un corso"
 
-#: templates/timetable/base.html:66
+#: templates/timetable/base.html:69
 msgid "Add hours per teacher"
 msgstr "Aggiungi ore ad un insegnante"
 
-#: templates/timetable/base.html:69
+#: templates/timetable/base.html:72
 msgid "Add hour-slot"
 msgstr "Aggiungi uno slot orario"
 
-#: templates/timetable/base.html:72
+#: templates/timetable/base.html:75
 msgid "Add holiday"
 msgstr "Aggiungi una vacanza"
 
-#: templates/timetable/base.html:75
+#: templates/timetable/base.html:78
 msgid "Add stage"
 msgstr "Aggiungi uno stage"
 
-#: templates/timetable/base.html:78
+#: templates/timetable/base.html:81
 msgid "Add subject"
 msgstr "Aggiungi una materia"
 
-#: templates/timetable/base.html:87
+#: templates/timetable/base.html:92
 msgid "Add new year"
 msgstr "Aggiungi un nuovo anno"
 
-#: templates/timetable/base.html:90
+#: templates/timetable/base.html:95
 msgid "Add school"
 msgstr "Aggiungi una scuola"
 
-#: templates/timetable/base.html:93
+#: templates/timetable/base.html:98
 msgid "Add school admin"
 msgstr "Aggiungi un admin di una scuola"
 
-#: templates/timetable/base.html:101
+#: templates/timetable/base.html:107
 msgid "Menu"
 msgstr "Menù"
 
@@ -182,32 +182,22 @@ msgid "School year:"
 msgstr "Anno scolastico:"
 
 #: templates/timetable/substitute_teacher.html:30
-#, fuzzy
-#| msgid "Teacher"
 msgid "Teachers:"
 msgstr "Insegnanti:"
 
 #: templates/timetable/substitute_teacher.html:37
-#, fuzzy
-#| msgid "Choose a class:"
 msgid "Choose a date:"
 msgstr "Scegli una data"
 
 #: templates/timetable/substitute_teacher.html:41
-#, fuzzy
-#| msgid "lecture"
 msgid "Load lectures"
 msgstr "Carica lezioni"
 
 #: templates/timetable/substitute_teacher.html:93
-#, fuzzy
-#| msgid "List of teachers:"
 msgid "Available teachers:"
 msgstr "Insegnanti disponibili:"
 
 #: templates/timetable/substitute_teacher.html:98
-#, fuzzy
-#| msgid "substitution"
 msgid "Make substitution"
 msgstr "Sostituzione"
 
@@ -216,20 +206,14 @@ msgid "No lectures found!"
 msgstr "Nessuna lezione trovata!"
 
 #: templates/timetable/substitute_teacher.html:124
-#, fuzzy
-#| msgid "substitutions made so far"
 msgid "Hours of substitutions made:"
 msgstr "Ore di sostituzione fatte fino ad ora"
 
 #: templates/timetable/substitute_teacher.html:125
-#, fuzzy
-#| msgid "has class before"
 msgid "Has a lesson before:"
 msgstr "Ha lezione prima:"
 
 #: templates/timetable/substitute_teacher.html:126
-#, fuzzy
-#| msgid "has class after"
 msgid "Has a lesson after:"
 msgstr "Ha lezione dopo:"
 
@@ -244,8 +228,6 @@ msgstr "Legenda"
 
 #: templates/timetable/teacher_timetable.html:79
 #: templates/timetable/timetable.html:89
-#, fuzzy
-#| msgid "lecture"
 msgid "Lecture"
 msgstr "Lezione"
 
@@ -257,15 +239,11 @@ msgstr "B.E.S."
 
 #: templates/timetable/teacher_timetable.html:81
 #: templates/timetable/timetable.html:91
-#, fuzzy
-#| msgid "List of teachers:"
 msgid "Absence of the teacher"
 msgstr "Assenza del professore"
 
 #: templates/timetable/teacher_timetable.html:82
 #: templates/timetable/timetable.html:92
-#, fuzzy
-#| msgid "substitution"
 msgid "Substitution lecture"
 msgstr "Sostituzione"
 
@@ -276,8 +254,6 @@ msgstr "Conflitti con altre lezioni"
 
 #: templates/timetable/teacher_timetable.html:84
 #: templates/timetable/timetable.html:94
-#, fuzzy
-#| msgid "Add hours per teacher"
 msgid "Hours blocked for a teacher"
 msgstr "Ore bloccate per l'insegnante"
 

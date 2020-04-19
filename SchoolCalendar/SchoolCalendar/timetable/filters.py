@@ -100,11 +100,12 @@ class AssignmentFilter(FilterSet):
         """
         Set default interval to current week if it is not specified
         """
-        if not data.get('from_date') or not data.get("to_date"):
-            data = data.copy()
-            data['from_date'] = utils.get_closest_smaller_Monday()
+        #TODO: maybe useless, filters data even when selecting by id
+        #if not data.get('from_date') or not data.get("to_date"):
+        #    data = data.copy()
+        #    data['from_date'] = utils.get_closest_smaller_Monday()
             # Plus 6 as we need next Sunday
-            data['to_date'] = data['from_date'] + datetime.timedelta(days=6)
+        #    data['to_date'] = data['from_date'] + datetime.timedelta(days=6)
         super(AssignmentFilter, self).__init__(data, *args, **kwargs)
 
     class Meta:
