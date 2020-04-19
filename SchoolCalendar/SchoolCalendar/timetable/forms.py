@@ -26,7 +26,8 @@ class BaseFormWithSchoolCheck(ModelForm):
             queryset=School.objects.filter(id=get_school_from_user(self.user).id))
 
         for visible in self.visible_fields():
-            visible.field.widget.attrs['class'] = 'form-control'
+            if 'class' not in visible.field.widget.attrs:
+                visible.field.widget.attrs['class'] = 'form-control'
 
 
     def clean_school(self):
@@ -115,9 +116,10 @@ class AdminSchoolForm(UserCreationForm, BaseFormWithSchoolCheck):
 
 
 class SchoolYearForm(ModelForm):
-    date_start = forms.DateField(widget=forms.TextInput(attrs={
-        'class': 'datepicker'
-    }))
+    date_start = forms.TimeField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control datepicker'
+        }))
 
     class Meta:
         model = SchoolYear
@@ -142,14 +144,19 @@ class CourseForm(BaseFormWithSchoolCheck):
 
 
 class HourSlotForm(BaseFormWithSchoolCheck):
-    starts_at = forms.TimeField(widget=forms.TextInput(attrs={
-        'class': 'datepicker'
+    starts_at = forms.TimeField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control timepicker'
     }))
-    ends_at = forms.TimeField(widget=forms.TextInput(attrs={
-        'class': 'datepicker'
+    ends_at = forms.TimeField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control timepicker'
     }))
-    legal_duration = forms.DurationField(widget=TimeDurationWidget(show_days=False, show_hours=True, show_minutes=True,
-                                                                   show_seconds=False),
+    legal_duration = forms.DurationField(widget=TimeDurationWidget(show_days=False,
+                                                                   show_hours=True,
+                                                                   show_minutes=True,
+                                                                   show_seconds=False,
+                                                                   attrs={}),  # We need to remove form-control.
                                          required=False)
 
     class Meta:
@@ -197,12 +204,14 @@ class AbsenceBlockForm(BaseFormWithTeacherAndSchoolCheck):
 
 class HolidayForm(BaseFormWithSchoolCheck):
 
-    date_start = forms.DateField(widget=forms.TextInput(attrs={
-        'class': 'datepicker'
-    }))
-    date_end = forms.DateField(widget=forms.TextInput(attrs={
-        'class': 'datepicker'
-    }))
+    date_start = forms.DateField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control datepicker'
+        }))
+    date_end = forms.DateField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control datepicker'
+        }))
 
     class Meta:
         model = Holiday
@@ -219,12 +228,14 @@ class HolidayForm(BaseFormWithSchoolCheck):
 
 
 class StageForm(BaseFormWithCourseTeacherAndSchoolCheck):
-    date_start = forms.DateField(widget=forms.TextInput(attrs={
-        'class': 'datepicker'
-    }))
-    date_end = forms.DateField(widget=forms.TextInput(attrs={
-        'class': 'datepicker'
-    }))
+    date_start = forms.DateField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control datepicker'
+        }))
+    date_end = forms.DateField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control datepicker'
+        }))
 
     class Meta:
         model = Stage
@@ -270,13 +281,13 @@ class HoursPerTeacherInClassForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck)
 
 class AssignmentForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck):
     date = forms.DateField(widget=forms.TextInput(attrs={
-        'class': 'datepicker'
+        'class': 'form-control datepicker'
     }))
     hour_start = forms.TimeField(widget=forms.TextInput(attrs={
-        'class': 'timepicker'
+        'class': 'form-control timepicker'
     }))
     hour_end = forms.TimeField(widget=forms.TextInput(attrs={
-        'class': 'timepicker'
+        'class': 'form-control timepicker'
     }))
 
     class Meta:
