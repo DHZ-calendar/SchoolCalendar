@@ -113,7 +113,9 @@ li.conflicts-content{
     let timetable;
     let currentDate;
     $(document).ready(async () => {
-        $('.datepicker').datepicker();
+        $('.datepicker').datepicker({
+            dateFormat: 'dd-mm-yy'
+        });
 
         let cal = $("#calendar");
         timetable = new Timetable(cal, 7, 23);

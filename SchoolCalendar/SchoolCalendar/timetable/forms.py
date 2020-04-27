@@ -117,6 +117,7 @@ class AdminSchoolForm(UserCreationForm, BaseFormWithSchoolCheck):
 
 class SchoolYearForm(ModelForm):
     date_start = forms.TimeField(
+        input_formats=['%d/%m/%Y'],
         widget=forms.TextInput(attrs={
             'class': 'form-control datepicker'
         }))
@@ -145,10 +146,12 @@ class CourseForm(BaseFormWithSchoolCheck):
 
 class HourSlotForm(BaseFormWithSchoolCheck):
     starts_at = forms.TimeField(
+        input_formats=['%d/%m/%Y'],
         widget=forms.TextInput(attrs={
             'class': 'form-control timepicker'
     }))
     ends_at = forms.TimeField(
+        input_formats=['%d/%m/%Y'],
         widget=forms.TextInput(attrs={
             'class': 'form-control timepicker'
     }))
@@ -280,7 +283,9 @@ class HoursPerTeacherInClassForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck)
 
 
 class AssignmentForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck):
-    date = forms.DateField(widget=forms.TextInput(attrs={
+    date = forms.DateField(
+        input_formats=['%d/%m/%Y'],
+        widget=forms.TextInput(attrs={
         'class': 'form-control datepicker'
     }))
     hour_start = forms.TimeField(widget=forms.TextInput(attrs={
