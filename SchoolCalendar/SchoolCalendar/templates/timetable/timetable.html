@@ -208,7 +208,9 @@ li.conflicts-content{
             showMeridian: false,
             defaultTime: false
         });
-        $('.datepicker').datepicker();
+        $('.datepicker').datepicker({
+            dateFormat: 'dd-mm-yy'
+        });
 
         let cal = $("#calendar");
         timetable = new Timetable(cal, 7, 23);
