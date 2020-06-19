@@ -301,7 +301,7 @@ async function getTeacherAssignments(startDate, endDate){
             let clickEvent = (event) => {
                 alert("Lecture " + event.lecture + ", teacher " + event.teacher);
             };
-            timetable.addEvent(customEvent, blockId, clickEvent, deleteAssignment);
+            timetable.addEvent(customEvent, blockId, clickEvent);
 
             if(assign.bes){
                 customEvent.htmlElement.addClass('cal-event-bes');
