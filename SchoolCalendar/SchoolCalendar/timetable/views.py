@@ -556,7 +556,9 @@ class TeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View)
                    _('Missing B.E.S. hours')]
         headers = map(lambda h: '\n'.join(h.split(' ')), headers)  # To avoid breaking page borders
         data = [headers] + \
-               [[teacher[key] for key in teacher.keys()] for teacher in teachers_report]
+               [[
+                   Paragraph(str(teacher[key]), styles['Normal']) for key in teacher.keys()
+               ] for teacher in teachers_report]
         t = Table(data)
 
         t.setStyle(TableStyle([

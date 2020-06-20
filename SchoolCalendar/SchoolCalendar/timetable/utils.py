@@ -89,7 +89,8 @@ def compute_total_hours_assignments(assignments, hours_slots):
 
 def get_teachers_hours_info():
     teachers_report = []
-    for hptic in HoursPerTeacherInClass.objects.order_by('teacher__last_name', 'teacher__first_name'):
+    for hptic in HoursPerTeacherInClass.objects.order_by('teacher__last_name', 'teacher__first_name',
+                                                         'course__year', 'course__section'):
         assignments = Assignment.objects.filter(teacher=hptic.teacher,
                                             course=hptic.course,
                                             subject=hptic.subject,
