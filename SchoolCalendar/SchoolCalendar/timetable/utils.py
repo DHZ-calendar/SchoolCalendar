@@ -1,6 +1,6 @@
 import datetime
 
-from timetable.models import Teacher, AdminSchool
+from timetable.models import Teacher, AdminSchool, HoursPerTeacherInClass, Assignment, HourSlot
 
 
 def get_school_from_user(user):
@@ -85,3 +85,48 @@ def compute_total_hours_assignments(assignments, hours_slots):
     for el in assignments:
         total += el['legal_duration']
     return int(total.seconds/3600)
+
+
+def get_teachers_hours_info():
+    teachers_report = []
+    for hptic in HoursPerTeacherInClass.objects.order_by('teacher__last_name', 'teacher__first_name'):
+        assignments = Assignment.objects.filter(teacher=hptic.teacher,
+                                            course=hptic.course,
+                                            subject=hptic.subject,
+                                            school=hptic.school,
+                                            school_year=hptic.school_year).values(
+                                                                'date__week_day', 'hour_start', 'hour_end')
+        for el in assignments:
+            el['date__week_day'] = convert_weekday_into_0_6_format(el['date__week_day'])
+
+        hours_slots = HourSlot.objects.filter(school=hptic.school,
+                                              school_year=hptic.school_year).values("day_of_week", "starts_at",
+                                                                                  "ends_at", "legal_duration")
+        # Normal assignments lessons
+        normal_done_assign = assignments.filter(bes=False, substitution=False)
+        total_normal_done = compute_total_hours_assignments(normal_done_assign, hours_slots)
+
+        # Substitution assignments
+        subst_done_assign = assignments.filter(substitution=True)
+        total_subst_done = compute_total_hours_assignments(subst_done_assign, hours_slots)
+
+        # BES assignments
+        bes_done_assign = assignments.filter(bes=True)
+        total_bes_done = compute_total_hours_assignments(bes_done_assign, hours_slots)
+
+        # not BES assignments
+        not_bes_done_assign = assignments.filter(bes=False)
+        total_not_bes_done = compute_total_hours_assignments(not_bes_done_assign, hours_slots)
+
+        teachers_report.append({
+            'first_name': hptic.teacher.first_name,
+            'last_name': hptic.teacher.last_name,
+            'subject': hptic.subject.name,
+            'course': str(hptic.course.year) + " " + hptic.course.section,
+            'normal_done': total_normal_done,
+            'substitution_done': total_subst_done,
+            'bes_done': total_bes_done,
+            'missing_hours': hptic.hours - total_not_bes_done,
+            'missing_bes': hptic.hours_bes - total_bes_done
+        })
+    return teachers_report

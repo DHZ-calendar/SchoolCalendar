@@ -21,6 +21,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 import datetime
 from pprint import pprint
 
+import io
+from django.http import FileResponse
+
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+
 from timetable.mixins import AdminSchoolPermissionMixin, SuperUserPermissionMixin, TeacherPermissionMixin
 from timetable.permissions import SchoolAdminCanWriteDelete, TeacherCanView
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
@@ -308,7 +316,7 @@ class AbsenceBlocksPerTeacherViewSet(UserPassesTestMixin, ListModelMixin, Generi
         """
         teacher_pk = self.kwargs.get('teacher_pk')
         return Teacher.objects.filter(id=teacher_pk).exists() and \
-                Teacher.objects.get(id=teacher_pk).school == utils.get_school_from_user(self.request.user)
+               Teacher.objects.get(id=teacher_pk).school == utils.get_school_from_user(self.request.user)
 
     def get_queryset(self, *args, **kwargs):
         """
@@ -524,50 +532,47 @@ class TeacherReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, Template
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        teachers_report = []
-        for hptic in HoursPerTeacherInClass.objects.order_by('teacher__last_name', 'teacher__first_name'):
-            assignments = Assignment.objects.filter(teacher=hptic.teacher,
-                                                course=hptic.course,
-                                                subject=hptic.subject,
-                                                school=hptic.school,
-                                                school_year=hptic.school_year).values(
-                                                                    'date__week_day', 'hour_start', 'hour_end')
-            for el in assignments:
-                el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
-
-            hours_slots = HourSlot.objects.filter(school=hptic.school,
-                                                  school_year=hptic.school_year).values("day_of_week", "starts_at",
-                                                                                      "ends_at", "legal_duration")
-            # Normal assignments lessons
-            normal_done_assign = assignments.filter(bes=False, substitution=False)
-            total_normal_done = utils.compute_total_hours_assignments(normal_done_assign, hours_slots)
-
-            # Substitution assignments
-            subst_done_assign = assignments.filter(substitution=True)
-            total_subst_done = utils.compute_total_hours_assignments(subst_done_assign, hours_slots)
-
-            # BES assignments
-            bes_done_assign = assignments.filter(bes=True)
-            total_bes_done = utils.compute_total_hours_assignments(bes_done_assign, hours_slots)
-
-            # not BES assignments
-            not_bes_done_assign = assignments.filter(bes=False)
-            total_not_bes_done = utils.compute_total_hours_assignments(not_bes_done_assign, hours_slots)
-
-            teachers_report.append({
-                'first_name': hptic.teacher.first_name,
-                'last_name': hptic.teacher.last_name,
-                'subject': hptic.subject.name,
-                'course': str(hptic.course.year) + " " + hptic.course.section,
-                'normal_done': total_normal_done,
-                'substitution_done': total_subst_done,
-                'bes_done': total_bes_done,
-                'missing_hours': hptic.hours - total_not_bes_done,
-                'missing_bes': hptic.hours_bes - total_bes_done
-            })
-
-        context['teachers_report'] = teachers_report
+        context['teachers_report'] = utils.get_teachers_hours_info()
         return context
+
+
+class TeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):
+    def get(self, request, *args, **kwargs):
+        teachers_report = utils.get_teachers_hours_info()
+
+        buffer = io.BytesIO()
+
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        styles = getSampleStyleSheet()
+        styles.add(ParagraphStyle(name='title_style', fontName="Helvetica-Bold", fontSize=12, leftIndent=200))
+        title_style = styles['title_style']
+        elements = [
+            Paragraph(_("Teachers report"), title_style),
+            Spacer(0, 12)
+        ]
+
+        headers = [_('Last name'), _('First name'), _('Subject'), _('Course'), _('Teaching hours made'),
+                   _('Substitution hours made'), _('B.E.S. hours made'), _('Missing teaching hours'),
+                   _('Missing B.E.S. hours')]
+        headers = map(lambda h: '\n'.join(h.split(' ')), headers)  # To avoid breaking page borders
+        data = [headers] + \
+               [[teacher[key] for key in teacher.keys()] for teacher in teachers_report]
+        t = Table(data)
+
+        t.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, 0), 'Courier-Bold'),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('ALIGN', (4, 1), (-1, -1), 'CENTER'),
+            ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+        ]))
+
+        elements.append(t)
+
+        doc.build(elements)
+
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename='report.pdf')
 
 
 class LoggedUserRedirectView(LoginRequiredMixin, RedirectView):

@@ -5,5 +5,5 @@ djangorestframework==3.11.0
 Markdown==3.2
 django-filter==2.2.0
 numpy==1.18.1
-
+reportlab==3.5.42
 
