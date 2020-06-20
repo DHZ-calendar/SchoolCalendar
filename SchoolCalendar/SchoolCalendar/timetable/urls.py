@@ -6,7 +6,7 @@ from timetable.views import SchoolCreate, TeacherCreate, AdminSchoolCreate, Scho
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
     AbsenceBlocksPerTeacherViewSet, ReplicateAssignmentViewSet, CreateMultipleAssignmentsView, \
     TeacherSubstitutionViewSet, SubstituteTeacherView, TeacherTimetableViewSet, TeacherTimetableView, \
-    LoggedUserRedirectView
+    LoggedUserRedirectView, TeacherReportView
 
 from rest_framework.routers import DefaultRouter
 
@@ -37,6 +37,7 @@ urlpatterns = [
     path('admin_school', TimetableView.as_view(), name='timetable-view'),
     path('substitute_teacher', SubstituteTeacherView.as_view(), name='substitute_teacher-view'),
     path('teacher_view', TeacherTimetableView.as_view(), name='teacher_timetable-view'),
+    path('teacher_report_view', TeacherReportView.as_view(), name='teacher_report-view'),
     re_path(r'^api-auth/', include('rest_framework.urls')),    # Django Rest Framework
     re_path(r'^api/', include(router.urls)),
     path('school/add/', SchoolCreate.as_view(), name='school-add'),
@@ -54,6 +55,4 @@ urlpatterns = [
     path('assignment/add/', AssignmentCreate.as_view(), name='assignment-add'),
     re_path(r'multiple_assignments/add/(?P<assignment_pk>[0-9]+)/(?P<from>\d\d\d\d-\d\d-\d\d)/(?P<to>\d\d\d\d-\d\d-\d\d)'
             , CreateMultipleAssignmentsView.as_view(), name='multiple_assignment-add')
-    # path('author/<int:pk>/', AuthorUpdate.as_view(), name='author-update'),
-    # path('author/<int:pk>/delete/', AuthorDelete.as_view(), name='author-delete'),
 ]
