@@ -1,7 +1,13 @@
 from django.urls import path, re_path, include
 from timetable.views.CRUD_views import SchoolCreate, TeacherCreate, AdminSchoolCreate, SchoolYearCreate, CourseCreate, \
     HourSlotCreate, AbsenceBlockCreate, HolidayCreate, StageCreate, SubjectCreate, \
-    HoursPerTeacherInClassCreate, AssignmentCreate
+    HoursPerTeacherInClassCreate, AssignmentCreate, \
+    SchoolList, TeacherList, AdminSchoolList, SchoolYearList, CourseList, HourSlotList, AbsenceBlockList,\
+    HolidayList, StageList, SubjectList, HoursPerTeacherInClassList, \
+    TeacherUpdate, AdminSchoolUpdate, SchoolYearUpdate, CourseUpdate, HourSlotUpdate, AbsenceBlockUpdate,\
+    HolidayUpdate, StageUpdate, SubjectUpdate, HoursPerTeacherInClassUpdate, \
+    TeacherDelete, AdminSchoolDelete, SchoolYearDelete, CourseDelete, HourSlotDelete, AbsenceBlockDelete, \
+    HolidayDelete, StageDelete, SubjectDelete, HoursPerTeacherInClassDelete
 from timetable.views.rest_framework_views import TeacherViewSet, \
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
@@ -44,17 +50,50 @@ urlpatterns = [
     re_path(r'^api-auth/', include('rest_framework.urls')),    # Django Rest Framework
     re_path(r'^api/', include(router.urls)),
     path('school/add/', SchoolCreate.as_view(), name='school-add'),
+    path('school/', SchoolList.as_view(), name='school-list'),
     path('teacher/add/', TeacherCreate.as_view(), name='teacher-add'),
+    path('teacher/<pk>/edit/', TeacherUpdate.as_view(), name='teacher-edit'),
+    path('teacher/<pk>/delete/', TeacherDelete.as_view(), name='teacher-delete'),
+    path('teacher/', TeacherList.as_view(), name='teacher-list'),
     path('admin_school/add/', AdminSchoolCreate.as_view(), name='adminschool-add'),
+    path('admin_school/<pk>/edit/', AdminSchoolUpdate.as_view(), name='adminschool-edit'),
+    path('admin_school/<pk>/delete/', AdminSchoolDelete.as_view(), name='adminschool-delete'),
+    path('admin_school/', AdminSchoolList.as_view(), name='adminschool-list'),
     path('school_year/add/', SchoolYearCreate.as_view(), name='school_year-add'),
+    path('school_year/<pk>/edit/', SchoolYearUpdate.as_view(), name='school_year-edit'),
+    path('school_year/<pk>/delete/', SchoolYearDelete.as_view(), name='school_year-delete'),
+    path('school_year/', SchoolYearList.as_view(), name='school_year-list'),
     path('course/add/', CourseCreate.as_view(), name='course-add'),
+    path('course/<pk>/edit/', CourseUpdate.as_view(), name='course-edit'),
+    path('course/<pk>/delete/', CourseDelete.as_view(), name='course-delete'),
+    path('course/', CourseList.as_view(), name='course-list'),
     path('hour_slot/add/', HourSlotCreate.as_view(), name='hourslot-add'),
+    path('hour_slot/<pk>/edit/', HourSlotUpdate.as_view(), name='hourslot-edit'),
+    path('hour_slot/<pk>/delete/', HourSlotDelete.as_view(), name='hourslot-delete'),
+    path('hour_slot/', HourSlotList.as_view(), name='hourslot-list'),
     path('absence_block/add/', AbsenceBlockCreate.as_view(), name='absenceblock-add'),
+    path('absence_block/<pk>/edit/', AbsenceBlockUpdate.as_view(), name='absenceblock-edit'),
+    path('absence_block/<pk>/delete/', AbsenceBlockDelete.as_view(), name='absenceblock-delete'),
+    path('absence_block/', AbsenceBlockList.as_view(), name='absenceblock-list'),
     path('holiday/add/', HolidayCreate.as_view(), name='holiday-add'),
+    path('holiday/<pk>/edit/', HolidayUpdate.as_view(), name='holiday-edit'),
+    path('holiday/<pk>/delete/', HolidayDelete.as_view(), name='holiday-delete'),
+    path('holiday/', HolidayList.as_view(), name='holiday-list'),
     path('stage/add/', StageCreate.as_view(), name='stage-add'),
+    path('stage/<pk>/edit/', StageUpdate.as_view(), name='stage-edit'),
+    path('stage/<pk>/delete/', StageDelete.as_view(), name='stage-delete'),
+    path('stage/', StageList.as_view(), name='stage-list'),
     path('subject/add/', SubjectCreate.as_view(), name='subject-add'),
+    path('subject/<pk>/edit/', SubjectUpdate.as_view(), name='subject-edit'),
+    path('subject/<pk>/delete/', SubjectDelete.as_view(), name='subject-delete'),
+    path('subject/', SubjectList.as_view(), name='subject-list'),
     path('hours_per_teacher_in_class/add/', HoursPerTeacherInClassCreate.as_view(),
          name='hours_per_teacher_in_class-add'),
+    path('hours_per_teacher_in_class/<pk>/edit/', HoursPerTeacherInClassUpdate.as_view(),
+         name='hours_per_teacher_in_class-edit'),
+    path('hours_per_teacher_in_class/<pk>/delete/', HoursPerTeacherInClassDelete.as_view(),
+         name='hours_per_teacher_in_class-delete'),
+    path('hours_per_teacher_in_class/', HoursPerTeacherInClassList.as_view(), name='hours_per_teacher_in_class-list'),
     path('assignment/add/', AssignmentCreate.as_view(), name='assignment-add'),
     re_path(r'multiple_assignments/add/(?P<assignment_pk>[0-9]+)/(?P<from>\d\d\d\d-\d\d-\d\d)/(?P<to>\d\d\d\d-\d\d-\d\d)'
             , CreateMultipleAssignmentsView.as_view(), name='multiple_assignment-add')

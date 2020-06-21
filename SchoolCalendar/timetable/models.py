@@ -191,6 +191,9 @@ class HoursPerTeacherInClass(models.Model):
     hours = models.IntegerField(null=False, blank=False, verbose_name=_("hours"))
     hours_bes = models.IntegerField(null=False, blank=False, verbose_name=_("hours BES"))
 
+    def __str__(self):
+        return str(self.teacher) + " - " + str(self.course) + " " + self.subject.name
+
 
 class Assignment(models.Model):
     """

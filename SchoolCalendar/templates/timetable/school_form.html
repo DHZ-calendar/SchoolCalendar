@@ -7,7 +7,7 @@
         <h1 class="col text-center">{% trans "School" %}</h1>
     </div>
     <div class="row">
-        <form action="{% url 'school-add' %}" method="post" class="form-group col text-center">
+        <form method="post" class="form-group col text-center">
             {% csrf_token %}
             {{ form }}
             <br/>

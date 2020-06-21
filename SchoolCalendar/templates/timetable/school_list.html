@@ -1,0 +1,32 @@
+{% extends 'timetable/base.html' %}
+{% load i18n %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <h1 class="col text-center">{% trans "Schools" %}</h1>
+    </div>
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped">
+                <thead class="table-primary">
+                    <tr>
+                      <th scope="col">{% trans 'Name' %}</th>
+                      <th scope="col">{% trans 'Edit' %}</th>
+                      <th scope="col">{% trans 'Delete' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for school in object_list %}
+                        <tr>
+                            <td scope="row">{{ school.name }}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

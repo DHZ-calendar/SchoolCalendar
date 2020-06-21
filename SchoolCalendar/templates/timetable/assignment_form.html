@@ -3,7 +3,7 @@
 
 {% block body %}
     <h1>{% trans 'Assignment' %}</h1>
-    <form action="{% url 'assignment-add' %}" method="post">
+    <form method="post">
         {% csrf_token %}
         {{ form }}
         <input type="submit" value="Submit">
