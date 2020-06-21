@@ -1,11 +1,13 @@
 from django.urls import path, re_path, include
-from timetable.views import SchoolCreate, TeacherCreate, AdminSchoolCreate, SchoolYearCreate, CourseCreate, \
+from timetable.views.CRUD_views import SchoolCreate, TeacherCreate, AdminSchoolCreate, SchoolYearCreate, CourseCreate, \
     HourSlotCreate, AbsenceBlockCreate, HolidayCreate, StageCreate, SubjectCreate, \
-    HoursPerTeacherInClassCreate, AssignmentCreate, TimetableView, TeacherViewSet, \
+    HoursPerTeacherInClassCreate, AssignmentCreate
+from timetable.views.rest_framework_views import TeacherViewSet, \
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
     AbsenceBlocksPerTeacherViewSet, ReplicateAssignmentViewSet, CreateMultipleAssignmentsView, \
-    TeacherSubstitutionViewSet, SubstituteTeacherView, TeacherTimetableViewSet, TeacherTimetableView, \
+    TeacherSubstitutionViewSet, TeacherTimetableViewSet
+from timetable.views.other_views import TimetableView, SubstituteTeacherView, TeacherTimetableView, \
     LoggedUserRedirectView, TeacherReportView, TeacherPDFReportView
 
 from rest_framework.routers import DefaultRouter
