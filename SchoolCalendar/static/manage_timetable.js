@@ -494,6 +494,7 @@ async function addAssignment(teacherId, subjId, schoolId, block, bes){
 }
 
 function deleteAssignment(assign){
+    assign.htmlElement.tooltip('hide');
     let res = confirm(_TRANS['delete_lecture_msg']);
     if(res){
         let params = {
