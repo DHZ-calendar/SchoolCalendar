@@ -88,17 +88,18 @@ class HolidaySerializer(AbstractTimePeriodSerializer):
 
     class Meta:
         model = Holiday
-        fields = ['start', 'end', 'date_start', 'date_end', 'name', 'school', 'school_year']
+        fields = ['id', 'start', 'end', 'date_start', 'date_end', 'name', 'school', 'school_year']
 
 
 class StageSerializer(AbstractTimePeriodSerializer):
     """
     Stage Serializer with period filter
     """
+    course = CourseSerializer()
 
     class Meta:
         model = Stage
-        fields = ['start', 'end', 'date_start', 'date_end', 'name', 'course', 'school', 'school_year']
+        fields = ['id', 'start', 'end', 'date_start', 'date_end', 'name', 'course', 'school', 'school_year']
 
 
 class HourSlotSerializer(ModelSerializer):
@@ -119,10 +120,11 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
     missing_hours_bes = SerializerMethodField()
     teacher = TeacherSerializer()
     subject = SubjectSerializer()
+    course = CourseSerializer()
 
     class Meta:
         model = HoursPerTeacherInClass
-        fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'hours', 'hours_bes', 'missing_hours',
+        fields = ['id', 'teacher', 'course', 'subject', 'school_year', 'school', 'hours', 'hours_bes', 'missing_hours',
                   'missing_hours_bes']
 
     def get_missing_hours(self, obj, *args, **kwargs):
@@ -294,6 +296,10 @@ class AssignmentSerializer(ModelSerializer):
 
 class AbsenceBlockSerializer(ModelSerializer):
     teacher = TeacherSerializer()
+    hour_slot = SerializerMethodField(read_only=True)
+
+    def get_hour_slot(self, obj, *args, **kwargs):
+        return str(obj.hour_slot)
 
     class Meta:
         model = AbsenceBlock

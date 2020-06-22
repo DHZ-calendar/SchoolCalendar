@@ -11,6 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
 
 <script src="{% static 'manage_timetable.js' %}"></script>
+<link rel="stylesheet" href="{% static 'main.css' %}"/>
 {% endblock %}
 
 {% block style %}
@@ -45,11 +46,6 @@
 
 li.conflicts-content{
     padding: 0px;
-}
-
-.form-control-custom{
-    width: auto;
-    display: initial;
 }
 
 .col-teacher-list{
@@ -256,7 +252,7 @@ li.conflicts-content{
         'hour_per_teacher_in_class': "{% url 'hour_per_teacher_in_class-list' %}",
         'assignments': "{% url 'assignments-list' %}",
         'holiday': "{% url 'holiday-list' %}",
-        'stage': "{% url 'stage-list' 999999 %}",
+        'stage': "{% url 'stage-list' %}",
         'teacher_assignments': "{% url 'teacher_assignments-list' 12345 99999 %}",
         'teacher_absence_blocks': "{% url 'teacher_absence_blocks-list' 12345 99999 %}",
         'replicate_assignment': "{% url 'replicate_assignment-list' 12345 '0000-00-00' '9999-99-99' %}",

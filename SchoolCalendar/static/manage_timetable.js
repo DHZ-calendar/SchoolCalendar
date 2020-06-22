@@ -353,7 +353,7 @@ async function getHolidays(startDate, endDate){
     }
 }
 async function getStages(startDate, endDate){
-    let url = _URL['stage'].replace('999999', $('#course_section').val());
+    let url = _URL['stage'];
     let data = {
         'school_year': $('#school_year').val(),
         'course': $('#course_section').val(),

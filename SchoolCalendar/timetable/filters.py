@@ -7,7 +7,7 @@ import datetime
 from timetable import utils
 from timetable.utils import get_school_from_user, convert_weekday_into_0_6_format
 from timetable.models import Holiday, Stage, AbsenceBlock, Teacher, AdminSchool, HourSlot, HoursPerTeacherInClass, \
-    Course, Assignment
+    Course, Assignment, Subject
 
 
 class TeacherFromSameSchoolFilterBackend(BaseFilterBackend):
@@ -16,7 +16,7 @@ class TeacherFromSameSchoolFilterBackend(BaseFilterBackend):
     """
     def filter_queryset(self, request, queryset, view):
         school = get_school_from_user(request.user)
-        return queryset.filter(school=school.id)
+        return queryset.filter(teacher__school=school.id)
 
 
 class QuerysetFromSameSchool(BaseFilterBackend):
@@ -32,40 +32,30 @@ class HolidayPeriodFilter(FilterSet):
     to_date = DateFilter(field_name='date_start', lookup_expr='lte')
     from_date = DateFilter(field_name='date_end', lookup_expr='gte')
 
-    def __init__(self, data, *args, **kwargs):
-        """
-        Set default interval to current week if it is not specified
-        """
-        if not data.get('from_date') or not data.get("to_date"):
-            data = data.copy()
-            data['from_date'] = utils.get_closest_smaller_Monday()
-            # Plus 6 as we need next Sunday
-            data['to_date'] = data['from_date'] + datetime.timedelta(days=6)
-        super(HolidayPeriodFilter, self).__init__(data, *args, **kwargs)
-
     class Meta:
         model = Holiday
         fields = ['from_date', 'to_date', 'school_year']
 
 
-class StagePeriodFilter(FilterSet):
+class StageFilter(FilterSet):
     to_date = DateFilter(field_name='date_start', lookup_expr='lte')
     from_date = DateFilter(field_name='date_end', lookup_expr='gte')
 
-    def __init__(self, data, *args, **kwargs):
-        """
-        Set default interval to current week if it is not specified
-        """
-        if not data.get('from_date') or not data.get("to_date"):
-            data = data.copy()
-            data['from_date'] = utils.get_closest_smaller_Monday()
-            # Plus 6 as we need next Sunday
-            data['to_date'] = data['from_date'] + datetime.timedelta(days=6)
-        super(StagePeriodFilter, self).__init__(data, *args, **kwargs)
-
     class Meta:
         model = Stage
-        fields = ['from_date', 'to_date', 'school_year']
+        fields = ['from_date', 'to_date', 'school_year', 'course']
+
+
+class SubjectFilter(FilterSet):
+    class Meta:
+        model = Subject
+        fields = ['school_year']
+
+
+class AbsenceBlockFilter(FilterSet):
+    class Meta:
+        model = AbsenceBlock
+        fields = ['school_year']
 
 
 class HourSlotFilter(FilterSet):
@@ -95,18 +85,6 @@ class CourseYearOnlyFilter(FilterSet):
 class AssignmentFilter(FilterSet):
     to_date = DateFilter(field_name='date', lookup_expr='lte')
     from_date = DateFilter(field_name='date', lookup_expr='gte')
-
-    def __init__(self, data, *args, **kwargs):
-        """
-        Set default interval to current week if it is not specified
-        """
-        #TODO: maybe useless, filters data even when selecting by id
-        #if not data.get('from_date') or not data.get("to_date"):
-        #    data = data.copy()
-        #    data['from_date'] = utils.get_closest_smaller_Monday()
-            # Plus 6 as we need next Sunday
-        #    data['to_date'] = data['from_date'] + datetime.timedelta(days=6)
-        super(AssignmentFilter, self).__init__(data, *args, **kwargs)
 
     class Meta:
         model = Assignment
