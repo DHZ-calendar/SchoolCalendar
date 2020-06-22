@@ -15,11 +15,11 @@ from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, C
     Stage, Subject, HoursPerTeacherInClass, Assignment
 from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer, \
     HolidaySerializer, StageSerializer, HourSlotSerializer, HoursPerTeacherInClassSerializer, AssignmentSerializer, \
-    AbsenceBlockSerializer, TeacherSubstitutionSerializer
+    AbsenceBlockSerializer, TeacherSubstitutionSerializer, SubjectSerializer
 from timetable.permissions import SchoolAdminCanWriteDelete, TeacherCanView
 from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
-    StagePeriodFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
-    AssignmentFilter
+    StageFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
+    AssignmentFilter, AbsenceBlockFilter, SubjectFilter
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 
 from timetable import utils
@@ -29,7 +29,23 @@ class TeacherViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, Li
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
-    filter_backends = [TeacherFromSameSchoolFilterBackend]
+    filter_backends = [QuerysetFromSameSchool]
+
+
+class AbsenceBlockViewSet(ListModelMixin, GenericViewSet):
+    queryset = AbsenceBlock.objects.all()
+    serializer_class = AbsenceBlockSerializer
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
+    filterset_class = AbsenceBlockFilter
+    filter_backends = [DjangoFilterBackend, TeacherFromSameSchoolFilterBackend]
+
+
+class SubjectViewSet(ListModelMixin, GenericViewSet):
+    queryset = Subject.objects.all()
+    serializer_class = SubjectSerializer
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
+    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
+    filterset_class = SubjectFilter
 
 
 class CourseYearOnlyListViewSet(ListModelMixin, GenericViewSet):
@@ -65,42 +81,12 @@ class HolidayViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, Li
     filterset_class = HolidayPeriodFilter
 
 
-class StageViewSet(UserPassesTestMixin, ListModelMixin, GenericViewSet):
+class StageViewSet(ListModelMixin, GenericViewSet):
     queryset = Stage.objects.all()
     serializer_class = StageSerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
-    filterset_class = StagePeriodFilter
-    lookup_url_kwarg = 'course_pk'
-
-    def dispatch(self, request, *args, **kwargs):
-        request.course_pk = kwargs.get('course_pk')
-        return super(StageViewSet, self).dispatch(request, *args, **kwargs)
-
-    def get_queryset(self):
-        """
-        Select only the stages of the given course.
-        Need to check whether the course is from the same course of the user making the request.
-        :return:
-        """
-        try:
-            course = Course.objects.get(pk=self.request.course_pk)
-        except ObjectDoesNotExist:
-            return Stage.objects.none()
-
-        result = Stage.objects.filter(course=course)
-        return result
-
-    def test_func(self):
-        """
-        Returnt True only when the user and the course are in the same school
-        :return:
-        """
-        try:
-            course = Course.objects.get(pk=self.request.course_pk)
-        except ObjectDoesNotExist:
-            return False
-        return utils.get_school_from_user(self.request.user) == course.school
+    filterset_class = StageFilter
 
 
 class HourSlotViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):

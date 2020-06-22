@@ -3,20 +3,11 @@
 
 {% block body %}
     <h1>{% trans 'Assignment' %}</h1>
-    <form action="{% url 'assignment-add' %}" method="post">
+    <form method="post">
         {% csrf_token %}
         {{ form }}
         <input type="submit" value="Submit">
     </form>
-
-    <h2>Replicate Assignment</h2>
-    <label for="id_assignment">id assignment</label>
-    <input id="id_assignment" name="id_assignment"></br>
-    <label for="from_date_assignment">From</label>
-    <input id="from_date"  name="from_date" class="datepicker"></br>
-    <label for="to_date" >To</label>
-    <input id='to_date' name="to_date" class="datepicker"></br>
-    <button id="test"> click here </button>
 
 
     <script>
@@ -28,23 +19,5 @@
                 showMeridian: false,
                 defaultTime: false
             });
-        $('#test').click(function(){
-            $.post({
-                url: '{% url 'multiple_assignment-add' "999999"  '20-01-2001' '20-01-2101' %}'.
-                            replace('999999', $('#id_assignment')[0].value).
-                            replace('20-01-2001', $('#from_date')[0].value.replace(/\//g, '-')).
-                            replace('20-01-2101', $('#to_date')[0].value.replace(/\//g, '-')),
-                data:{
-                    csrfmiddlewaretoken:'{{csrf_token}}'
-                },
-                success: function(data){
-                    console.log(data);
-                },
-                error: function(e){
-                    console.log("Error!")
-                    console.log(e.responseJSON);
-                }
-            });
-        })
     </script>
 {% endblock %}

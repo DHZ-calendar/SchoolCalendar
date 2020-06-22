@@ -175,7 +175,7 @@ async function getTeachers(){
         data = await $.get(url, data=data);
         for(let tea of data){
             let html = `
-                <li class="list-group-item list-teachers" data-teacher-id="${tea.teacher.id}">
+                <li class="list-group-item list-teachers" data-teacher-id="${tea.id}">
                     <b>${tea.teacher.first_name} ${tea.teacher.last_name}</b> - ${tea.subject.name}<br/>
                     <div class="row font-italic">
                         <span class="col-9">${_TRANS['hours_teaching']}:</span>
@@ -195,8 +195,8 @@ async function getTeachers(){
                         <span class="col-3 tea-missing_bes">${tea.missing_hours_bes}</span>
                     </div>
                     <div class="row">
-                        <button type="button" class="col-6 btn cal-event" onclick="teacherClick($(this).parent().parent(), ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false)">${_TRANS['assign_lecture']}</button>
-                        <button type="button" class="col-6 btn cal-event-bes" onclick="teacherClick($(this).parent().parent(), ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, true)">${_TRANS['assign_bes']}</button>
+                        <button type="button" class="col-6 btn cal-event" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false)">${_TRANS['assign_lecture']}</button>
+                        <button type="button" class="col-6 btn cal-event-bes" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, true)">${_TRANS['assign_bes']}</button>
                     </div>
                 </li>`;
             $('#teachers_list').append(html);
@@ -216,7 +216,7 @@ async function refreshTeachers(){
     try{
         data = await $.get(url, data=data);
         for(let tea of data){
-            let teaElement = $(`#teachers_list *[data-teacher-id=${tea.teacher.id}]`);
+            let teaElement = $(`#teachers_list *[data-teacher-id=${tea.id}]`);
 
             teaElement.find('.tea-hours').text(tea.hours);
             teaElement.find('.tea-hours_bes').text(tea.hours_bes);
@@ -353,7 +353,7 @@ async function getHolidays(startDate, endDate){
     }
 }
 async function getStages(startDate, endDate){
-    let url = _URL['stage'].replace('999999', $('#course_section').val());
+    let url = _URL['stage'];
     let data = {
         'school_year': $('#school_year').val(),
         'course': $('#course_section').val(),
@@ -376,15 +376,16 @@ async function getStages(startDate, endDate){
     }
 }
 
-async function teacherClick(btn, teacherId, subjId, schoolId, bes){
+async function teacherClick(btn, teaId, teacherId, subjId, schoolId, bes){
     btn = $(btn);
 
     if(!btn.hasClass('active')){
+        $('#teachers_list li').removeClass('active');
         btn.addClass('active');
 
         for(let blk of Object.keys(timetable.blocks)){
             timetable.getBlock(blk).setState('available');
-            timetable.getBlock(blk).setOnClick((blk) => addAssignment(teacherId, subjId, schoolId, blk, bes));
+            timetable.getBlock(blk).setOnClick((blk) => addAssignment(teaId, teacherId, subjId, schoolId, blk, bes));
         }
 
         await setLockedBlocksTeacher(teacherId);
@@ -463,7 +464,7 @@ async function setLockedBlocksAbsenceTeacher(teacherId){
     }
 }
 
-async function addAssignment(teacherId, subjId, schoolId, block, bes){
+async function addAssignment(teaId, teacherId, subjId, schoolId, block, bes){
     let url = _URL['assignments'];
 
     let date = moment(currentDate).add(block.day, 'days').format('YYYY-MM-DD');
@@ -485,7 +486,7 @@ async function addAssignment(teacherId, subjId, schoolId, block, bes){
         let res = await $.post(url, data=data);
         await loadData(true, false);
         await refreshTeachers();
-        await teacherClick($(`#teachers_list *[data-teacher-id=${teacherId}]`), teacherId, subjId, schoolId, bes);
+        await teacherClick($(`#teachers_list *[data-teacher-id=${teaId}]`), teacherId, subjId, schoolId, bes);
     }
     catch(e){
         console.log("Error adding an assignment");
@@ -494,6 +495,7 @@ async function addAssignment(teacherId, subjId, schoolId, block, bes){
 }
 
 function deleteAssignment(assign){
+    assign.htmlElement.tooltip('hide');
     let res = confirm(_TRANS['delete_lecture_msg']);
     if(res){
         let params = {
