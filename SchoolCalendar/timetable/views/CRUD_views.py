@@ -18,24 +18,11 @@ class CreateViewWithUser(CreateView):
         return kwargs
 
 
-class UpdateViewWithUser(CreateView):
+class UpdateViewWithUser(UpdateView):
     def get_form_kwargs(self):
         kwargs = super(UpdateViewWithUser, self).get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
-
-    # To fix loading of model data
-    def get_initial(self):
-        instance = self.get_object()
-        initial = {}
-        print(vars(instance))
-        obj_dict = vars(instance)
-        for key in obj_dict.keys():
-            if key[-3:] == '_id':
-                initial[key[:-3]] = obj_dict[key]
-            else:
-                initial[key] = obj_dict[key]
-        return initial
 
 
 # School CRUD
