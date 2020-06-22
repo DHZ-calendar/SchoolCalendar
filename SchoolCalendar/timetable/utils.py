@@ -131,3 +131,14 @@ def get_teachers_hours_info():
             'missing_bes': hptic.hours_bes - total_bes_done
         })
     return teachers_report
+
+
+def assign_html_style_to_visible_forms_fields(form):
+    """
+    Add the form-control class to the html of the form fields,
+    so that they are well formatted by Bootstrap.
+    :param form: a form instance
+    """
+    for visible in form.visible_fields():
+        if 'class' not in visible.field.widget.attrs:
+            visible.field.widget.attrs['class'] = 'form-control'
