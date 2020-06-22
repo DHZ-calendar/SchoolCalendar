@@ -4,6 +4,8 @@
 
 {% block head %}
 <link rel="stylesheet" href="{% static 'main.css' %}"/>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 {% endblock %}
 
 {% block body %}
@@ -68,7 +70,7 @@
             for(let slot of data){
                 let html = `
                     <tr>
-                        <td scope="row">${ slot.day_of_week }</td>
+                        <td scope="row">${ moment().day(slot.day_of_week + 1).format('dddd') }</td>
                         <td scope="row">${ slot.hour_number }</td>
                         <td scope="row">${ slot.starts_at }</td>
                         <td scope="row">${ slot.ends_at }</td>
