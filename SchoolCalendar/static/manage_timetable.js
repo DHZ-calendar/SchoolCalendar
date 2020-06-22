@@ -380,6 +380,7 @@ async function teacherClick(btn, teaId, teacherId, subjId, schoolId, bes){
     btn = $(btn);
 
     if(!btn.hasClass('active')){
+        $('#teachers_list li').removeClass('active');
         btn.addClass('active');
 
         for(let blk of Object.keys(timetable.blocks)){
