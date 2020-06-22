@@ -46,6 +46,20 @@ class SchoolCreate(SuperUserPermissionMixin, CreateView):
     success_url = reverse_lazy('school-add')
 
 
+class SchoolUpdate(SuperUserPermissionMixin, UpdateView):
+    model = School
+    form_class = SchoolForm
+    template_name = 'timetable/school_form.html'
+    success_url = reverse_lazy('school-listview')
+
+
+class SchoolDelete(SuperUserPermissionMixin, DeleteView):
+    model = School
+    form_class = SchoolForm
+    template_name = 'timetable/delete_form.html'
+    success_url = reverse_lazy('school-listview')
+
+
 class SchoolList(SuperUserPermissionMixin, ListView):
     model = School
     template_name = 'timetable/school_list.html'
@@ -56,21 +70,21 @@ class TeacherCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
     model = Teacher
     form_class = TeacherForm
     template_name = 'timetable/teacher_form.html'
-    success_url = reverse_lazy('teacher-list')
+    success_url = reverse_lazy('teacher-listview')
 
 
 class TeacherUpdate(AdminSchoolPermissionMixin, UpdateViewWithUser):
     model = Teacher
     form_class = TeacherForm
     template_name = 'timetable/teacher_form.html'
-    success_url = reverse_lazy('teacher-list')
+    success_url = reverse_lazy('teacher-listview')
 
 
 class TeacherDelete(AdminSchoolPermissionMixin, DeleteView):
     model = Teacher
     form_class = TeacherForm
     template_name = 'timetable/delete_form.html'
-    success_url = reverse_lazy('teacher-list')
+    success_url = reverse_lazy('teacher-listview')
 
 
 class TeacherList(AdminSchoolPermissionMixin, ListView):
@@ -83,21 +97,21 @@ class AdminSchoolCreate(SuperUserPermissionMixin, CreateViewWithUser):
     model = AdminSchool
     form_class = AdminSchoolForm
     template_name = 'timetable/adminschool_form.html'
-    success_url = reverse_lazy('adminschool-list')
+    success_url = reverse_lazy('adminschool-listview')
 
 
 class AdminSchoolUpdate(SuperUserPermissionMixin, UpdateViewWithUser):
     model = AdminSchool
     form_class = AdminSchoolForm
     template_name = 'timetable/adminschool_form.html'
-    success_url = reverse_lazy('adminschool-list')
+    success_url = reverse_lazy('adminschool-listview')
 
 
 class AdminSchoolDelete(SuperUserPermissionMixin, DeleteView):
     model = AdminSchool
     form_class = AdminSchoolForm
     template_name = 'timetable/delete_form.html'
-    success_url = reverse_lazy('adminschool-list')
+    success_url = reverse_lazy('adminschool-listview')
 
 
 class AdminSchoolList(SuperUserPermissionMixin, ListView):
@@ -110,21 +124,21 @@ class SchoolYearCreate(SuperUserPermissionMixin, CreateView):
     model = SchoolYear
     form_class = SchoolYearForm
     template_name = 'timetable/school_year_form.html'
-    success_url = reverse_lazy('school_year-list')
+    success_url = reverse_lazy('school_year-listview')
 
 
 class SchoolYearUpdate(SuperUserPermissionMixin, UpdateView):
     model = SchoolYear
     form_class = SchoolYearForm
     template_name = 'timetable/school_year_form.html'
-    success_url = reverse_lazy('school_year-list')
+    success_url = reverse_lazy('school_year-listview')
 
 
 class SchoolYearDelete(SuperUserPermissionMixin, DeleteView):
     model = SchoolYear
     form_class = SchoolYearForm
     template_name = 'timetable/delete_form.html'
-    success_url = reverse_lazy('school_year-list')
+    success_url = reverse_lazy('school_year-listview')
 
 
 class SchoolYearList(SuperUserPermissionMixin, ListView):
@@ -137,21 +151,21 @@ class CourseCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
     model = Course
     form_class = CourseForm
     template_name = 'timetable/course_form.html'
-    success_url = reverse_lazy('course-list')
+    success_url = reverse_lazy('course-listview')
 
 
 class CourseUpdate(AdminSchoolPermissionMixin, UpdateViewWithUser):
     model = Course
     form_class = CourseForm
     template_name = 'timetable/course_form.html'
-    success_url = reverse_lazy('course-list')
+    success_url = reverse_lazy('course-listview')
 
 
 class CourseDelete(AdminSchoolPermissionMixin, DeleteView):
     model = Course
     form_class = CourseForm
     template_name = 'timetable/delete_form.html'
-    success_url = reverse_lazy('course-list')
+    success_url = reverse_lazy('course-listview')
 
 
 class CourseList(AdminSchoolPermissionMixin, ListView):
@@ -164,21 +178,21 @@ class HourSlotCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
     model = HourSlot
     form_class = HourSlotForm
     template_name = 'timetable/hourslot_form.html'
-    success_url = reverse_lazy('hourslot-list')
+    success_url = reverse_lazy('hourslot-listview')
 
 
 class HourSlotUpdate(AdminSchoolPermissionMixin, UpdateViewWithUser):
     model = HourSlot
     form_class = HourSlotForm
     template_name = 'timetable/hourslot_form.html'
-    success_url = reverse_lazy('hourslot-list')
+    success_url = reverse_lazy('hourslot-listview')
 
 
 class HourSlotDelete(AdminSchoolPermissionMixin, DeleteView):
     model = HourSlot
     form_class = HourSlotForm
     template_name = 'timetable/delete_form.html'
-    success_url = reverse_lazy('hourslot-list')
+    success_url = reverse_lazy('hourslot-listview')
 
 
 class HourSlotList(AdminSchoolPermissionMixin, ListView):
@@ -191,21 +205,21 @@ class AbsenceBlockCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
     model = AbsenceBlock
     form_class = AbsenceBlockForm
     template_name = 'timetable/absenceBlock_form.html'
-    success_url = reverse_lazy('absenceblock-add')
+    success_url = reverse_lazy('absenceblock-listview')
 
 
 class AbsenceBlockUpdate(AdminSchoolPermissionMixin, UpdateViewWithUser):
     model = AbsenceBlock
     form_class = AbsenceBlockForm
     template_name = 'timetable/absenceBlock_form.html'
-    success_url = reverse_lazy('absenceblock-list')
+    success_url = reverse_lazy('absenceblock-listview')
 
 
 class AbsenceBlockDelete(AdminSchoolPermissionMixin, DeleteView):
     model = AbsenceBlock
     form_class = AbsenceBlockForm
     template_name = 'timetable/delete_form.html'
-    success_url = reverse_lazy('absenceblock-list')
+    success_url = reverse_lazy('absenceblock-listview')
 
 
 class AbsenceBlockList(AdminSchoolPermissionMixin, ListView):
@@ -218,21 +232,21 @@ class HolidayCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
     model = Holiday
     form_class = HolidayForm
     template_name = 'timetable/holiday_form.html'
-    success_url = reverse_lazy('holiday-list')
+    success_url = reverse_lazy('holiday-listview')
 
 
 class HolidayUpdate(AdminSchoolPermissionMixin, UpdateViewWithUser):
     model = Holiday
     form_class = HolidayForm
     template_name = 'timetable/holiday_form.html'
-    success_url = reverse_lazy('holiday-list')
+    success_url = reverse_lazy('holiday-listview')
 
 
 class HolidayDelete(AdminSchoolPermissionMixin, DeleteView):
     model = Holiday
     form_class = HolidayForm
     template_name = 'timetable/delete_form.html'
-    success_url = reverse_lazy('holiday-list')
+    success_url = reverse_lazy('holiday-listview')
 
 
 class HolidayList(AdminSchoolPermissionMixin, ListView):
@@ -245,21 +259,21 @@ class StageCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
     model = Stage
     form_class = StageForm
     template_name = 'timetable/stage_form.html'
-    success_url = reverse_lazy('stage-list')
+    success_url = reverse_lazy('stage-listview')
 
 
 class StageUpdate(AdminSchoolPermissionMixin, UpdateViewWithUser):
     model = Stage
     form_class = StageForm
     template_name = 'timetable/stage_form.html'
-    success_url = reverse_lazy('stage-list')
+    success_url = reverse_lazy('stage-listview')
 
 
 class StageDelete(AdminSchoolPermissionMixin, DeleteView):
     model = Stage
     form_class = StageForm
     template_name = 'timetable/delete_form.html'
-    success_url = reverse_lazy('stage-list')
+    success_url = reverse_lazy('stage-listview')
 
 
 class StageList(AdminSchoolPermissionMixin, ListView):
@@ -272,21 +286,21 @@ class SubjectCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
     model = Subject
     form_class = SubjectForm
     template_name = 'timetable/subject_form.html'
-    success_url = reverse_lazy('subject-list')
+    success_url = reverse_lazy('subject-listview')
 
 
 class SubjectUpdate(AdminSchoolPermissionMixin, UpdateViewWithUser):
     model = Subject
     form_class = SubjectForm
     template_name = 'timetable/subject_form.html'
-    success_url = reverse_lazy('subject-list')
+    success_url = reverse_lazy('subject-listview')
 
 
 class SubjectDelete(AdminSchoolPermissionMixin, DeleteView):
     model = Subject
     form_class = SubjectForm
     template_name = 'timetable/delete_form.html'
-    success_url = reverse_lazy('subject-list')
+    success_url = reverse_lazy('subject-listview')
 
 
 class SubjectList(AdminSchoolPermissionMixin, ListView):
@@ -299,21 +313,21 @@ class HoursPerTeacherInClassCreate(AdminSchoolPermissionMixin, CreateViewWithUse
     model = HoursPerTeacherInClass
     form_class = HoursPerTeacherInClassForm
     template_name = 'timetable/hoursPerTeacherInClass_form.html'
-    success_url = reverse_lazy('hours_per_teacher_in_class-list')
+    success_url = reverse_lazy('hours_per_teacher_in_class-listview')
 
 
 class HoursPerTeacherInClassUpdate(AdminSchoolPermissionMixin, UpdateViewWithUser):
     model = HoursPerTeacherInClass
     form_class = HoursPerTeacherInClassForm
     template_name = 'timetable/hoursPerTeacherInClass_form.html'
-    success_url = reverse_lazy('hours_per_teacher_in_class-list')
+    success_url = reverse_lazy('hours_per_teacher_in_class-listview')
 
 
 class HoursPerTeacherInClassDelete(AdminSchoolPermissionMixin, DeleteView):
     model = HoursPerTeacherInClass
     form_class = HoursPerTeacherInClassForm
     template_name = 'timetable/delete_form.html'
-    success_url = reverse_lazy('hours_per_teacher_in_class-list')
+    success_url = reverse_lazy('hours_per_teacher_in_class-listview')
 
 
 class HoursPerTeacherInClassList(AdminSchoolPermissionMixin, ListView):
