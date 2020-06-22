@@ -1,1 +1,2 @@
-web: sh -c 'cd ./SchoolCalendar/SchoolCalendar/ && exec gunicorn SchoolCalendar.wsgi --log-file -'
+web: sh -c 'cd ./SchoolCalendar/ && exec gunicorn SchoolCalendar.wsgi --log-file -'
+

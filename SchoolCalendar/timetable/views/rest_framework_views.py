@@ -1,153 +1,28 @@
-from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
-from django.db.models import Q
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render, redirect, reverse
-from django.core.exceptions import ObjectDoesNotExist
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.views.generic import TemplateView
-from django.views.generic.base import RedirectView
-from django.urls import reverse_lazy
-from django.views import View
-from django.contrib.auth.models import User
-from django.utils.translation import gettext as _
-
-from rest_framework.renderers import JSONRenderer
 from rest_framework.viewsets import ModelViewSet, ViewSet, GenericViewSet
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, \
     UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils.translation import gettext as _
+from django.views import View
+from django.http import HttpResponse, JsonResponse
+from django.db.models import Q
 
 import datetime
-from pprint import pprint
 
-from timetable.mixins import AdminSchoolPermissionMixin, SuperUserPermissionMixin, TeacherPermissionMixin
-from timetable.permissions import SchoolAdminCanWriteDelete, TeacherCanView
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
     Stage, Subject, HoursPerTeacherInClass, Assignment
-
-from timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYearForm, CourseForm, HourSlotForm, \
-    AbsenceBlockForm, HolidayForm, StageForm, SubjectForm, HoursPerTeacherInClassForm, \
-    AssignmentForm
-
-from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
-    StagePeriodFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
-    AssignmentFilter
-from timetable import utils
 from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer, \
     HolidaySerializer, StageSerializer, HourSlotSerializer, HoursPerTeacherInClassSerializer, AssignmentSerializer, \
     AbsenceBlockSerializer, TeacherSubstitutionSerializer
+from timetable.permissions import SchoolAdminCanWriteDelete, TeacherCanView
+from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
+    StagePeriodFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
+    AssignmentFilter
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 
-
-class CreateViewWithUser(CreateView):
-    def get_form_kwargs(self):
-        kwargs = super(CreateViewWithUser, self).get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
-
-class SchoolCreate(SuperUserPermissionMixin, CreateView):
-    model = School
-    form_class = SchoolForm
-    template_name = 'timetable/school_form.html'
-    success_url = reverse_lazy('school-add')
-
-
-class TeacherCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
-    model = Teacher
-    form_class = TeacherForm
-    template_name = 'timetable/teacher_form.html'
-    success_url = reverse_lazy('teacher-add')
-
-
-class AdminSchoolCreate(SuperUserPermissionMixin, CreateViewWithUser):
-    model = AdminSchool
-    form_class = AdminSchoolForm
-    template_name = 'timetable/adminschool_form.html'
-    success_url = reverse_lazy('adminschool-add')
-
-
-class SchoolYearCreate(SuperUserPermissionMixin, CreateView):
-    model = SchoolYear
-    form_class = SchoolYearForm
-    template_name = 'timetable/school_year_form.html'
-    success_url = reverse_lazy('school_year-add')
-
-
-class CourseCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
-    model = Course
-    form_class = CourseForm
-    template_name = 'timetable/course_form.html'
-    success_url = reverse_lazy('course-add')
-
-
-class HourSlotCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
-    model = HourSlot
-    form_class = HourSlotForm
-    template_name = 'timetable/hourslot_form.html'
-    success_url = reverse_lazy('hourslot-add')
-
-
-class AbsenceBlockCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
-    model = AbsenceBlock
-    form_class = AbsenceBlockForm
-    template_name = 'timetable/absenceBlock_form.html'
-    success_url = reverse_lazy('absenceblock-add')
-
-
-class HolidayCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
-    model = Holiday
-    form_class = HolidayForm
-    template_name = 'timetable/holiday_form.html'
-    success_url = reverse_lazy('holiday-add')
-
-
-class StageCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
-    model = Stage
-    form_class = StageForm
-    template_name = 'timetable/stage_form.html'
-    success_url = reverse_lazy('stage-add')
-
-
-class SubjectCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
-    model = Subject
-    form_class = SubjectForm
-    template_name = 'timetable/subject_form.html'
-    success_url = reverse_lazy('subject-add')
-
-
-class HoursPerTeacherInClassCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
-    model = HoursPerTeacherInClass
-    form_class = HoursPerTeacherInClassForm
-    template_name = 'timetable/hoursPerTeacherInClass_form.html'
-    success_url = reverse_lazy('hours_per_teacher_in_class-add')
-
-
-class AssignmentCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
-    model = Assignment
-    form_class = AssignmentForm
-    template_name = 'timetable/assignment_form.html'
-    success_url = reverse_lazy('assignment-add')
-
-
-class TimetableView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateView):
-    template_name = 'timetable/timetable.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['school_years'] = SchoolYear.objects.all()
-        return context
-
-
-class SubstituteTeacherView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateView):
-    template_name = 'timetable/substitute_teacher.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['school_years'] = SchoolYear.objects.all()
-        return context
+from timetable import utils
 
 
 class TeacherViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
@@ -308,7 +183,7 @@ class AbsenceBlocksPerTeacherViewSet(UserPassesTestMixin, ListModelMixin, Generi
         """
         teacher_pk = self.kwargs.get('teacher_pk')
         return Teacher.objects.filter(id=teacher_pk).exists() and \
-                Teacher.objects.get(id=teacher_pk).school == utils.get_school_from_user(self.request.user)
+               Teacher.objects.get(id=teacher_pk).school == utils.get_school_from_user(self.request.user)
 
     def get_queryset(self, *args, **kwargs):
         """
@@ -506,21 +381,3 @@ class TeacherTimetableViewSet(ListModelMixin, GenericViewSet):
         # Return all assignments for a teacher in a given time period
         assignments = Assignment.objects.filter(teacher_id=self.request.user.id)
         return assignments
-
-
-class TeacherTimetableView(LoginRequiredMixin, TeacherPermissionMixin, TemplateView):
-    template_name = 'timetable/teacher_timetable.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['school_years'] = SchoolYear.objects.all()
-        return context
-
-
-class LoggedUserRedirectView(LoginRequiredMixin, RedirectView):
-    def get_redirect_url(self, *args, **kwargs):
-        if utils.is_adminschool(self.request.user):
-            return reverse('timetable-view')
-        else:
-            return reverse('teacher_timetable-view')

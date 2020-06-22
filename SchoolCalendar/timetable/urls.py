@@ -1,12 +1,14 @@
 from django.urls import path, re_path, include
-from timetable.views import SchoolCreate, TeacherCreate, AdminSchoolCreate, SchoolYearCreate, CourseCreate, \
+from timetable.views.CRUD_views import SchoolCreate, TeacherCreate, AdminSchoolCreate, SchoolYearCreate, CourseCreate, \
     HourSlotCreate, AbsenceBlockCreate, HolidayCreate, StageCreate, SubjectCreate, \
-    HoursPerTeacherInClassCreate, AssignmentCreate, TimetableView, TeacherViewSet, \
+    HoursPerTeacherInClassCreate, AssignmentCreate
+from timetable.views.rest_framework_views import TeacherViewSet, \
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
     AbsenceBlocksPerTeacherViewSet, ReplicateAssignmentViewSet, CreateMultipleAssignmentsView, \
-    TeacherSubstitutionViewSet, SubstituteTeacherView, TeacherTimetableViewSet, TeacherTimetableView, \
-    LoggedUserRedirectView
+    TeacherSubstitutionViewSet, TeacherTimetableViewSet
+from timetable.views.other_views import TimetableView, SubstituteTeacherView, TeacherTimetableView, \
+    LoggedUserRedirectView, TeacherReportView, TeacherPDFReportView
 
 from rest_framework.routers import DefaultRouter
 
@@ -37,6 +39,8 @@ urlpatterns = [
     path('admin_school', TimetableView.as_view(), name='timetable-view'),
     path('substitute_teacher', SubstituteTeacherView.as_view(), name='substitute_teacher-view'),
     path('teacher_view', TeacherTimetableView.as_view(), name='teacher_timetable-view'),
+    path('teacher_report_view', TeacherReportView.as_view(), name='teacher_report-view'),
+    path('teacher_pdf_report_view', TeacherPDFReportView.as_view(), name='teacher_pdf_report-view'),
     re_path(r'^api-auth/', include('rest_framework.urls')),    # Django Rest Framework
     re_path(r'^api/', include(router.urls)),
     path('school/add/', SchoolCreate.as_view(), name='school-add'),
@@ -54,6 +58,4 @@ urlpatterns = [
     path('assignment/add/', AssignmentCreate.as_view(), name='assignment-add'),
     re_path(r'multiple_assignments/add/(?P<assignment_pk>[0-9]+)/(?P<from>\d\d\d\d-\d\d-\d\d)/(?P<to>\d\d\d\d-\d\d-\d\d)'
             , CreateMultipleAssignmentsView.as_view(), name='multiple_assignment-add')
-    # path('author/<int:pk>/', AuthorUpdate.as_view(), name='author-update'),
-    # path('author/<int:pk>/delete/', AuthorDelete.as_view(), name='author-delete'),
 ]

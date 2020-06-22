@@ -9,3 +9,5 @@ numpy==1.18.1
 whitenoise==5.0.1
 psycopg2-binary==2.8.4
 dj-database-url==0.5.0
+reportlab==3.5.42
+

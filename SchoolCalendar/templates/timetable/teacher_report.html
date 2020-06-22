@@ -1,0 +1,183 @@
+{% extends 'timetable/base.html' %}
+{% load i18n %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <h3 class="col text-center">{% trans 'Teachers report' %}</h3>
+    </div>
+    <div class="row">
+        <div class="col text-right">
+            <a href="{% url 'teacher_pdf_report-view' %}" class="btn btn-danger" role="button" aria-pressed="true">
+                {% trans 'Download PDF' %}
+                <svg class="bi bi-download" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"/>
+                  <path fill-rule="evenodd" d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"/>
+                  <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 1z"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="row p-1">
+        <div class="col">
+            <table class="table table-striped">
+                <thead class="table-primary">
+                    <tr>
+                      <th scope="col">{% trans 'Last name' %}</th>
+                      <th scope="col">{% trans 'First name' %}</th>
+                      <th scope="col">{% trans 'Subject' %}</th>
+                      <th scope="col">{% trans 'Course' %}</th>
+                      <th scope="col">{% trans 'Teaching hours made' %}</th>
+                      <th scope="col">{% trans 'Substitution hours made' %}</th>
+                      <th scope="col">{% trans 'B.E.S. hours made' %}</th>
+                      <th scope="col">{% trans 'Missing teaching hours' %}</th>
+                      <th scope="col">{% trans 'Missing B.E.S. hours' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for teacher_hours in teachers_report %}
+                        <tr>
+                            <th scope="row">{{ teacher_hours.last_name }}</th>
+                            <th scope="row">{{ teacher_hours.first_name }}</th>
+                            <td>{{ teacher_hours.subject }}</td>
+                            <td>{{ teacher_hours.course }}</td>
+                            <td>{{ teacher_hours.normal_done }}</td>
+                            <td>{{ teacher_hours.substitution_done }}</td>
+                            <td>{{ teacher_hours.bes_done }}</td>
+                            <td>{{ teacher_hours.missing_hours }}</td>
+                            <td>{{ teacher_hours.missing_bes }}</td>
+                        </tr>
+                    {% endfor %}
+
+              </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block script %}
+    $(document).ready(() => {
+        $('.datepicker').datepicker({
+            dateFormat: 'dd-mm-yy'
+        });
+        getTeachers();
+    });
+
+    function getTeachers(){
+        let url = "{% url 'teacher-list' %}";
+        let data = {
+            'school_year': $('#school_year').val()
+        };
+        $.get(url, data=data, function(data) {
+            $("#teachers").empty();
+            for(let tea of data){
+                $("#teachers").append(`
+                    <option value="${tea.id}">${tea.first_name} ${tea.last_name}</option>
+                `);
+            }
+        });
+    }
+
+    function getTeacherAssignments(){
+        let url = "{% url 'teacher_assignments-list' 1234 9999 %}"
+            .replace('1234', $("#teachers").val())
+            .replace('9999', $('#school_year').val());
+        
+        let date = moment($("#date").val()).format('YYYY-MM-DD');
+        let data = {
+            'from_date': date,
+            'to_date': date
+        };
+        $.get(url, data=data, function(data) {
+            $("#lectures").empty();
+            for(let assign of data){
+                $("#lectures").append(`
+                    <hr/>
+                    <div class="row m-0">
+                        <b>${assign.subject.name}</b>&nbsp;${assign.hour_start} - ${assign.hour_end}&nbsp;
+                        {% trans 'Available teachers:' %}
+                        <ul class="list-group col-12 my-2" id="sub_teachers-${assign.id}">
+                        </ul>
+                        <button type="button" class="btn btn-success" assignId="${assign.id}" teaId="${assign.teacher.id}" subId="${assign.subject.id}" date="${assign.date}" 
+                            hourStart="${assign.hour_start}" hourEnd="${assign.hour_end}" course="${assign.course.id}" schoolYear="${assign.school_year}" school="${assign.school}"
+                            onclick="substituteTeacher($(this))">{% trans 'Make substitution' %}</button>
+                    </div>
+                `);
+
+                let substituteBlock = $("#lectures").find("ul#sub_teachers-" + assign.id);
+                getSubstituteTeachers(assign.id, substituteBlock);
+            }
+            if(data.length === 0){
+                $("#lectures").append(`<b>{% trans 'No lectures found!' %}</b>`);
+            }
+        });
+    }
+
+    function getSubstituteTeachers(assignId, substSelect){
+        let url = "{% url 'teacher_substitution-list' 1234 %}"
+            .replace('1234', assignId);
+        $.get(url, function(data) {
+            substSelect.empty();
+            for(let tea of data){
+                substSelect.append(`
+                    <li class="list-group-item row" style="display: flex;">
+                        <div class="col-1 text-center">
+                            <input class="check-subsitute" type="radio" name="radio-${assignId}" value="${tea.id}">
+                        </div>
+                        <div class="col-11">
+                            <b>${tea.first_name} ${tea.last_name}</b><br/>
+                            {% trans 'Hours of substitutions made:' %} ${tea.substitutions_made_so_far}<br/>
+                            {% trans 'Has a lesson before:' %} ${tea.has_hour_before}<br/>
+                            {% trans 'Has a lesson after:' %} ${tea.has_hour_after}<br/>
+                        </div>
+                    </li>
+                `);
+            }
+        });
+    }
+
+    async function substituteTeacher(btn){
+        let assignId = btn.attr("assignId");
+        console.log(assignId)
+        let teacherId = $("input[name=radio-" + assignId + "]:checked").val();
+        
+        if(teacherId !== undefined){
+            let url = "{% url 'assignments-list' %}" + assignId + "/";
+            let data = {
+                csrfmiddlewaretoken: Cookies.get('csrftoken'),
+                absent: true,
+                teacher_id: btn.attr("teaId"),
+                subject_id: btn.attr("subId"),
+                date: btn.attr("date"),
+                hour_start: btn.attr("hourStart"),
+                hour_end: btn.attr("hourEnd"),
+                course_id: btn.attr("course"),
+                school_year: btn.attr("schoolYear"),
+                school: btn.attr("school")
+            }
+            $.ajax({
+                url: url,
+                type: 'PUT',
+                headers: { "X-CSRFToken": Cookies.get('csrftoken') },
+                data: data,
+                statusCode: {
+                    200: function(xhr) {
+                        getTeacherAssignments();
+                    }
+                }
+            });
+
+            url = "{% url 'assignments-list' %}";
+
+            data.teacher_id = teacherId;
+            data.substitution = true;
+            data.absent = false;
+
+            $.post(url, data=data, function(data) {
+            });
+        }
+    }
+{% endblock %}
