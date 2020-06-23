@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 
 from timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYearForm, CourseForm, HourSlotForm, \
     AbsenceBlockForm, HolidayForm, StageForm, SubjectForm, HoursPerTeacherInClassForm, \
-    AssignmentForm
+    AssignmentForm, TeacherCreationForm
 from timetable.mixins import AdminSchoolPermissionMixin, SuperUserPermissionMixin, TeacherPermissionMixin
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
     Stage, Subject, HoursPerTeacherInClass, Assignment
@@ -62,7 +62,7 @@ class SchoolList(SuperUserPermissionMixin, TemplateViewWithSchoolYears):
 # Teacher CRUD
 class TeacherCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
     model = Teacher
-    form_class = TeacherForm
+    form_class = TeacherCreationForm
     template_name = 'timetable/teacher_form.html'
     success_url = reverse_lazy('teacher-listview')
 
