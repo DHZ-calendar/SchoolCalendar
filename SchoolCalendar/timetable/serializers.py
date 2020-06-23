@@ -296,14 +296,14 @@ class AssignmentSerializer(ModelSerializer):
 
 class AbsenceBlockSerializer(ModelSerializer):
     teacher = TeacherSerializer()
-    hour_slot = SerializerMethodField(read_only=True)
+    hour_slot_text = SerializerMethodField(read_only=True)
 
-    def get_hour_slot(self, obj, *args, **kwargs):
+    def get_hour_slot_text(self, obj, *args, **kwargs):
         return str(obj.hour_slot)
 
     class Meta:
         model = AbsenceBlock
-        fields = ['teacher', 'hour_slot', 'school_year', 'id']
+        fields = ['teacher', 'hour_slot', 'hour_slot_text', 'school_year', 'id']
 
 
 class TeacherSubstitutionSerializer(ModelSerializer):
