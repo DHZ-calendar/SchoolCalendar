@@ -46,12 +46,6 @@ class StageFilter(FilterSet):
         fields = ['from_date', 'to_date', 'school_year', 'course']
 
 
-class SubjectFilter(FilterSet):
-    class Meta:
-        model = Subject
-        fields = ['school_year']
-
-
 class AbsenceBlockFilter(FilterSet):
     class Meta:
         model = AbsenceBlock

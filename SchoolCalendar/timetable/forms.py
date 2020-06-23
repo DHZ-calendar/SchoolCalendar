@@ -6,7 +6,7 @@ from django.utils.translation import gettext as _
 
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday,\
                              Stage, Subject, HoursPerTeacherInClass, Assignment
-from timetable.utils import get_school_from_user, assign_html_style_to_visible_forms_fields
+from timetable.utils import get_school_from_user, assign_html_style_to_visible_forms_fields, generate_random_password
 
 
 class SchoolForm(ModelForm):
@@ -107,9 +107,40 @@ class BaseFormWithSubjectCourseTeacherAndSchoolCheck(BaseFormWithCourseTeacherAn
         return self.cleaned_data['subject']
 
 
-class TeacherForm(UserCreationForm, BaseFormWithSchoolCheck):
+class UserCreationFormWithoutPassword(UserCreationForm):
+    """
+    A UserCreationForm without password inputs.
+    """
+    def __init__(self, *args, **kwargs):
+        super(UserCreationFormWithoutPassword, self).__init__(*args, **kwargs)
+        self.fields.pop('password1')
+        self.fields.pop('password2')
+
+    def clean(self):
+        if self.instance.pk is None:  # Creating a new user
+            self.cleaned_data['password1'] = generate_random_password()
+            self.cleaned_data['password2'] = self.cleaned_data['password1']
+
+
+class TeacherForm(BaseFormWithSchoolCheck):
     def __init__(self, user, *args, **kwargs):
         super(TeacherForm, self).__init__(user, *args, **kwargs)
+        # Populate with the correct schools
+        self.fields['school'] = forms.ModelChoiceField(
+            queryset=School.objects.filter(id=get_school_from_user(user).id))
+        assign_html_style_to_visible_forms_fields(self)
+
+    class Meta:
+        model = Teacher
+        fields = ['username', 'first_name', 'last_name', 'email', 'school', 'notes']
+
+
+class TeacherCreationForm(UserCreationFormWithoutPassword, BaseFormWithSchoolCheck):
+    """
+    Form for creating a Teacher entity without asking passwords
+    """
+    def __init__(self, user, *args, **kwargs):
+        super(TeacherCreationForm, self).__init__(user, *args, **kwargs)
         # Populate with the correct schools
         self.fields['school'] = forms.ModelChoiceField(
             queryset=School.objects.filter(id=get_school_from_user(user).id))
@@ -171,6 +202,9 @@ class CourseForm(BaseFormWithSchoolCheck):
 
 
 class HourSlotForm(BaseFormWithSchoolCheck):
+    hour_number = forms.IntegerField(help_text=_('This is the order of the hour during the day. '
+                                                 'For instance, if hour from 9 to 10 is the second hour of the morning,'
+                                                 ' hour_number field must be 2.'))
     starts_at = forms.TimeField(
         input_formats=['%H:%M'],
         widget=forms.TextInput(attrs={
@@ -202,12 +236,32 @@ class HourSlotForm(BaseFormWithSchoolCheck):
 
     def clean(self):
         """
-        Of course, the starts_at must be smaller than ends_at
+        Of course, the starts_at must be smaller than ends_at.
+        Moreover, we cannot have another hour-slot with the same hour_number in the same day, school and school_year.
         :return:
         """
         if self.cleaned_data['starts_at'] >= self.cleaned_data['ends_at']:
             self.add_error(None, forms.ValidationError(_('The start hour must be strictly smaller that the '
                                                          'end hour.')))
+
+        # Check if there is already the n-th hour of the day:
+        conflicting_hour_number = HourSlot.objects.filter(
+            school=self.cleaned_data['school'],
+            school_year=self.cleaned_data['school_year'],
+            day_of_week=self.cleaned_data['day_of_week'],
+            hour_number=self.cleaned_data['hour_number']
+        )
+        if conflicting_hour_number.exists():
+            if self.instance is not None and conflicting_hour_number.first().pk != self.instance.id:
+                self.add_error(None, forms.ValidationError(
+                    _("There is already the {}{} hour of the day "
+                      "for this school, day of week and school_year!".format(
+                                                            self.cleaned_data['hour_number'],
+                                                            _("th") if self.cleaned_data['hour_number'] % 10 > 3 else
+                                                            _("st") if self.cleaned_data['hour_number'] % 10 == 1 else
+                                                            _("nd") if self.cleaned_data['hour_number'] % 10 == 2 else
+                                                            _("rd")))))
+
         return self.cleaned_data
 
 
@@ -307,6 +361,7 @@ class StageForm(BaseFormWithCourseTeacherAndSchoolCheck):
         if self.cleaned_data['date_start'] > self.cleaned_data['date_end']:
             self.add_error(None, forms.ValidationError(_('The date_start field can\'t be greater than the end date')))
 
+        # TODO: Add check for schoolyear!
         return self.cleaned_data
 
 
@@ -319,7 +374,7 @@ class SubjectForm(BaseFormWithSchoolCheck):
 
     class Meta:
         model = Subject
-        fields = ['name', 'school', 'school_year']
+        fields = ['name', 'school']
 
 
 class HoursPerTeacherInClassForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck):

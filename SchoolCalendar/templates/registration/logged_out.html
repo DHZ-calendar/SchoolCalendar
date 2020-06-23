@@ -1,7 +1,11 @@
+{% extends 'registration/base.html' %}
 {% load i18n %}
+{% load static %}
 
-{% block content %}
-<p>{% trans "Logged out" %}</p>
+{% block form %}
+    <div class="col text-center">
+        <p>{% trans "Logged out" %}</p>
 
-<a href="{% url 'login' %}">{% trans 'Log in' %}</a>
+        <a href="{% url 'login' %}">{% trans 'Log in' %}</a>
+    </div>
 {% endblock %}

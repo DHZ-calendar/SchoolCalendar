@@ -19,7 +19,7 @@ from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, C
 from timetable.permissions import SchoolAdminCanWriteDelete, TeacherCanView
 from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
     StageFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
-    AssignmentFilter, AbsenceBlockFilter, SubjectFilter
+    AssignmentFilter, AbsenceBlockFilter
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 
 from timetable import utils
@@ -45,7 +45,6 @@ class SubjectViewSet(ListModelMixin, GenericViewSet):
     serializer_class = SubjectSerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
-    filterset_class = SubjectFilter
 
 
 class CourseYearOnlyListViewSet(ListModelMixin, GenericViewSet):

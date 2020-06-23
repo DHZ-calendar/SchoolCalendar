@@ -1,5 +1,10 @@
 {% extends 'timetable/base.html' %}
 {% load i18n %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'main.css' %}"/>
+{% endblock %}
 
 {% block body %}
     <h1>{% trans 'Assignment' %}</h1>

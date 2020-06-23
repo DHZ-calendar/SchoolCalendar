@@ -1,4 +1,6 @@
 import datetime
+import random
+import string
 
 from timetable.models import Teacher, AdminSchool, HoursPerTeacherInClass, Assignment, HourSlot
 
@@ -142,3 +144,12 @@ def assign_html_style_to_visible_forms_fields(form):
     for visible in form.visible_fields():
         if 'class' not in visible.field.widget.attrs:
             visible.field.widget.attrs['class'] = 'form-control'
+
+
+def generate_random_password():
+    """
+    Generate a random 15-chars string composed of ascii letters + digits + punctuation characters.
+    """
+    length = 15
+    password_characters = string.ascii_letters + string.digits + string.punctuation
+    return ''.join(random.choice(password_characters) for i in range(length))
