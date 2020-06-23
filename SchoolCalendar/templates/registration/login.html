@@ -1,13 +1,16 @@
+{% extends 'registration/base.html' %}
 {% load i18n %}
+{% load static %}
 
-{% block content %}
-<form method="post" action=".">
-  {% csrf_token %} 
-  {{ form.as_p }}
+{% block form %}
+    <form method="post" class="form-group col text-center">
+        {% csrf_token %}
+        {{ form.as_p }}
 
-  <input type="submit" value="{% trans 'Log in' %}" />
-  <input type="hidden" name="next" value="{{ next }}" />
-</form>
-
-<p>{% trans "Forgot password" %}? <a href="{% url 'password_reset' %}">{% trans "Reset it" %}</a>!</p>
+        <input class="btn btn-primary" type="submit" value="{% trans 'Log in' %}" />
+        <input type="hidden" name="next" value="{{ next }}" />
+        <p class="mt-4 text-center">
+            {% trans "Forgot password" %}? <a href="{% url 'password_reset' %}">{% trans "Reset it" %}</a>!
+        </p>
+    </form>
 {% endblock %}
