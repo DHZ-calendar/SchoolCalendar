@@ -168,8 +168,6 @@ class Subject(models.Model):
     """
     name = models.CharField(max_length=256, blank=False, null=False, verbose_name=_("name"))
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("school"))
-    school_year = models.ForeignKey(SchoolYear, on_delete=models.CASCADE, null=False, blank=False,
-                                    verbose_name=_("school year"))
 
     def __str__(self):
         return self.name

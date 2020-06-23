@@ -350,7 +350,7 @@ class SubjectForm(BaseFormWithSchoolCheck):
 
     class Meta:
         model = Subject
-        fields = ['name', 'school', 'school_year']
+        fields = ['name', 'school']
 
 
 class HoursPerTeacherInClassForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck):
