@@ -6,7 +6,7 @@ from django.utils.translation import gettext as _
 
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday,\
                              Stage, Subject, HoursPerTeacherInClass, Assignment
-from timetable.utils import get_school_from_user, assign_html_style_to_visible_forms_fields
+from timetable.utils import get_school_from_user, assign_html_style_to_visible_forms_fields, generate_random_password
 
 
 class SchoolForm(ModelForm):
@@ -107,9 +107,40 @@ class BaseFormWithSubjectCourseTeacherAndSchoolCheck(BaseFormWithCourseTeacherAn
         return self.cleaned_data['subject']
 
 
-class TeacherForm(UserCreationForm, BaseFormWithSchoolCheck):
+class UserCreationFormWithoutPassword(UserCreationForm):
+    """
+    A UserCreationForm without password inputs.
+    """
+    def __init__(self, *args, **kwargs):
+        super(UserCreationFormWithoutPassword, self).__init__(*args, **kwargs)
+        self.fields.pop('password1')
+        self.fields.pop('password2')
+
+    def clean(self):
+        if self.instance.pk is None:  # Creating a new user
+            self.cleaned_data['password1'] = generate_random_password()
+            self.cleaned_data['password2'] = self.cleaned_data['password1']
+
+
+class TeacherForm(BaseFormWithSchoolCheck):
     def __init__(self, user, *args, **kwargs):
         super(TeacherForm, self).__init__(user, *args, **kwargs)
+        # Populate with the correct schools
+        self.fields['school'] = forms.ModelChoiceField(
+            queryset=School.objects.filter(id=get_school_from_user(user).id))
+        assign_html_style_to_visible_forms_fields(self)
+
+    class Meta:
+        model = Teacher
+        fields = ['username', 'first_name', 'last_name', 'email', 'school', 'notes']
+
+
+class TeacherCreationForm(UserCreationFormWithoutPassword, BaseFormWithSchoolCheck):
+    """
+    Form for creating a Teacher entity without asking passwords
+    """
+    def __init__(self, user, *args, **kwargs):
+        super(TeacherCreationForm, self).__init__(user, *args, **kwargs)
         # Populate with the correct schools
         self.fields['school'] = forms.ModelChoiceField(
             queryset=School.objects.filter(id=get_school_from_user(user).id))

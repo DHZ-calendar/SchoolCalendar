@@ -2,3 +2,53 @@
     width: auto;
     display: initial;
 }
+
+.helptext{
+    display: block;
+    margin-bottom: 15px;
+}
+
+.cal-block-absence {
+    background-color: darkgray;
+}
+.cal-block-conflict {
+    background-color: lightsalmon;
+}
+
+.cal-event-bes {
+    background-color: #ffb554;
+}
+.cal-event-absent {
+    background-color: #cda7eb;
+}
+.cal-event-substitution {
+    background-color: #bafff6;
+}
+
+.list-teachers hr {
+    margin-top: 3px;
+    margin-bottom: 3px;
+    color: black;
+}
+
+.btn-functions{
+    white-space: normal;
+    height: 100%;
+    width: 100%;
+}
+
+li.conflicts-content{
+    padding: 0px;
+}
+
+.col-teacher-list{
+    height: calc(100vh - 95px);
+    overflow-y: scroll;
+}
+
+.legend-label {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    border-radius: 4px;
+}
