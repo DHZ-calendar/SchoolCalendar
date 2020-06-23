@@ -1,3 +1,4 @@
+from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.shortcuts import render, redirect, reverse
 
@@ -8,7 +9,7 @@ from django.views import View
 from django.utils.translation import gettext as _
 
 import io
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
@@ -110,3 +111,16 @@ class LoggedUserRedirectView(LoginRequiredMixin, RedirectView):
             return reverse('timetable-view')
         else:
             return reverse('teacher_timetable-view')
+
+
+class SendInvitationEmailView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):
+    def post(self, request, *args, **kwargs):
+        email = kwargs.get('email')
+        form = PasswordResetForm({'email': email})
+        assert form.is_valid()
+        form.save(
+            request=request,
+            use_https=request.is_secure(),
+            email_template_name='email_templates/invite.html'
+        )
+        return HttpResponse(status=200)

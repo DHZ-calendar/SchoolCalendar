@@ -1,0 +1,20 @@
+{% autoescape off %}
+{% load i18n %}
+
+{% blocktrans %}
+Hi teacher!
+You have been inserted into SchoolCalendar by a school admin.
+
+To access the platform and see your timetable with your lessons use your username:
+{{ user.get_username }}
+
+and click the link below to set your password:
+{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
+
+If clicking the link above doesn't work, please copy and paste the URL in a new browser
+window instead.
+
+Sincerely,
+The School Calendar Team
+{% endblocktrans %}
+{% endautoescape %}
