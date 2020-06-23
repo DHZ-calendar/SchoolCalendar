@@ -19,8 +19,10 @@
 </div>
 
     <script>
-        $('.datepicker').datepicker({
-            dateFormat: 'dd-mm-yy'
+        $(function () {
+            $(".datepicker").datepicker({
+              format: 'yyyy-mm-dd',
+            });
         });
     </script>
 {% endblock %}

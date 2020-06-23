@@ -239,15 +239,18 @@ class AbsenceBlockForm(BaseFormWithHourSlotTeacherAndSchoolCheck):
 
 
 class HolidayForm(BaseFormWithSchoolCheck):
-
     date_start = forms.DateField(
-        widget=forms.TextInput(attrs={
-            'class': 'form-control datepicker'
-        }))
+        input_formats=['%Y-%m-%d'],
+        widget=forms.DateInput(attrs={
+            'class': 'form-control datepicker-input datepicker'
+        })
+    )
     date_end = forms.DateField(
-        widget=forms.TextInput(attrs={
-            'class': 'form-control datepicker'
-        }))
+        input_formats=['%Y-%m-%d'],
+        widget=forms.DateInput(attrs={
+            'class': 'form-control datepicker-input datepicker',
+        })
+    )
 
     def __init__(self, user, *args, **kwargs):
         super(HolidayForm, self).__init__(user, *args, **kwargs)
@@ -272,13 +275,17 @@ class HolidayForm(BaseFormWithSchoolCheck):
 
 class StageForm(BaseFormWithCourseTeacherAndSchoolCheck):
     date_start = forms.DateField(
-        widget=forms.TextInput(attrs={
-            'class': 'form-control datepicker'
-        }))
+        input_formats=['%Y-%m-%d'],
+        widget=forms.DateInput(attrs={
+            'class': 'form-control datepicker-input datepicker'
+        })
+    )
     date_end = forms.DateField(
-        widget=forms.TextInput(attrs={
-            'class': 'form-control datepicker'
-        }))
+        input_formats=['%Y-%m-%d'],
+        widget=forms.DateInput(attrs={
+            'class': 'form-control datepicker-input datepicker',
+        })
+    )
 
     def __init__(self, user, *args, **kwargs):
         super(StageForm, self).__init__(user, *args, **kwargs)
