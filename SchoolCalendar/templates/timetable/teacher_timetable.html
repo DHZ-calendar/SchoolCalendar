@@ -14,45 +14,6 @@
 <link rel="stylesheet" href="{% static 'main.css' %}"/>
 {% endblock %}
 
-{% block style %}
-.cal-block-absence {
-    background-color: darkgray;
-}
-.cal-block-conflict {
-    background-color: lightsalmon;
-}
-
-.cal-event-bes {
-    background-color: #ffb554;
-}
-.cal-event-absent {
-    background-color: #cda7eb;
-}
-.cal-event-substitution {
-    background-color: #bafff6;
-}
-
-.list-teachers hr {
-    margin-top: 3px;
-    margin-bottom: 3px;
-    color: black;
-}
-
-.btn-functions{
-    white-space: normal;
-    height: 100%;
-    width: 100%;
-}
-
-li.conflicts-content{
-    padding: 0px;
-}
-
-.col-teacher-list{
-    height: calc(100vh - 95px);
-    overflow-y: scroll;
-}
-{% endblock %}
 
 {% block body %}
 <div class="container-fluid">
@@ -72,12 +33,24 @@ li.conflicts-content{
         </div>
         <div class="col-5 row">
             <div class="col-12"><b>{% trans 'Legend' %}:</b></div>
-            <div class="col-6"><span class="cal-event">{% trans 'Lecture' %}</span></div>
-            <div class="col-6"><span class="cal-event-bes">{% trans 'B.E.S.' %}</span></div>
-            <div class="col-6"><span class="cal-event-absent">{% trans 'Absence of the teacher' %}</span></div>
-            <div class="col-6"><span class="cal-event-substitution">{% trans 'Substitution lecture' %}</span></div>
-            <div class="col-6"><span class="cal-block-conflict">{% trans 'Collision with other lectures' %}</span></div>
-            <div class="col-6"><span class="cal-block-absence">{% trans 'Hours blocked for a teacher' %}</span></div>
+            <div class="col-6">
+                <span class="legend-label cal-event">{% trans 'Lecture' %}</span>
+            </div>
+            <div class="col-6">
+                <span class="legend-label cal-event-bes">{% trans 'B.E.S.' %}</span>
+            </div>
+            <div class="col-6">
+                <span class="legend-label cal-event-absent">{% trans 'Absence of the teacher' %}</span>
+            </div>
+            <div class="col-6">
+                <span class="legend-label cal-event-substitution">{% trans 'Substitution lecture' %}</span>
+            </div>
+            <div class="col-6">
+                <span class="legend-label cal-block-conflict">{% trans 'Collision with other lectures' %}</span>
+            </div>
+            <div class="col-6">
+                <span class="legend-label cal-block-absence">{% trans 'Hours blocked for a teacher' %}</span>
+            </div>
         </div>
     </div>
     <div class="row">
