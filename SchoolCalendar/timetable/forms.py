@@ -202,6 +202,9 @@ class CourseForm(BaseFormWithSchoolCheck):
 
 
 class HourSlotForm(BaseFormWithSchoolCheck):
+    hour_number = forms.IntegerField(help_text=_('This is the order of the hour during the day. '
+                                                 'For instance, if hour from 9 to 10 is the second hour of the morning,'
+                                                 ' hour_number field must be 2.'))
     starts_at = forms.TimeField(
         input_formats=['%H:%M'],
         widget=forms.TextInput(attrs={
@@ -233,12 +236,32 @@ class HourSlotForm(BaseFormWithSchoolCheck):
 
     def clean(self):
         """
-        Of course, the starts_at must be smaller than ends_at
+        Of course, the starts_at must be smaller than ends_at.
+        Moreover, we cannot have another hour-slot with the same hour_number in the same day, school and school_year.
         :return:
         """
         if self.cleaned_data['starts_at'] >= self.cleaned_data['ends_at']:
             self.add_error(None, forms.ValidationError(_('The start hour must be strictly smaller that the '
                                                          'end hour.')))
+
+        # Check if there is already the n-th hour of the day:
+        conflicting_hour_number = HourSlot.objects.filter(
+            school=self.cleaned_data['school'],
+            school_year=self.cleaned_data['school_year'],
+            day_of_week=self.cleaned_data['day_of_week'],
+            hour_number=self.cleaned_data['hour_number']
+        )
+        if conflicting_hour_number.exists():
+            if self.instance is not None and conflicting_hour_number.first().pk != self.instance.id:
+                self.add_error(None, forms.ValidationError(
+                    _("There is already the {}{} hour of the day "
+                      "for this school, day of week and school_year!".format(
+                                                            self.cleaned_data['hour_number'],
+                                                            _("th") if self.cleaned_data['hour_number'] % 10 > 3 else
+                                                            _("st") if self.cleaned_data['hour_number'] % 10 == 1 else
+                                                            _("nd") if self.cleaned_data['hour_number'] % 10 == 2 else
+                                                            _("rd")))))
+
         return self.cleaned_data
 
 
