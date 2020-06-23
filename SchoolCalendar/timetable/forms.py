@@ -361,6 +361,7 @@ class StageForm(BaseFormWithCourseTeacherAndSchoolCheck):
         if self.cleaned_data['date_start'] > self.cleaned_data['date_end']:
             self.add_error(None, forms.ValidationError(_('The date_start field can\'t be greater than the end date')))
 
+        # TODO: Add check for schoolyear!
         return self.cleaned_data
 
 
