@@ -449,25 +449,26 @@ class AssignmentForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck):
         school_year, school, subject, bes. Only if the hour is not a substitution class.
         :return:
         """
-        if self.cleaned_data['hour_start'] > self.cleaned_data['hour_end']:
-            self.add_error(None, forms.ValidationError(_('The start time field can\'t be greater than the end time')))
+        if not self.errors:
+            # If there are already some errors, there is no need to check again!
+            if self.cleaned_data['hour_start'] > self.cleaned_data['hour_end']:
+                self.add_error(None, forms.ValidationError(_('The start time field can\'t be greater than the end time')))
+            if not self.cleaned_data['substitution']:
+                # We need to check for the existence of a related HourPerTeacherInClass
+                hours_teacher_in_class = HoursPerTeacherInClass.objects.filter(
+                                                            teacher=self.cleaned_data['teacher'],
+                                                            school_year=self.cleaned_data['school_year'],
+                                                            school=self.cleaned_data['school'],
+                                                            course=self.cleaned_data['course'],
+                                                            subject=self.cleaned_data['subject'])
+                if not hours_teacher_in_class:
 
-        if not self.cleaned_data['substitution']:
-            # We need to check for the existence of a related HourPerTeacherInClass
-            hours_teacher_in_class = HoursPerTeacherInClass.objects.filter(
-                                                        teacher=self.cleaned_data['teacher'],
-                                                        school_year=self.cleaned_data['school_year'],
-                                                        school=self.cleaned_data['school'],
-                                                        course=self.cleaned_data['course'],
-                                                        subject=self.cleaned_data['subject'])
-            if not hours_teacher_in_class:
-
-                self.add_error(None, forms.ValidationError(_('There is not a related '
-                                                             'teacher in class instance.')))
-            elif self.cleaned_data['bes'] and hours_teacher_in_class.first().hours_bes == 0:
-                self.add_error(None, forms.ValidationError(_('The teacher doesn\'t have bes hours '
-                                                             'in this course.')))
-            elif not self.cleaned_data['bes'] and hours_teacher_in_class.first().hours == 0:
-                self.add_error(None, forms.ValidationError(_('The teacher has only bes hours '
+                    self.add_error(None, forms.ValidationError(_('There is not a related '
+                                                                 'teacher in class instance.')))
+                elif self.cleaned_data['bes'] and hours_teacher_in_class.first().hours_bes == 0:
+                    self.add_error(None, forms.ValidationError(_('The teacher doesn\'t have bes hours '
+                                                                 'in this course.')))
+                elif not self.cleaned_data['bes'] and hours_teacher_in_class.first().hours == 0:
+                    self.add_error(None, forms.ValidationError(_('The teacher has only bes hours '
                                                              'in this course.')))
         return self.cleaned_data
