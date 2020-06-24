@@ -151,13 +151,22 @@ class TeacherCreationForm(UserCreationFormWithoutPassword, BaseFormWithSchoolChe
         fields = ['username', 'first_name', 'last_name', 'email', 'school', 'notes']
 
 
-class AdminSchoolForm(UserCreationForm, BaseFormWithSchoolCheck):
+class AdminSchoolForm(ModelForm):
     def __init__(self, user, *args, **kwargs):
-        super(AdminSchoolForm, self).__init__(user, *args, **kwargs)
-        # Populate the school picker with the correct for the given user
-        self.user = user
-        self.fields['school'] = forms.ModelChoiceField(
-            queryset=School.objects.filter(id=get_school_from_user(self.user).id))
+        super(AdminSchoolForm, self).__init__(*args, **kwargs)
+        assign_html_style_to_visible_forms_fields(self)
+
+    class Meta:
+        model = AdminSchool
+        fields = ['username', 'first_name', 'last_name', 'email', 'school']
+
+
+class AdminSchoolCreationForm(UserCreationFormWithoutPassword):
+    """
+    Form for creating a AdminSchool entity without asking passwords
+    """
+    def __init__(self, user, *args, **kwargs):
+        super(AdminSchoolCreationForm, self).__init__(*args, **kwargs)
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
@@ -172,6 +181,10 @@ class SchoolYearForm(ModelForm):
             'class': 'form-control datepicker-input datepicker'
         })
     )
+
+    def __init__(self, *args, **kwargs):
+        super(SchoolYearForm, self).__init__(*args, **kwargs)
+        assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
         model = SchoolYear

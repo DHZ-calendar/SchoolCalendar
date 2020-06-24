@@ -109,18 +109,21 @@ class LoggedUserRedirectView(LoginRequiredMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         if utils.is_adminschool(self.request.user):
             return reverse('timetable-view')
+        elif self.request.user.is_superuser:
+            return reverse('school-listview')
         else:
             return reverse('teacher_timetable-view')
 
 
-class SendInvitationEmailView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):
+class SendInvitationTeacherEmailView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):
     def post(self, request, *args, **kwargs):
         email = kwargs.get('email')
-        form = PasswordResetForm({'email': email})
-        assert form.is_valid()
-        form.save(
-            request=request,
-            use_https=request.is_secure(),
-            email_template_name='email_templates/invite.html'
-        )
+        utils.send_invitation_email(email, request)
+        return HttpResponse(status=200)
+
+
+class SendInvitationAdminSchoolEmailView(LoginRequiredMixin, SuperUserPermissionMixin, View):
+    def post(self, request, *args, **kwargs):
+        email = kwargs.get('email')
+        utils.send_invitation_email(email, request)
         return HttpResponse(status=200)
