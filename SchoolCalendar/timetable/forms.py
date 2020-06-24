@@ -166,11 +166,12 @@ class AdminSchoolForm(UserCreationForm, BaseFormWithSchoolCheck):
 
 
 class SchoolYearForm(ModelForm):
-    date_start = forms.TimeField(
-        input_formats=['%H:%M'],
-        widget=forms.TextInput(attrs={
-            'class': 'form-control timepicker'
-    }))
+    date_start = forms.DateField(
+        input_formats=['%Y-%m-%d'],
+        widget=forms.DateInput(attrs={
+            'class': 'form-control datepicker-input datepicker'
+        })
+    )
 
     class Meta:
         model = SchoolYear
