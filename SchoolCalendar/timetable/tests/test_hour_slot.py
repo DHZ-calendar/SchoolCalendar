@@ -14,7 +14,6 @@ class HourSlotTestCase(BaseTestCase):
         self.school_year_2020.save()
 
     def test_hour_slot_correct_creation(self):
-        pass
         """
         Test the creation of an HourSlot, using the correct admin and school.
         :return:
@@ -29,7 +28,7 @@ class HourSlotTestCase(BaseTestCase):
                 'legal_duration_1': '0'}   # Minutes
         f = HourSlotForm(user=self.a1, data=data)
         f.full_clean()
-        self.assertTrue(f.is_valid(), msg='the errors are: {}'.format(f.errors))
+        self.assertTrue(f.is_valid())
 
     def test_hour_slot_wrong_admin_for_school_creation(self):
         """
