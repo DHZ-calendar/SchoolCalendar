@@ -78,7 +78,7 @@ class CourseSerializer(ModelSerializer):
 class SubjectSerializer(ModelSerializer):
     class Meta:
         model = Subject
-        fields = ['id', 'name', 'school', 'school_year']
+        fields = ['id', 'name', 'school']
 
 
 class HolidaySerializer(AbstractTimePeriodSerializer):
