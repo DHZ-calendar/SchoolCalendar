@@ -2,6 +2,7 @@ import datetime
 import random
 import string
 
+from django.contrib.auth.forms import PasswordResetForm
 from timetable.models import Teacher, AdminSchool, HoursPerTeacherInClass, Assignment, HourSlot
 
 
@@ -153,3 +154,13 @@ def generate_random_password():
     length = 15
     password_characters = string.ascii_letters + string.digits + string.punctuation
     return ''.join(random.choice(password_characters) for i in range(length))
+
+
+def send_invitation_email(email, request):
+    form = PasswordResetForm({'email': email})
+    assert form.is_valid()
+    form.save(
+        request=request,
+        use_https=request.is_secure(),
+        email_template_name='email_templates/invite.html'
+    )
