@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-22 07:39+0000\n"
+"POT-Creation-Date: 2020-06-24 10:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,37 +26,97 @@ msgstr "Inglese"
 msgid "Italian"
 msgstr "Italiano"
 
-#: templates/registration/logged_out.html:4
+#: templates/email_templates/invite.html:4
+msgid ""
+"\n"
+"Hi teacher!\n"
+"You have been inserted into SchoolCalendar, a platform for managing the "
+"timetable of teachers and classes.\n"
+"\n"
+"To access the platform use your username:\n"
+msgstr""
+"\n"
+"Ciao!\n"
+"Sei stati inserito nell'applicazione SchoolCalendar, una piattaforma per  "
+"gestire l'orario degli insegnanti e delle classi.\n"
+"\n"
+"per accedere alla piattaforma usa il tuo username:\n"
+
+#: templates/email_templates/invite.html:12
+msgid ""
+"\n"
+"and click the link below to set your password:\n"
+msgstr ""
+"\n"
+"e clicca il link qui sotto per impostare la tua password:\n"
+
+#: templates/email_templates/invite.html:17
+msgid ""
+"\n"
+"If clicking the link above doesn't work, please copy and paste the URL in a "
+"new browser window instead.\n"
+"\n"
+"Sincerely,\n"
+"The School Calendar Team\n"
+msgstr ""
+"\n"
+"Se il link qua sopra non funziona, copia e incolla l'URL in una "
+"nuova finestra del tuo browser.\n"
+"\n"
+"Cordialmente,\n"
+"Il team di School Calendar\n"
+
+#: templates/registration/base.html:10 templates/timetable/base.html:10
+msgid "SchoolCalendar"
+msgstr "SchoolCalendar"
+
+#: templates/registration/logged_out.html:7
 msgid "Logged out"
 msgstr "Disconnesso"
 
-#: templates/registration/logged_out.html:6 templates/registration/login.html:8
-#: templates/registration/password_reset_complete.html:7
+#: templates/registration/logged_out.html:9
+#: templates/registration/login.html:10
+#: templates/registration/password_reset_complete.html:9
+#: templates/registration/password_reset_form.html:11
 msgid "Log in"
 msgstr "Accedi"
 
-#: templates/registration/login.html:12
+#: templates/registration/login.html:13
 msgid "Forgot password"
 msgstr "Password dimenticata"
 
-#: templates/registration/login.html:12
+#: templates/registration/login.html:13
 msgid "Reset it"
 msgstr "Cambia password"
 
-#: templates/registration/password_reset_complete.html:5
+#: templates/registration/password_change_done.html:7
+#: templates/registration/password_change_form.html:7
+#: templates/timetable/base.html:139
+#, fuzzy
+#| msgid "Forgot password"
+msgid "Change password"
+msgstr "Password dimenticata"
+
+#: templates/registration/password_change_done.html:10
+#, fuzzy
+#| msgid "Password reset failed"
+msgid "Password changed!"
+msgstr "Errore nel reset della password"
+
+#: templates/registration/password_reset_complete.html:7
 msgid "Password reset successfully"
 msgstr "Password resettata correttamente"
 
-#: templates/registration/password_reset_confirm.html:11
-#: templates/registration/password_reset_form.html:8
+#: templates/registration/password_reset_confirm.html:13
+#: templates/registration/password_reset_form.html:10
 msgid "Submit"
 msgstr "Conferma"
 
-#: templates/registration/password_reset_confirm.html:16
+#: templates/registration/password_reset_confirm.html:18
 msgid "Password reset failed"
 msgstr "Errore nel reset della password"
 
-#: templates/registration/password_reset_done.html:4
+#: templates/registration/password_reset_done.html:6
 msgid "Email with password reset instructions has been sent."
 msgstr "Un'email con le istruzioni per resettare la password è stata mandata."
 
@@ -65,110 +125,133 @@ msgstr "Un'email con le istruzioni per resettare la password è stata mandata."
 msgid "Reset password at %(site_name)s"
 msgstr "Resetta la password su %(site_name)s"
 
-#: templates/timetable/absenceBlock_form.html:7
+#: templates/registration/password_reset_form.html:11
+msgid "Back to"
+msgstr "Torna indietro"
+
+#: templates/timetable/absenceBlock_form.html:12
 msgid "Absence Block"
 msgstr "Blocco di assenza"
 
-#: templates/timetable/absenceBlock_list.html:7
+#: templates/timetable/absenceBlock_list.html:12
 msgid "Absence Blocks"
 msgstr "Blocchi di assenza"
 
 #: templates/timetable/absenceBlock_list.html:16
-#: templates/timetable/adminschool_list.html:16
 #: templates/timetable/course_list.html:16
 #: templates/timetable/holiday_list.html:16
 #: templates/timetable/hours_per_teacher_in_class_list.html:16
-#: templates/timetable/hourslot_list.html:16
-#: templates/timetable/school_year_list.html:16
+#: templates/timetable/hourslot_list.html:18
 #: templates/timetable/stage_list.html:16
-#: templates/timetable/subject_list.html:16
-#: templates/timetable/teacher_list.html:16
+#: templates/timetable/substitute_teacher.html:22
+#: templates/timetable/teacher_timetable.html:26
+#: templates/timetable/timetable.html:28
+msgid "School year:"
+msgstr "Anno scolastico:"
+
+#: templates/timetable/absenceBlock_list.html:29
+#: templates/timetable/adminschool_list.html:23
+#: templates/timetable/course_list.html:29
+#: templates/timetable/holiday_list.html:29
+#: templates/timetable/hours_per_teacher_in_class_list.html:29
+#: templates/timetable/hourslot_list.html:31
+#: templates/timetable/school_list.html:16
+#: templates/timetable/school_year_list.html:16
+#: templates/timetable/stage_list.html:29
+#: templates/timetable/subject_list.html:21
+#: templates/timetable/teacher_list.html:23
 msgid "Add new"
 msgstr "Aggiungi nuovo"
 
-#: templates/timetable/absenceBlock_list.html:21
-#: templates/timetable/hours_per_teacher_in_class_list.html:21
-#: templates/timetable/teacher_form.html:7
+#: templates/timetable/absenceBlock_list.html:38
+#: templates/timetable/hours_per_teacher_in_class_list.html:38
+#: templates/timetable/teacher_form.html:12
 msgid "Teacher"
 msgstr "Insegnante"
 
-#: templates/timetable/absenceBlock_list.html:22
+#: templates/timetable/absenceBlock_list.html:39
 msgid "Hour slot"
 msgstr "Slot orari"
 
-#: templates/timetable/absenceBlock_list.html:23
-#: templates/timetable/course_list.html:23
-#: templates/timetable/hours_per_teacher_in_class_list.html:23
-#: templates/timetable/hourslot_list.html:24
-#: templates/timetable/subject_list.html:22
-msgid "School year"
-msgstr "Anno scolastico"
-
-#: templates/timetable/absenceBlock_list.html:24
-#: templates/timetable/adminschool_list.html:24
-#: templates/timetable/course_list.html:24
-#: templates/timetable/holiday_list.html:24
-#: templates/timetable/hours_per_teacher_in_class_list.html:26
-#: templates/timetable/hourslot_list.html:27
-#: templates/timetable/school_list.html:15
+#: templates/timetable/absenceBlock_list.html:40
+#: templates/timetable/adminschool_list.html:32
+#: templates/timetable/course_list.html:40
+#: templates/timetable/holiday_list.html:41
+#: templates/timetable/hours_per_teacher_in_class_list.html:43
+#: templates/timetable/hourslot_list.html:45
+#: templates/timetable/school_list.html:22
 #: templates/timetable/school_year_list.html:23
-#: templates/timetable/stage_list.html:25
-#: templates/timetable/subject_list.html:23
-#: templates/timetable/teacher_list.html:24
+#: templates/timetable/stage_list.html:42
+#: templates/timetable/subject_list.html:31
+#: templates/timetable/teacher_list.html:35
 msgid "Edit"
 msgstr "Modifica"
 
-#: templates/timetable/absenceBlock_list.html:25
-#: templates/timetable/adminschool_list.html:25
-#: templates/timetable/course_list.html:25
-#: templates/timetable/holiday_list.html:25
-#: templates/timetable/hours_per_teacher_in_class_list.html:27
-#: templates/timetable/hourslot_list.html:28
-#: templates/timetable/school_list.html:16
+#: templates/timetable/absenceBlock_list.html:41
+#: templates/timetable/adminschool_list.html:33
+#: templates/timetable/course_list.html:41
+#: templates/timetable/holiday_list.html:42
+#: templates/timetable/hours_per_teacher_in_class_list.html:44
+#: templates/timetable/hourslot_list.html:46
+#: templates/timetable/school_list.html:23
 #: templates/timetable/school_year_list.html:24
-#: templates/timetable/stage_list.html:26
-#: templates/timetable/subject_list.html:24
-#: templates/timetable/teacher_list.html:25
+#: templates/timetable/stage_list.html:43
+#: templates/timetable/subject_list.html:32
+#: templates/timetable/teacher_list.html:36
 msgid "Delete"
 msgstr "Elimina"
 
-#: templates/timetable/adminschool_form.html:7
-#: templates/timetable/adminschool_list.html:7 timetable/models.py:53
+#: templates/timetable/adminschool_form.html:12
+#: templates/timetable/adminschool_list.html:14 timetable/models.py:53
 msgid "Admin School"
 msgstr "Admin della scuola"
 
-#: templates/timetable/adminschool_list.html:21
-#: templates/timetable/teacher_list.html:21
-#: templates/timetable/teacher_report.html:26 timetable/views/other_views.py:81
+#: templates/timetable/adminschool_list.html:28
+#: templates/timetable/teacher_list.html:32
+#: templates/timetable/teacher_report.html:26 timetable/views/other_views.py:82
 msgid "Last name"
 msgstr "Cognome"
 
-#: templates/timetable/adminschool_list.html:22
-#: templates/timetable/teacher_list.html:22
-#: templates/timetable/teacher_report.html:27 timetable/views/other_views.py:81
+#: templates/timetable/adminschool_list.html:29
+#: templates/timetable/teacher_list.html:33
+#: templates/timetable/teacher_report.html:27 timetable/views/other_views.py:82
 msgid "First name"
 msgstr "Nome"
 
-#: templates/timetable/adminschool_list.html:23
-#: templates/timetable/school_form.html:7
-#: templates/timetable/teacher_list.html:23
+#: templates/timetable/adminschool_list.html:30
+#: templates/timetable/school_form.html:12
 msgid "School"
 msgstr "Scuola"
 
-#: templates/timetable/assignment_form.html:5
+#: templates/timetable/adminschool_list.html:31
+#: templates/timetable/adminschool_list.html:44
+#: templates/timetable/teacher_list.html:34
+#: templates/timetable/teacher_list.html:67
+#, fuzzy
+#| msgid "end date"
+msgid "Send invite"
+msgstr "data di fine"
+
+#: templates/timetable/adminschool_list.html:87
+#: templates/timetable/teacher_list.html:109
+msgid "Invitation email sent correctly!"
+msgstr "L'email di invito è stata inviata correttamente!"
+
+#: templates/timetable/adminschool_list.html:88
+#: templates/timetable/teacher_list.html:110
+msgid "An error appears while sending the invite!"
+msgstr "Un errore è avvenuto durante l'invio dell'invito!"
+
+#: templates/timetable/assignment_form.html:10
 msgid "Assignment"
 msgstr "Assegnamento"
-
-#: templates/timetable/base.html:10
-msgid "SchoolCalendar"
-msgstr "SchoolCalendar"
 
 #: templates/timetable/base.html:58
 msgid "Logout"
 msgstr "Disconnetti"
 
 #: templates/timetable/base.html:66
-#: templates/timetable/teacher_timetable.html:64
+#: templates/timetable/teacher_timetable.html:21
 msgid "Timetable"
 msgstr "Calendario"
 
@@ -178,11 +261,11 @@ msgid "Substitute a teacher"
 msgstr "Sostituisci un insegnante"
 
 #: templates/timetable/base.html:87 templates/timetable/teacher_report.html:7
-#: timetable/views/other_views.py:77
+#: timetable/views/other_views.py:78
 msgid "Teachers report"
 msgstr "Report degli insegnanti"
 
-#: templates/timetable/base.html:94
+#: templates/timetable/base.html:94 templates/timetable/teacher_list.html:14
 msgid "Teachers"
 msgstr "Insegnanti"
 
@@ -190,7 +273,7 @@ msgstr "Insegnanti"
 msgid "Absence blocks"
 msgstr "Blocchi di assenza"
 
-#: templates/timetable/base.html:100 templates/timetable/course_list.html:7
+#: templates/timetable/base.html:100 templates/timetable/course_list.html:12
 msgid "Courses"
 msgstr "Corsi"
 
@@ -202,15 +285,15 @@ msgstr "Ore per insegnante"
 msgid "Hour-slots"
 msgstr "Slot orari"
 
-#: templates/timetable/base.html:109 templates/timetable/holiday_list.html:7
+#: templates/timetable/base.html:109 templates/timetable/holiday_list.html:12
 msgid "Holidays"
 msgstr "Vacanze"
 
-#: templates/timetable/base.html:112 templates/timetable/stage_list.html:7
+#: templates/timetable/base.html:112 templates/timetable/stage_list.html:12
 msgid "Stages"
 msgstr "Stage"
 
-#: templates/timetable/base.html:115 templates/timetable/subject_list.html:7
+#: templates/timetable/base.html:115 templates/timetable/subject_list.html:12
 msgid "Subjects"
 msgstr "Materie"
 
@@ -219,7 +302,6 @@ msgid "School years"
 msgstr "Anni scolastici"
 
 #: templates/timetable/base.html:129 templates/timetable/school_list.html:7
-#: templates/timetable/teacher_list.html:7
 msgid "Schools"
 msgstr "Scuole"
 
@@ -227,103 +309,109 @@ msgstr "Scuole"
 msgid "School admins"
 msgstr "Amministratori scolastici"
 
-#: templates/timetable/base.html:141
+#: templates/timetable/base.html:146
 msgid "Menu"
 msgstr "Menù"
 
-#: templates/timetable/course_form.html:7
-#: templates/timetable/hours_per_teacher_in_class_list.html:22
-#: templates/timetable/stage_list.html:22
-#: templates/timetable/teacher_report.html:29 timetable/views/other_views.py:81
+#: templates/timetable/course_form.html:12
+#: templates/timetable/hours_per_teacher_in_class_list.html:39
+#: templates/timetable/stage_list.html:39
+#: templates/timetable/teacher_report.html:29 timetable/views/other_views.py:82
 msgid "Course"
 msgstr "Corso"
 
-#: templates/timetable/course_list.html:21
+#: templates/timetable/course_list.html:38
 msgid "Year"
 msgstr "Anno"
 
-#: templates/timetable/course_list.html:22
+#: templates/timetable/course_list.html:39
 msgid "Section"
 msgstr "Sezione"
 
-#: templates/timetable/delete_form.html:7
+#: templates/timetable/delete_form.html:12
 msgid "Delete element"
 msgstr "Elimina elemento"
 
-#: templates/timetable/delete_form.html:12
+#: templates/timetable/delete_form.html:17
 msgid "Are you sure you want to delete"
 msgstr "Sei sicuro di voler eliminare"
 
-#: templates/timetable/holiday_form.html:7
+#: templates/timetable/holiday_form.html:12
 msgid "Holiday"
 msgstr "Vacanza"
 
-#: templates/timetable/holiday_list.html:21
-#: templates/timetable/school_list.html:14
-#: templates/timetable/stage_list.html:21
-#: templates/timetable/subject_list.html:21
+#: templates/timetable/holiday_list.html:38
+#: templates/timetable/school_list.html:21
+#: templates/timetable/stage_list.html:38
+#: templates/timetable/subject_list.html:30
 msgid "Name"
 msgstr "Nome"
 
-#: templates/timetable/holiday_list.html:22
+#: templates/timetable/holiday_list.html:39
 #: templates/timetable/school_year_list.html:22
-#: templates/timetable/stage_list.html:23
-#: templates/timetable/timetable.html:178
+#: templates/timetable/stage_list.html:40
+#: templates/timetable/timetable.html:147
 msgid "Date start"
 msgstr "Data di inizio"
 
-#: templates/timetable/holiday_list.html:23
-#: templates/timetable/stage_list.html:24
-#: templates/timetable/timetable.html:181
+#: templates/timetable/holiday_list.html:40
+#: templates/timetable/stage_list.html:41
+#: templates/timetable/timetable.html:150
 msgid "Date end"
 msgstr "Data di fine"
 
-#: templates/timetable/hoursPerTeacherInClass_form.html:7
+#: templates/timetable/hoursPerTeacherInClass_form.html:12
 msgid "Hours Per Teacher in Class"
 msgstr "Ore per insegnante in una classe"
 
-#: templates/timetable/hours_per_teacher_in_class_list.html:7
+#: templates/timetable/hours_per_teacher_in_class_list.html:12
 msgid "Hours per teacher in class"
 msgstr "Ore in classe per insegnante"
 
-#: templates/timetable/hours_per_teacher_in_class_list.html:24
+#: templates/timetable/hours_per_teacher_in_class_list.html:40
+#: templates/timetable/subject_form.html:12
+#: templates/timetable/teacher_report.html:28 timetable/views/other_views.py:82
+msgid "Subject"
+msgstr "Materia"
+
+#: templates/timetable/hours_per_teacher_in_class_list.html:41
 msgid "Normal hours"
 msgstr "Ore normali"
 
-#: templates/timetable/hours_per_teacher_in_class_list.html:25
+#: templates/timetable/hours_per_teacher_in_class_list.html:42
 msgid "B.E.S. hours"
 msgstr "Ore B.E.S."
 
-#: templates/timetable/hourslot_form.html:7
+#: templates/timetable/hourslot_form.html:12
 msgid "Hour Slot"
 msgstr "Slot orario"
 
-#: templates/timetable/hourslot_list.html:7
+#: templates/timetable/hourslot_list.html:14
 msgid "Hour Slots"
 msgstr "Slot orari"
 
-#: templates/timetable/hourslot_list.html:21
-msgid "Hour number"
-msgstr "Numero di ore"
-
-#: templates/timetable/hourslot_list.html:22
-msgid "Starts at"
-msgstr "Inizia alle"
-
-#: templates/timetable/hourslot_list.html:23
-msgid "Ends at"
-msgstr "Finisce alle"
-
-#: templates/timetable/hourslot_list.html:25
-#: templates/timetable/timetable.html:143
+#: templates/timetable/hourslot_list.html:40
+#: templates/timetable/timetable.html:112
 msgid "Day of week"
 msgstr "Giorno della settimana"
 
-#: templates/timetable/hourslot_list.html:26
+#: templates/timetable/hourslot_list.html:41
+msgid "Hour number"
+msgstr "Numero di ore"
+
+#: templates/timetable/hourslot_list.html:42
+msgid "Starts at"
+msgstr "Inizia alle"
+
+#: templates/timetable/hourslot_list.html:43
+msgid "Ends at"
+msgstr "Finisce alle"
+
+#: templates/timetable/hourslot_list.html:44
 msgid "Legal duration"
 msgstr "Durata legale"
 
-#: templates/timetable/school_year_form.html:7
+#: templates/timetable/school_year_form.html:12
 #: templates/timetable/school_year_list.html:7
 msgid "School Year"
 msgstr "Anno scolastico"
@@ -332,20 +420,9 @@ msgstr "Anno scolastico"
 msgid "Year start"
 msgstr "Anno d'inizio"
 
-#: templates/timetable/stage_form.html:7
+#: templates/timetable/stage_form.html:12
 msgid "Stage"
 msgstr "Stage"
-
-#: templates/timetable/subject_form.html:7
-#: templates/timetable/teacher_report.html:28 timetable/views/other_views.py:81
-msgid "Subject"
-msgstr "Materia"
-
-#: templates/timetable/substitute_teacher.html:22
-#: templates/timetable/teacher_timetable.html:69
-#: templates/timetable/timetable.html:71
-msgid "School year:"
-msgstr "Anno scolastico:"
 
 #: templates/timetable/substitute_teacher.html:30
 msgid "Teachers:"
@@ -393,252 +470,286 @@ msgstr "Ha lezione dopo:"
 msgid "Download PDF"
 msgstr "Scarica PDF"
 
-#: templates/timetable/teacher_report.html:30 timetable/views/other_views.py:81
+#: templates/timetable/teacher_report.html:30 timetable/views/other_views.py:82
 msgid "Teaching hours made"
 msgstr "Ore di insegnamento svolte"
 
-#: templates/timetable/teacher_report.html:31 timetable/views/other_views.py:82
+#: templates/timetable/teacher_report.html:31 timetable/views/other_views.py:83
 msgid "Substitution hours made"
 msgstr "Ore di sostituzione fatte"
 
-#: templates/timetable/teacher_report.html:32 timetable/views/other_views.py:82
+#: templates/timetable/teacher_report.html:32 timetable/views/other_views.py:83
 msgid "B.E.S. hours made"
 msgstr "Ore di B.E.S. fatte"
 
-#: templates/timetable/teacher_report.html:33 timetable/views/other_views.py:82
+#: templates/timetable/teacher_report.html:33 timetable/views/other_views.py:83
 msgid "Missing teaching hours"
 msgstr "Ore mancanti"
 
-#: templates/timetable/teacher_report.html:34 timetable/views/other_views.py:83
+#: templates/timetable/teacher_report.html:34 timetable/views/other_views.py:84
 msgid "Missing B.E.S. hours"
 msgstr "Ore B.E.S. mancanti"
 
-#: templates/timetable/teacher_timetable.html:78
-#: templates/timetable/timetable.html:88
+#: templates/timetable/teacher_timetable.html:35
+#: templates/timetable/timetable.html:45
 msgid "Legend"
 msgstr "Legenda"
 
-#: templates/timetable/teacher_timetable.html:79
-#: templates/timetable/timetable.html:89
+#: templates/timetable/teacher_timetable.html:37
+#: templates/timetable/timetable.html:47
 msgid "Lecture"
 msgstr "Lezione"
 
-#: templates/timetable/teacher_timetable.html:80
-#: templates/timetable/teacher_timetable.html:147
-#: templates/timetable/timetable.html:90 templates/timetable/timetable.html:243
+#: templates/timetable/teacher_timetable.html:40
+#: templates/timetable/teacher_timetable.html:116
+#: templates/timetable/timetable.html:50 templates/timetable/timetable.html:212
 msgid "B.E.S."
 msgstr "B.E.S."
 
-#: templates/timetable/teacher_timetable.html:81
-#: templates/timetable/timetable.html:91
+#: templates/timetable/teacher_timetable.html:43
+#: templates/timetable/timetable.html:53
 msgid "Absence of the teacher"
 msgstr "Assenza del professore"
 
-#: templates/timetable/teacher_timetable.html:82
-#: templates/timetable/timetable.html:92
+#: templates/timetable/teacher_timetable.html:46
+#: templates/timetable/timetable.html:56
 msgid "Substitution lecture"
 msgstr "Sostituzione"
 
-#: templates/timetable/teacher_timetable.html:83
-#: templates/timetable/timetable.html:93
+#: templates/timetable/teacher_timetable.html:49
+#: templates/timetable/timetable.html:59
 msgid "Collision with other lectures"
 msgstr "Conflitti con altre lezioni"
 
-#: templates/timetable/teacher_timetable.html:84
-#: templates/timetable/timetable.html:94
+#: templates/timetable/teacher_timetable.html:52
+#: templates/timetable/timetable.html:62
 msgid "Hours blocked for a teacher"
 msgstr "Ore bloccate per l'insegnante"
 
-#: templates/timetable/teacher_timetable.html:91
-#: templates/timetable/timetable.html:107
+#: templates/timetable/teacher_timetable.html:60
+#: templates/timetable/timetable.html:76
 msgid "Previous week"
 msgstr "Settimana scorsa"
 
-#: templates/timetable/teacher_timetable.html:96
-#: templates/timetable/timetable.html:112
+#: templates/timetable/teacher_timetable.html:65
+#: templates/timetable/timetable.html:81
 msgid "Go"
 msgstr "Vai"
 
-#: templates/timetable/teacher_timetable.html:100
-#: templates/timetable/timetable.html:116
+#: templates/timetable/teacher_timetable.html:69
+#: templates/timetable/timetable.html:85
 msgid "Next week"
 msgstr "Settimana prossima"
 
-#: templates/timetable/teacher_timetable.html:144
-#: templates/timetable/timetable.html:240
+#: templates/timetable/teacher_timetable.html:113
+#: templates/timetable/timetable.html:209
 msgid "Extra lecture"
 msgstr "Lezione extra"
 
-#: templates/timetable/teacher_timetable.html:145
-#: templates/timetable/timetable.html:241
+#: templates/timetable/teacher_timetable.html:114
+#: templates/timetable/timetable.html:210
 msgid "lecture"
 msgstr "lezione"
 
-#: templates/timetable/teacher_timetable.html:146
-#: templates/timetable/timetable.html:242
+#: templates/timetable/teacher_timetable.html:115
+#: templates/timetable/timetable.html:211
 msgid "Hours of theaching"
 msgstr "Ore di insegnamento"
 
-#: templates/timetable/teacher_timetable.html:148
-#: templates/timetable/timetable.html:244
+#: templates/timetable/teacher_timetable.html:117
+#: templates/timetable/timetable.html:213
 msgid "Missing hours"
 msgstr "Ore mancanti"
 
-#: templates/timetable/teacher_timetable.html:149
-#: templates/timetable/timetable.html:245
+#: templates/timetable/teacher_timetable.html:118
+#: templates/timetable/timetable.html:214
 msgid "Assign lecture"
 msgstr "Assegna lezione"
 
-#: templates/timetable/teacher_timetable.html:150
-#: templates/timetable/timetable.html:246
+#: templates/timetable/teacher_timetable.html:119
+#: templates/timetable/timetable.html:215
 msgid "Assign B.E.S."
 msgstr "Assegna B.E.S."
 
-#: templates/timetable/teacher_timetable.html:151
-#: templates/timetable/timetable.html:247
+#: templates/timetable/teacher_timetable.html:120
+#: templates/timetable/timetable.html:216
 msgid "Are you sure to delete this lecture?"
 msgstr "Sei sicuro di voler eliminare questa lezione?"
 
-#: templates/timetable/teacher_timetable.html:152
-#: templates/timetable/timetable.html:248
+#: templates/timetable/teacher_timetable.html:121
+#: templates/timetable/timetable.html:217
 msgid "Week replicated!"
 msgstr "Settimana replicata!"
 
-#: templates/timetable/teacher_timetable.html:153
-#: templates/timetable/timetable.html:249
+#: templates/timetable/teacher_timetable.html:122
+#: templates/timetable/timetable.html:218
 msgid "Conflict on date"
 msgstr "Conflitto il giorno"
 
-#: templates/timetable/timetable.html:64
+#: templates/timetable/timetable.html:21
 msgid "Plan a timetable"
 msgstr "Pianifica un calendario"
 
-#: templates/timetable/timetable.html:79
+#: templates/timetable/timetable.html:36
 msgid "Choose a class:"
 msgstr "Scegli una classe"
 
-#: templates/timetable/timetable.html:82
+#: templates/timetable/timetable.html:39
 msgid "section:"
 msgstr "sezione"
 
-#: templates/timetable/timetable.html:97
+#: templates/timetable/timetable.html:66
 msgid "Add extra lecture"
 msgstr "Aggiungi una lezione extra"
 
-#: templates/timetable/timetable.html:100
+#: templates/timetable/timetable.html:69
 msgid "Replicate week"
 msgstr "Replica settimana"
 
-#: templates/timetable/timetable.html:125
+#: templates/timetable/timetable.html:94
 msgid "List of teachers:"
 msgstr "Lista degli insegnanti"
 
-#: templates/timetable/timetable.html:137
+#: templates/timetable/timetable.html:106
 msgid "Add extra lecture slot"
 msgstr "Aggiungi uno slot orario extra."
 
-#: templates/timetable/timetable.html:145 timetable/models.py:9
+#: templates/timetable/timetable.html:114 timetable/models.py:9
 msgid "Monday"
 msgstr "Lunedì"
 
-#: templates/timetable/timetable.html:146 timetable/models.py:10
+#: templates/timetable/timetable.html:115 timetable/models.py:10
 msgid "Tuesday"
 msgstr "Martedì"
 
-#: templates/timetable/timetable.html:147 timetable/models.py:11
+#: templates/timetable/timetable.html:116 timetable/models.py:11
 msgid "Wednesday"
 msgstr "Mercoledì"
 
-#: templates/timetable/timetable.html:148 timetable/models.py:12
+#: templates/timetable/timetable.html:117 timetable/models.py:12
 msgid "Thursday"
 msgstr "Giovedì"
 
-#: templates/timetable/timetable.html:149 timetable/models.py:13
+#: templates/timetable/timetable.html:118 timetable/models.py:13
 msgid "Friday"
 msgstr "Venerdì"
 
-#: templates/timetable/timetable.html:150 timetable/models.py:14
+#: templates/timetable/timetable.html:119 timetable/models.py:14
 msgid "Saturday"
 msgstr "Sabato"
 
-#: templates/timetable/timetable.html:153
+#: templates/timetable/timetable.html:122
 msgid "Hour start"
 msgstr "Ora di inizio"
 
-#: templates/timetable/timetable.html:156
+#: templates/timetable/timetable.html:125
 msgid "Hour end"
 msgstr "Ora di fine"
 
-#: templates/timetable/timetable.html:160
-#: templates/timetable/timetable.html:189
+#: templates/timetable/timetable.html:129
+#: templates/timetable/timetable.html:158
 msgid "Close"
 msgstr "Chiudi"
 
-#: templates/timetable/timetable.html:161
+#: templates/timetable/timetable.html:130
 msgid "Add"
 msgstr "Aggiungi"
 
-#: templates/timetable/timetable.html:172
+#: templates/timetable/timetable.html:141
 msgid "Replicate lectures of this week"
 msgstr "Replica lezioni di questa settimana"
 
-#: templates/timetable/timetable.html:190
+#: templates/timetable/timetable.html:159
 msgid "Check conflicts"
 msgstr "Controlla eventuali conflitti"
 
-#: templates/timetable/timetable.html:191
+#: templates/timetable/timetable.html:160
 msgid "Replicate lectures"
 msgstr "Replica lezioni"
 
-#: timetable/forms.py:35
+#: timetable/forms.py:28
 msgid "The school selected is not a valid choice."
 msgstr "La scuola selezionata non è una scelta valida."
 
-#: timetable/forms.py:55
+#: timetable/forms.py:46
 msgid "The teacher {} is not in the school ({})."
 msgstr "L'insegnante {} non è nella scuola {}."
 
-#: timetable/forms.py:77
-msgid "The course {} is not in the school ({})."
-msgstr "Il corso {} non è insegnato nella scuola {}."
-
-#: timetable/forms.py:100
-msgid "The subject {} is not taught in the school ({})."
-msgstr "La materia {} non è insegnata nella scuola {}."
-
-#: timetable/forms.py:135
-msgid "The start date must belong to the start year!"
-msgstr "La data di inizio deve appartenere all'anno di inizio!"
-
-#: timetable/forms.py:140
-msgid "This is the class number, for class IA for instance it is 1."
-msgstr "Questo è l'anno della classe, ad esempio per la classe IA è 1."
-
-#: timetable/forms.py:175
-msgid "The start hour must be strictly smaller that the end hour."
-msgstr "L'ora di inizio deve essere strettamente minore dell'ora di fine."
-
-#: timetable/forms.py:204
+#: timetable/forms.py:65
 msgid "The current school has no such hour slot!"
 msgstr "La scuola corrente non ha tale slot orario."
 
-#: timetable/forms.py:229 timetable/forms.py:266
+#: timetable/forms.py:83
+msgid "The course {} is not in the school ({})."
+msgstr "Il corso {} non è insegnato nella scuola {}."
+
+#: timetable/forms.py:104
+msgid "The subject {} is not taught in the school ({})."
+msgstr "La materia {} non è insegnata nella scuola {}."
+
+#: timetable/forms.py:199
+msgid "The start date must belong to the start year!"
+msgstr "La data di inizio deve appartenere all'anno di inizio!"
+
+#: timetable/forms.py:204
+msgid "This is the class number, for class IA for instance it is 1."
+msgstr "Questo è l'anno della classe, ad esempio per la classe IA è 1."
+
+#: timetable/forms.py:219
+msgid ""
+"This is the order of the hour during the day. For instance, if hour from 9 "
+"to 10 is the second hour of the morning, hour_number field must be 2."
+msgstr ""
+"Questo campo è l'ordine dell'ora durante il giorno. Ad esempio, se l'ora dalle 9 "
+"alle 10 è la seconda ora del mattino, il campo hour_number deve essere 2."
+
+#: timetable/forms.py:258
+msgid "The start hour must be strictly smaller that the end hour."
+msgstr "L'ora di inizio deve essere strettamente minore dell'ora di fine."
+
+#: timetable/forms.py:275
+msgid "th"
+msgstr "a"
+
+#: timetable/forms.py:276
+# It stands for fir-st
+msgid "st"
+msgstr "a"
+
+#: timetable/forms.py:277
+#, It stands for second
+msgid "nd"
+msgstr "a"
+
+#: timetable/forms.py:278
+# It stands for third
+msgid "rd"
+msgstr "a"
+
+#: timetable/forms.py:272
+msgid ""
+"There is already the {}{} hour of the day for this school, day of week and "
+"school_year!"
+msgstr ""
+"La {}{} ora del giorno è già presente per questa scuola, giorno della settimana e anno scolastico!"
+
+#: timetable/forms.py:338 timetable/forms.py:374
 msgid "The date_start field can't be greater than the end date"
 msgstr "Il campo data di inizio non può essere più grande della data di fine."
 
-#: timetable/forms.py:311
+#: timetable/forms.py:453
 msgid "The start time field can't be greater than the end time"
 msgstr "L'ora di inizio non può essere più grande dell'ora di fine."
 
-#: timetable/forms.py:323
+#: timetable/forms.py:465
 msgid "There is not a related teacher in class instance."
 msgstr "Non c'è un insegnante associato a tale corso."
 
-#: timetable/forms.py:326
+#: timetable/forms.py:468
 msgid "The teacher doesn't have bes hours in this course."
 msgstr "L'insegnante non ha ore BES in questo corso."
 
-#: timetable/forms.py:329
+#: timetable/forms.py:471
 msgid "The teacher has only bes hours in this course."
 msgstr "L'insegnante ha solo ore BES in questo corso."
 
@@ -653,7 +764,7 @@ msgstr "nome"
 
 #: timetable/models.py:41 timetable/models.py:54 timetable/models.py:83
 #: timetable/models.py:100 timetable/models.py:143 timetable/models.py:159
-#: timetable/models.py:170 timetable/models.py:188 timetable/models.py:209
+#: timetable/models.py:170 timetable/models.py:186 timetable/models.py:207
 msgid "school"
 msgstr "scuola"
 
@@ -678,8 +789,8 @@ msgid "section"
 msgstr "sezione"
 
 #: timetable/models.py:82 timetable/models.py:102 timetable/models.py:125
-#: timetable/models.py:146 timetable/models.py:161 timetable/models.py:172
-#: timetable/models.py:187 timetable/models.py:208
+#: timetable/models.py:146 timetable/models.py:161 timetable/models.py:185
+#: timetable/models.py:206
 msgid "school year"
 msgstr "anno scolastico"
 
@@ -703,7 +814,7 @@ msgstr "giorno della settimana"
 msgid "legal duration"
 msgstr "durata legale"
 
-#: timetable/models.py:121 timetable/models.py:183 timetable/models.py:204
+#: timetable/models.py:121 timetable/models.py:181 timetable/models.py:202
 msgid "teacher"
 msgstr "insegnante"
 
@@ -719,77 +830,80 @@ msgstr "data di fine"
 msgid "{}: from {} to {}"
 msgstr "{}: da {} a {}"
 
-#: timetable/models.py:158 timetable/models.py:184 timetable/models.py:205
+#: timetable/models.py:158 timetable/models.py:182 timetable/models.py:203
 msgid "course"
 msgstr "corso"
 
-#: timetable/models.py:185 timetable/models.py:206
+#: timetable/models.py:183 timetable/models.py:204
 msgid "subject"
 msgstr "materia"
 
-#: timetable/models.py:191
+#: timetable/models.py:189
 msgid "hours"
 msgstr "ore"
 
-#: timetable/models.py:192
+#: timetable/models.py:190
 msgid "hours BES"
 msgstr "ore BES"
 
-#: timetable/models.py:211
+#: timetable/models.py:209
 msgid "date"
 msgstr "data"
 
-#: timetable/models.py:214
+#: timetable/models.py:212
 msgid "start hour"
 msgstr "ora di inizio"
 
-#: timetable/models.py:215
+#: timetable/models.py:213
 msgid "end hour"
 msgstr "ora di fine"
 
-#: timetable/models.py:216
+#: timetable/models.py:214
 msgid "BES"
 msgstr "BES"
 
-#: timetable/models.py:217
+#: timetable/models.py:215
 msgid "substitution"
 msgstr "sostituzione"
 
-#: timetable/models.py:218
+#: timetable/models.py:216
 msgid "absence"
 msgstr "assenza"
 
-#: timetable/serializers.py:239
+#: timetable/serializers.py:241
 msgid "The start hour field can't be greater than the end hour"
 msgstr "L'ora di inizio non può essere più grande dell'ora di fine."
 
-#: timetable/serializers.py:249
+#: timetable/serializers.py:251
 msgid "The subject {} is not taught in this School ({})."
 msgstr "La materia {} non è insegnata in questa scuola ({})."
 
-#: timetable/serializers.py:261
+#: timetable/serializers.py:263
 msgid "The course {} is not taught in this School ({})."
 msgstr "Il corso {} non è insegnato in questa scuola ({})."
 
-#: timetable/serializers.py:273
+#: timetable/serializers.py:275
 msgid "The school {} is not a valid choice."
 msgstr "La scuola {} non è una scelta valida."
 
-#: timetable/serializers.py:285
+#: timetable/serializers.py:287
 msgid "The teacher {} does not teach in this School ({})."
 msgstr "L'insegnante {} non insegna in questa scuola ({})."
 
-#: timetable/views/rest_framework_views.py:267
+#: timetable/views/rest_framework_views.py:252
 msgid "Wrong format of date: yyyy-mm-dd"
 msgstr "Formato data errato: yyyy-mm-dd"
 
-#: timetable/views/rest_framework_views.py:271
+#: timetable/views/rest_framework_views.py:256
 msgid "The beginning of the period is greater then the end of the period"
 msgstr "L'inizio del periodo è più grande della fine del periodo."
 
-#: timetable/views/rest_framework_views.py:275
+#: timetable/views/rest_framework_views.py:260
 msgid "The Assignment Specified doesn't exist"
 msgstr "L'assegnamento specificato non esiste"
+
+#~ msgid "School year"
+#~ msgstr "Anno scolastico"
 
 #~ msgid "Add teacher"
 #~ msgstr "Aggiungi un insegnante"
@@ -826,9 +940,6 @@ msgstr "L'assegnamento specificato non esiste"
 
 #~ msgid "start"
 #~ msgstr "inizio"
-
-#~ msgid "end"
-#~ msgstr "fine"
 
 #~ msgid "missing hours"
 #~ msgstr "ore mancanti"
