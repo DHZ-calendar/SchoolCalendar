@@ -276,9 +276,6 @@ class AbsenceBlockForm(BaseFormWithHourSlotTeacherAndSchoolCheck):
         :param user: the user logged, the school is retrieved by her.
         """
         super(AbsenceBlockForm, self).__init__(user, *args, **kwargs)
-        # Populate the school picker with the correct for the given user
-        self.fields['school'] = forms.ModelChoiceField(
-            queryset=School.objects.filter(id=get_school_from_user(self.user).id))
         # Populate the teacher picker with the correct teachers
         self.fields['teacher'] = forms.ModelChoiceField(
             queryset=Teacher.objects.filter(school__id=get_school_from_user(self.user).id))
