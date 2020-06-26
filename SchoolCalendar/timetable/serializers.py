@@ -7,7 +7,7 @@ from rest_framework.serializers import HyperlinkedModelSerializer, ModelSerializ
 import datetime
 
 from timetable.models import Teacher, Holiday, Stage, AbsenceBlock, Assignment, HoursPerTeacherInClass, HourSlot, \
-    Course, Subject
+    Course, Subject, Room
 from timetable import utils
 
 
@@ -67,6 +67,12 @@ class TeacherSerializer(ModelSerializer):
     class Meta:
         model = Teacher
         fields = ['id', 'url', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'school', 'notes']
+
+
+class RoomSerializer(ModelSerializer):
+    class Meta:
+        model = Room
+        fields = ['id', 'name', 'school', 'capacity']
 
 
 class CourseSerializer(ModelSerializer):
@@ -207,6 +213,8 @@ class AssignmentSerializer(ModelSerializer):
     hour_slot = SerializerMethodField(read_only=True)
     course_id = PrimaryKeyRelatedField(write_only=True, queryset=Course.objects.all(), source='course')
     course = CourseSerializer(read_only=True)
+    room_id = PrimaryKeyRelatedField(write_only=True, queryset=Room.objects.all(), source='room')
+    room = RoomSerializer(read_only=True)
 
     def __init__(self, *args, **kwargs):
         super(AssignmentSerializer, self).__init__(*args, **kwargs)
@@ -285,6 +293,18 @@ class AssignmentSerializer(ModelSerializer):
         """
         if utils.get_school_from_user(self.user) != value.school:
             raise ValidationError(_('The teacher {} does not teach in this School ({}).'.format(
+                value, value.school
+            )))
+        return value
+
+    def validate_room(self, value):
+        """
+        Check whether the room is in the school of the user logged.
+        Somewhere else we should check that the user logged has enough permissions to do anything with a room.
+        :return:
+        """
+        if utils.get_school_from_user(self.user) != value.school:
+            raise ValidationError(_('The room {} cannot be used in this school ({}).'.format(
                 value, value.school
             )))
         return value
@@ -392,6 +412,7 @@ class TeacherSubstitutionSerializer(ModelSerializer):
 class ReplicationConflictsSerializer(Serializer):
     teacher_conflicts = SerializerMethodField('get_teacher_conflicts')
     course_conflicts = SerializerMethodField('get_course_conflicts')
+    # room_conflicts = SerializerMethodField('get_room_conflicts')
 
     def get_teacher_conflicts(self, obj):
         serializer_context = {'request': self.context.get('request')}
@@ -402,6 +423,11 @@ class ReplicationConflictsSerializer(Serializer):
         serializer_context = {'request': self.context.get('request')}
         serializer = AssignmentSerializer(self.initial_data['course_conflicts'], many=True, context=serializer_context)
         return serializer.data
+
+    # def get_room_conflicts(self, obj):
+    #     serializer_context = {'request': self.context.get('request')}
+    #     serializer = AssignmentSerializer(self.initial_data['room_conflicts'], many=True, context=serializer_context)
+    #     return serializer.data
 
     def create(self, validated_data):
         pass

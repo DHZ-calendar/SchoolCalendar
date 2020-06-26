@@ -13,7 +13,7 @@ from timetable.views.rest_framework_views import TeacherViewSet, \
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
     AbsenceBlocksPerTeacherViewSet, TeacherSubstitutionViewSet, TeacherTimetableViewSet, AbsenceBlockViewSet, \
-    SubjectViewSet
+    SubjectViewSet, RoomViewSet
 from timetable.views.other_views import TimetableView, SubstituteTeacherView, TeacherTimetableView, \
     LoggedUserRedirectView, TeacherReportView, TeacherPDFReportView, SendInvitationTeacherEmailView, \
     SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView
@@ -25,6 +25,7 @@ router.register(r'teachers', TeacherViewSet, basename='teacher')
 router.register(r'year_only_course', CourseYearOnlyListViewSet, basename='year_only_course')
 router.register(r'section_only_course', CourseSectionOnlyListViewSet, basename='section_only_course')
 router.register(r'holidays', HolidayViewSet, basename='holiday')
+router.register(r'rooms', RoomViewSet, basename='room')
 router.register(r'stages', StageViewSet, basename='stage')
 router.register(r'subjects', SubjectViewSet, basename='subject')
 router.register(r'hour_slots', HourSlotViewSet, basename='hour_slot')

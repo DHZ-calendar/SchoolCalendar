@@ -7,10 +7,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.core.exceptions import ObjectDoesNotExist
 
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
-    Stage, Subject, HoursPerTeacherInClass, Assignment
+    Stage, Subject, HoursPerTeacherInClass, Assignment, Room
 from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer, \
     HolidaySerializer, StageSerializer, HourSlotSerializer, HoursPerTeacherInClassSerializer, AssignmentSerializer, \
-    AbsenceBlockSerializer, TeacherSubstitutionSerializer, SubjectSerializer, ReplicationConflictsSerializer
+    AbsenceBlockSerializer, TeacherSubstitutionSerializer, SubjectSerializer, ReplicationConflictsSerializer, \
+    RoomSerializer
 from timetable.permissions import SchoolAdminCanWriteDelete, TeacherCanView
 from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
     StageFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
@@ -38,6 +39,13 @@ class AbsenceBlockViewSet(ListModelMixin, GenericViewSet):
 class SubjectViewSet(ListModelMixin, GenericViewSet):
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
+    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
+
+
+class RoomViewSet(ListModelMixin, GenericViewSet):
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
 

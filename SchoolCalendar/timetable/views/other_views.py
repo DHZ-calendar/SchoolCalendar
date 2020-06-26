@@ -109,7 +109,7 @@ class TeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View)
 class CheckWeekReplicationView(UserPassesTestMixin, View):
     def test_func(self):
         assignments = self.request.POST.getlist('assignments[]')
-
+        # TODO: improve this if statement, it is going to be super slow for long queries!
         for assign in assignments:
             if not (utils.is_adminschool(self.request.user) and Assignment.objects.filter(id=assign).exists() and
                Assignment.objects.get(id=assign).school == utils.get_school_from_user(self.request.user)):
@@ -126,6 +126,7 @@ class CheckWeekReplicationView(UserPassesTestMixin, View):
             to_date = datetime.datetime.strptime(kwargs.get('to'), '%Y-%m-%d').date()
             course_conflicts = Assignment.objects.none()
             teacher_conflicts = Assignment.objects.none()
+            room_conflicts = Assignment.objects.none()
             for assign in assignments:
                 a = Assignment.objects.get(pk=assign)
                 # Return all assignments from the same course or teacher that would collide in the future.
@@ -138,8 +139,14 @@ class CheckWeekReplicationView(UserPassesTestMixin, View):
                     .exclude(id=a.pk)
                 course_conflicts |= conflicts.filter(course=a.course)
                 teacher_conflicts |= conflicts.filter(teacher=a.teacher)
-
-            data = dict(course_conflicts=course_conflicts, teacher_conflicts=teacher_conflicts)
+                # TODO: Check if it is correct
+                # Check both that the room is not null, and is the same as the current room!
+                r_c = conflicts.filter(room__isnull=False, room=a.room) if \
+                    a.room is not None and conflicts.filter(room__isnull=False, room=a.room).count() > a.room.capacity \
+                    else Assignment.object.none()
+                room_conflicts |= r_c
+            data = dict(course_conflicts=course_conflicts,
+                        teacher_conflicts=teacher_conflicts)
             serializer = ReplicationConflictsSerializer(data=data, context={'request': request})
             serializer.is_valid()
             return JsonResponse(serializer.data)
@@ -192,6 +199,8 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
                 # TODO: is the sentence above correctly? Why is it not true for the same class? Because of overriding?
                 conflicts = Assignment.objects.filter(school=a.school,
                                                       teacher=a.teacher,
+                                                      room__isnull=False,
+                                                      room=a.room,
                                                       school_year=a.school_year,
                                                       hour_start=a.hour_start,
                                                       hour_end=a.hour_end,
@@ -235,6 +244,7 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
                             teacher=a.teacher,
                             course=a.course,
                             subject=a.subject,
+                            room=a.room,
                             school_year=a.school_year,
                             school=a.school,
                             hour_start=a.hour_start,
