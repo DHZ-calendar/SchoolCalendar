@@ -4,8 +4,8 @@ from django.contrib.auth.forms import UserCreationForm
 from durationwidget.widgets import TimeDurationWidget
 from django.utils.translation import gettext as _
 
-from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday,\
-                             Stage, Subject, HoursPerTeacherInClass, Assignment
+from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
+    Stage, Subject, HoursPerTeacherInClass, Assignment, Room
 from timetable.utils import get_school_from_user, assign_html_style_to_visible_forms_fields, generate_random_password
 
 
@@ -198,6 +198,22 @@ class SchoolYearForm(ModelForm):
         if self.cleaned_data['year_start'] != self.cleaned_data['date_start'].year:
             self.add_error(None, forms.ValidationError(_('The start date must belong to the start year!')))
         return self.cleaned_data
+
+
+class RoomForm(BaseFormWithSchoolCheck):
+    capacity = forms.IntegerField(help_text=_("This is the number of classes that can be held concurrently, "
+                                              "not the amount of students that can fit in."))
+
+    def __init__(self, *args, **kwargs):
+        super(RoomForm, self).__init__(*args, **kwargs)
+        # Populate schools options with the correct schools for the logged in user.
+        self.fields['school'] = forms.ModelChoiceField(
+            queryset=School.objects.filter(id=get_school_from_user(self.user).id))
+        assign_html_style_to_visible_forms_fields(self)
+
+    class Meta:
+        model = Room
+        fields = ['name', 'capacity', 'school']
 
 
 class CourseForm(BaseFormWithSchoolCheck):

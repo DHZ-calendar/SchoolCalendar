@@ -2,12 +2,13 @@ from django.urls import path, re_path, include
 from timetable.views.CRUD_views import SchoolCreate, TeacherCreate, AdminSchoolCreate, SchoolYearCreate, CourseCreate, \
     HourSlotCreate, AbsenceBlockCreate, HolidayCreate, StageCreate, SubjectCreate, \
     HoursPerTeacherInClassCreate, AssignmentCreate, \
-    SchoolList, TeacherList, AdminSchoolList, SchoolYearList, CourseList, HourSlotList, AbsenceBlockList,\
+    SchoolList, TeacherList, AdminSchoolList, SchoolYearList, CourseList, HourSlotList, AbsenceBlockList, \
     HolidayList, StageList, SubjectList, HoursPerTeacherInClassList, \
-    SchoolUpdate, TeacherUpdate, AdminSchoolUpdate, SchoolYearUpdate, CourseUpdate, HourSlotUpdate, AbsenceBlockUpdate,\
+    SchoolUpdate, TeacherUpdate, AdminSchoolUpdate, SchoolYearUpdate, CourseUpdate, HourSlotUpdate, AbsenceBlockUpdate, \
     HolidayUpdate, StageUpdate, SubjectUpdate, HoursPerTeacherInClassUpdate, \
     SchoolDelete, TeacherDelete, AdminSchoolDelete, SchoolYearDelete, CourseDelete, HourSlotDelete, AbsenceBlockDelete, \
-    HolidayDelete, StageDelete, SubjectDelete, HoursPerTeacherInClassDelete
+    HolidayDelete, StageDelete, SubjectDelete, HoursPerTeacherInClassDelete, RoomCreate, RoomUpdate, RoomDelete, \
+    RoomList
 from timetable.views.rest_framework_views import TeacherViewSet, \
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
@@ -54,6 +55,10 @@ urlpatterns = [
     path('school/<pk>/edit/', SchoolUpdate.as_view(), name='school-edit'),
     path('school/<pk>/delete/', SchoolDelete.as_view(), name='school-delete'),
     path('school/', SchoolList.as_view(), name='school-listview'),
+    path('room/add/', RoomCreate.as_view(), name='room-add'),
+    path('room/<pk>/edit/', RoomUpdate.as_view(), name='room-edit'),
+    path('room/<pk>/delete/', RoomDelete.as_view(), name='room-delete'),
+    path('room/', RoomList.as_view(), name='room-listview'),
     path('teacher/add/', TeacherCreate.as_view(), name='teacher-add'),
     path('teacher/<pk>/edit/', TeacherUpdate.as_view(), name='teacher-edit'),
     path('teacher/<pk>/delete/', TeacherDelete.as_view(), name='teacher-delete'),

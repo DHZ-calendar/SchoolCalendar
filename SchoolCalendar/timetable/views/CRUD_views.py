@@ -5,10 +5,10 @@ from django.urls import reverse_lazy
 
 from timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYearForm, CourseForm, HourSlotForm, \
     AbsenceBlockForm, HolidayForm, StageForm, SubjectForm, HoursPerTeacherInClassForm, \
-    AssignmentForm, TeacherCreationForm, AdminSchoolCreationForm
+    AssignmentForm, TeacherCreationForm, AdminSchoolCreationForm, RoomForm
 from timetable.mixins import AdminSchoolPermissionMixin, SuperUserPermissionMixin, TeacherPermissionMixin
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
-    Stage, Subject, HoursPerTeacherInClass, Assignment
+    Stage, Subject, HoursPerTeacherInClass, Assignment, Room
 
 
 class CreateViewWithUser(CreateView):
@@ -138,6 +138,32 @@ class SchoolYearDelete(SuperUserPermissionMixin, DeleteView):
 class SchoolYearList(SuperUserPermissionMixin, ListView):
     model = SchoolYear
     template_name = 'timetable/school_year_list.html'
+
+
+# CRUD Room
+class RoomCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
+    model = Room
+    form_class = RoomForm
+    template_name = 'timetable/room_form.html'
+    success_url = reverse_lazy('room-listview')
+
+
+class RoomUpdate(AdminSchoolPermissionMixin, UpdateViewWithUser):
+    model = Room
+    form_class = RoomForm
+    template_name = 'timetable/room_form.html'
+    success_url = reverse_lazy('room-listview')
+
+
+class RoomDelete(AdminSchoolPermissionMixin, DeleteView):
+    model = Room
+    form_class = RoomForm
+    template_name = 'timetable/delete_form.html'
+    success_url = reverse_lazy('room-listview')
+
+
+class RoomList(AdminSchoolPermissionMixin, TemplateViewWithSchoolYears):
+    template_name = 'timetable/room_list.html'
 
 
 # Course CRUD
