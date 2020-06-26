@@ -211,6 +211,15 @@ class RoomForm(BaseFormWithSchoolCheck):
             queryset=School.objects.filter(id=get_school_from_user(self.user).id))
         assign_html_style_to_visible_forms_fields(self)
 
+    def clean_capacity(self):
+        """
+        The capacity of the room, if specified, must be a strictly positive integer!
+        :return:
+        """
+        if self.cleaned_data['capacity'] < 1:
+            self.add_error(None, forms.ValidationError(_('The capacity must be a strictly positive number!')))
+        return self.cleaned_data['capacity']
+
     class Meta:
         model = Room
         fields = ['name', 'capacity', 'school']
