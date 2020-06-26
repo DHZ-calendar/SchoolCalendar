@@ -1,7 +1,10 @@
 {% extends 'timetable/base.html' %}
 {% load i18n %}
+{% load static %}
 
 {% block head %}
+<link rel="stylesheet" href="{% static 'main.css' %}"/>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
 {% endblock %}
@@ -10,17 +13,21 @@
 .check-subsitute{
     margin-top: calc(50% - 10px) !important;
 }
+.teachers-list{
+    max-height: 350px;
+    overflow-y: auto;
+}
 {% endblock %}
 
 {% block body %}
-<div class="container-fluid">
+<div class="container">
     <div class="row">
         <h3 class="col text-center">{% trans 'Substitute a teacher' %}</h3>
     </div>
     <div class="row p-1">
         <div class="col-6">
             {% trans 'School year:' %}
-            <select id="school_year" onchange="getTeachers()">
+            <select id="school_year" class="form-control form-control-custom" onchange="getTeachers()">
                 {% for year in school_years %}
                     <option value="{{ year.id }}">{{ year }}</option>
                 {% endfor %}
@@ -28,14 +35,14 @@
         </div>
         <div class="col-6">
             {% trans 'Teachers:' %}
-            <select id="teachers" onchange="">
+            <select id="teachers" class="form-control form-control-custom" onchange="">
             </select>
         </div>
     </div>
     <div class="row p-1">
         <div class="col-6">
             {% trans 'Choose a date:' %}
-            <input type="text" id="date" class="datepicker" />            
+            <input type="text" class="form-control form-control-custom datepicker" id="date" data-date-format='dd/mm/yyyy' />
         </div>
         <div class="col-6">
             <button type="button" class="btn btn-success" onclick="getTeacherAssignments($(this))">{% trans 'Load lectures' %}</button>
@@ -43,10 +50,10 @@
     </div>
     <div class="row">
         <div class="col-12 container">
-            <div id="lectures">
+            <div id="lectures" class="accordion mt-4">
             </div>
+        </div>
     </div>
-</div>
 </div>
 
 {% endblock %}
@@ -80,7 +87,7 @@
             .replace('1234', $("#teachers").val())
             .replace('9999', $('#school_year').val());
         
-        let date = moment($("#date").val()).format('YYYY-MM-DD');
+        let date = moment($("#date").val(), 'DD-MM-YYYY').format('YYYY-MM-DD');
         let data = {
             'from_date': date,
             'to_date': date
@@ -89,15 +96,24 @@
             $("#lectures").empty();
             for(let assign of data){
                 $("#lectures").append(`
-                    <hr/>
-                    <div class="row m-0">
-                        <b>${assign.subject.name}</b>&nbsp;${assign.hour_start} - ${assign.hour_end}&nbsp;
-                        {% trans 'Available teachers:' %}
-                        <ul class="list-group col-12 my-2" id="sub_teachers-${assign.id}">
-                        </ul>
-                        <button type="button" class="btn btn-success" assignId="${assign.id}" teaId="${assign.teacher.id}" subId="${assign.subject.id}" date="${assign.date}" 
-                            hourStart="${assign.hour_start}" hourEnd="${assign.hour_end}" course="${assign.course.id}" schoolYear="${assign.school_year}" school="${assign.school}"
-                            onclick="substituteTeacher($(this))">{% trans 'Make substitution' %}</button>
+                    <div class="card" id="card-${assign.id}">
+                        <div class="card-header">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse-${assign.id}" aria-expanded="false" aria-controls="collapse-${assign.id}">
+                                    <b>${assign.subject.name}</b>&nbsp;${assign.hour_start.substring(0, 5)} - ${assign.hour_end.substring(0, 5)}&nbsp;
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="collapse-${assign.id}" class="collapse" aria-labelledby="card-${assign.id}" data-parent="#lectures">
+                            <div class="card-body">
+                                {% trans 'Available teachers:' %}
+                                <ul class="list-group teachers-list col-12 my-2" id="sub_teachers-${assign.id}">
+                                </ul>
+                                <button type="button" class="btn btn-success" assignId="${assign.id}" teaId="${assign.teacher.id}" subId="${assign.subject.id}" date="${assign.date}"
+                                    hourStart="${assign.hour_start}" hourEnd="${assign.hour_end}" course="${assign.course.id}" schoolYear="${assign.school_year}" school="${assign.school}"
+                                    onclick="substituteTeacher($(this))">{% trans 'Make substitution' %}</button>
+                            </div>
+                        </div>
                     </div>
                 `);
 
