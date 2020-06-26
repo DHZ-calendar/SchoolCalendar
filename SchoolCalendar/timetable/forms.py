@@ -1,3 +1,5 @@
+import datetime
+
 from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
@@ -96,8 +98,8 @@ class BaseFormWithSubjectCourseTeacherAndSchoolCheck(BaseFormWithCourseTeacherAn
 
     def clean_subject(self):
         """
-        Check whether the course is in the school of the user logged.
-        Somewhere else we should check that the user logged has enough permissions to do anything with a course.
+        Check whether the subject is in the school of the user logged.
+        Somewhere else we should check that the user logged has enough permissions to do anything with a subject.
         :return:
         """
         if get_school_from_user(self.user) != self.cleaned_data['subject'].school:
@@ -105,6 +107,29 @@ class BaseFormWithSubjectCourseTeacherAndSchoolCheck(BaseFormWithCourseTeacherAn
                 self.cleaned_data['subject'], self.cleaned_data['subject'].school
             ))))
         return self.cleaned_data['subject']
+
+
+class BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck(BaseFormWithSubjectCourseTeacherAndSchoolCheck):
+    """
+    Base form class, which allows to retrieve only the correct rooms according to the school of the user logged.
+    Moreover it inherits from BaseFormWithSubjectCourseTeacherAndSchoolCheck
+    """
+    def __init__(self, user, *args, **kwargs):
+        super(BaseFormWithSubjectCourseTeacherAndSchoolCheck, self).__init__(user, *args, **kwargs)
+
+    def clean_room(self):
+        """
+        Check whether the room is in the school of the user logged.
+        Somewhere else we should check that the user logged has enough permissions to do anything with a room.
+        :return:
+        """
+        if 'room' in self.cleaned_data and\
+                self.cleaned_data['room'] is not None and \
+                get_school_from_user(self.user) != self.cleaned_data['room'].school:
+            self.add_error(None, forms.ValidationError(_('The room {} does not exist in the school ({}).'.format(
+                self.cleaned_data['room'], self.cleaned_data['subject'].school
+            ))))
+        return self.cleaned_data['room']
 
 
 class UserCreationFormWithoutPassword(UserCreationForm):
@@ -433,12 +458,13 @@ class HoursPerTeacherInClassForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck)
         fields = ['course', 'subject', 'teacher', 'school', 'hours', 'hours_bes', 'school_year']
 
 
-class AssignmentForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck):
+class AssignmentForm(BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck):
     date = forms.DateField(
-        input_formats=['%d/%m/%Y'],
-        widget=forms.TextInput(attrs={
-        'class': 'form-control datepicker'
-    }))
+        input_formats=['%Y-%m-%d'],
+        widget=forms.DateInput(attrs={
+            'class': 'form-control datepicker-input datepicker'
+        })
+    )
     hour_start = forms.TimeField(
         input_formats=['%H:%M'],
         widget=forms.TextInput(attrs={
@@ -460,18 +486,21 @@ class AssignmentForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck):
             queryset=Course.objects.filter(school__id=get_school_from_user(self.user).id))
         self.fields['subject'] = forms.ModelChoiceField(
             queryset=Subject.objects.filter(school__id=get_school_from_user(user).id))
+        self.fields['room'] = forms.ModelChoiceField(
+            queryset=Room.objects.filter(school__id=get_school_from_user(user).id), required=False)
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
         model = Assignment
         fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'date', 'hour_start', 'hour_end', 'bes',
-                  'substitution', 'absent']
+                  'substitution', 'absent', 'room']
 
     def clean(self):
         """
         We need to check whether date_start <= date_end
         Moreover, we need to check whether there is a HoursPerTeacherInClass for a given course, teacher,
         school_year, school, subject, bes. Only if the hour is not a substitution class.
+        Lastly we do not want to have conflicts for the teacher, course or room.
         :return:
         """
         if not self.errors:
@@ -495,5 +524,36 @@ class AssignmentForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck):
                                                                  'in this course.')))
                 elif not self.cleaned_data['bes'] and hours_teacher_in_class.first().hours == 0:
                     self.add_error(None, forms.ValidationError(_('The teacher has only bes hours '
-                                                             'in this course.')))
+                                                                 'in this course.')))
+
+            conflicts_teacher = Assignment.objects.filter(
+                school=self.cleaned_data['school'],
+                teacher=self.cleaned_data['teacher'],
+                school_year=self.cleaned_data['school_year'],
+                hour_start=self.cleaned_data['hour_start'],
+                hour_end=self.cleaned_data['hour_end'],
+                date=self.cleaned_data['date'])\
+                .exclude(
+                    id= self.instance.id if self.instance is not None else None
+                )
+
+            if conflicts_teacher:
+                self.add_error(None, forms.ValidationError(_("The teacher is already in another class {}.".format(
+                    str([c.course for c in conflicts_teacher])    # TODO: Fix visualization of this error.
+                ))))
+            if self.cleaned_data['room'] is not None:
+                conflict_room = Assignment.objects.filter(
+                    school=self.cleaned_data['school'],
+                    room=self.cleaned_data['room'],
+                    school_year=self.cleaned_data['school_year'],
+                    hour_start=self.cleaned_data['hour_start'],
+                    hour_end=self.cleaned_data['hour_end'],
+                    date=self.cleaned_data['date']) \
+                    .exclude(
+                    id=self.instance.id if self.instance is not None else None
+                )
+                if conflict_room.count() >= self.cleaned_data['room'].capacity:
+                    self.add_error(None, forms.ValidationError(
+                        "The room {} has already reached its maximum capacity".format(self.cleaned_data['room'].name)))
+
         return self.cleaned_data
