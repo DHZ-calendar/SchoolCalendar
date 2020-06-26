@@ -522,7 +522,7 @@ async function checkReplicateWeek(){
     let startDate = moment($('#date_start').val(), "DD/MM/YYYY").toDate();
     let endDate = moment($('#date_end').val(), "DD/MM/YYYY").toDate();
 
-    let url = _URL['replicate_assignments']
+    let url = _URL['check_week_replication']
         .replace("0000-00-00", formatDate(startDate))
         .replace("9999-99-99", formatDate(endDate));
     let data = {
@@ -535,11 +535,7 @@ async function checkReplicateWeek(){
         }
     }
 
-    let res = await $.ajax({
-        type: 'POST',
-        url: url,
-        data: data
-    });
+    let res = await $.post(url, data=data);
 
     let resultBox = $("#replicateResult");
     resultBox.empty();
@@ -581,51 +577,39 @@ async function checkReplicateWeek(){
 
 }
 
-async function replicateAssignment(assign, startDate, endDate){
-    let url = _URL['multiple_assignment']
-        .replace("12345", assign.id)
+async function replicateWeek(){
+    let startDate = moment($('#date_start').val(), "DD/MM/YYYY").toDate();
+    let endDate = moment($('#date_end').val(), "DD/MM/YYYY").toDate();
+
+    let url = _URL['replicate_week']
+        .replace("12345", $('#school_year').val())
+        .replace("99999", $('#course_section').val())
         .replace("0000-00-00", formatDate(startDate))
         .replace("9999-99-99", formatDate(endDate));
     let data = {
-        csrfmiddlewaretoken: Cookies.get('csrftoken')
+        csrfmiddlewaretoken: Cookies.get('csrftoken'),
+        assignments: []
     }
-    try {
-        let res = await $.ajax({
-            url: url,
-            type: 'POST',
-            data: data
-        });
-    }
-    catch(e){
-        if(e.status === 400){
-            let data = e.responseJSON;
-            return data[0];
-        }
-    }
-}
-async function replicateWeek(){
-    let startDate = moment($('#date_start').val(), "MM/DD/YYYY").toDate();
-    let endDate = moment($('#date_end').val(), "MM/DD/YYYY").toDate();
-
-    let results = [];
 
     for (let block of Object.keys(timetable.blocks)){
         for(let event of timetable.getBlock(block).events){
-            let res = await replicateAssignment(event, startDate, endDate);
-            if(res !== undefined)
-                results.push(res);
+            data.assignments.push(event.id);
         }
     }
 
-    if(results.length === 0){
+    try {
+        let res = await $.post(url, data=data);
         $('#modalReplicateWeek').modal('hide');
         alert(_TRANS['week_replicated_msg']);
     }
-    else{
-        let dates = '';
-        for(let d of results){
-            dates += d.date + ', ';
+    catch(e){
+        if(e.status === 400){
+            let results = e.responseJSON;
+            let dates = '';
+            for(let d of results){
+                dates += d.date + ', ';
+            }
+            alert(_TRANS['conflict_dates_msg'] + " " + dates);
         }
-        alert(_TRANS['conflict_dates_msg'] + " " + dates);
     }
 }

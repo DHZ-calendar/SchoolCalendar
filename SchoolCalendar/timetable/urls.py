@@ -11,11 +11,11 @@ from timetable.views.CRUD_views import SchoolCreate, TeacherCreate, AdminSchoolC
 from timetable.views.rest_framework_views import TeacherViewSet, \
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
-    AbsenceBlocksPerTeacherViewSet, ReplicateAssignmentView, CreateMultipleAssignmentsView, \
-    TeacherSubstitutionViewSet, TeacherTimetableViewSet, AbsenceBlockViewSet, SubjectViewSet
+    AbsenceBlocksPerTeacherViewSet, TeacherSubstitutionViewSet, TeacherTimetableViewSet, AbsenceBlockViewSet, \
+    SubjectViewSet
 from timetable.views.other_views import TimetableView, SubstituteTeacherView, TeacherTimetableView, \
     LoggedUserRedirectView, TeacherReportView, TeacherPDFReportView, SendInvitationTeacherEmailView, \
-    SendInvitationAdminSchoolEmailView
+    SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView
 
 from rest_framework.routers import DefaultRouter
 
@@ -98,8 +98,9 @@ urlpatterns = [
          name='hours_per_teacher_in_class-delete'),
     path('hours_per_teacher_in_class/', HoursPerTeacherInClassList.as_view(), name='hours_per_teacher_in_class-listview'),
     path('assignment/add/', AssignmentCreate.as_view(), name='assignment-add'),
-    re_path(r'multiple_assignments/add/(?P<assignment_pk>[0-9]+)/(?P<from>\d\d\d\d-\d\d-\d\d)/(?P<to>\d\d\d\d-\d\d-\d\d)'
-            , CreateMultipleAssignmentsView.as_view(), name='multiple_assignment-add'),
-    re_path(r'replicated_assignment/(?P<from>\d\d\d\d-\d\d-\d\d)/(?P<to>\d\d\d\d-\d\d-\d\d)',
-            ReplicateAssignmentView.as_view(), name='replicate_assignments-view')
+    re_path(r'replicate_week/add/(?P<school_year_pk>[0-9]+)/(?P<course_pk>[0-9]+)/(?P<from>\d\d\d\d-\d\d-\d\d)/'
+            r'(?P<to>\d\d\d\d-\d\d-\d\d)',
+            ReplicateWeekAssignmentsView.as_view(), name='replicate_week-view'),
+    re_path(r'check_week_replication/(?P<from>\d\d\d\d-\d\d-\d\d)/(?P<to>\d\d\d\d-\d\d-\d\d)',
+            CheckWeekReplicationView.as_view(), name='check_week_replication-view')
 ]
