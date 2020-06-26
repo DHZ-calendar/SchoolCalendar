@@ -1,15 +1,10 @@
+from rest_framework.filters import OrderingFilter
 from rest_framework.viewsets import ModelViewSet, ViewSet, GenericViewSet
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, \
     UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.translation import gettext as _
-from django.views import View
-from django.http import HttpResponse, JsonResponse
-from django.db.models import Q
-
-import datetime
 
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
     Stage, Subject, HoursPerTeacherInClass, Assignment
@@ -105,8 +100,9 @@ class HoursPerTeacherInClassViewSet(RetrieveModelMixin, UpdateModelMixin, Destro
     queryset = HoursPerTeacherInClass.objects.all()
     serializer_class = HoursPerTeacherInClassSerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
-    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool,)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool,)
     filterset_class = HoursPerTeacherInClassFilter
+    ordering = ['teacher__last_name', 'teacher__first_name']
 
 
 class AssignmentViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, CreateModelMixin,
