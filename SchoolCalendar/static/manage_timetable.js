@@ -518,63 +518,67 @@ function deleteAssignment(assign){
     return res;
 }
 
-function checkReplicationAssignment(assign, startDate, endDate, resultList){
-    let url = _URL['replicate_assignment']
-        .replace("12345", assign.id)
+async function checkReplicateWeek(){
+    let startDate = moment($('#date_start').val(), "DD/MM/YYYY").toDate();
+    let endDate = moment($('#date_end').val(), "DD/MM/YYYY").toDate();
+
+    let url = _URL['replicate_assignments']
         .replace("0000-00-00", formatDate(startDate))
         .replace("9999-99-99", formatDate(endDate));
-    $.get(url, function(data) {
-        let listConflict = ``;
-        for(let conflict of data){
-            listConflict += `
-                <li>
-                    <b>${conflict.teacher.first_name} ${conflict.teacher.last_name}</b> - ${conflict.subject.name}
-                    ${conflict.hour_start}-${conflict.hour_end}
-                </li>`;
+    let data = {
+        csrfmiddlewaretoken: Cookies.get('csrftoken'),
+        assignments: []
+    }
+    for (let block of Object.keys(timetable.blocks)){
+        for(let event of timetable.getBlock(block).events){
+            data.assignments.push(event.id);
         }
+    }
 
-        let date = moment(startDate).add(assign.block.day, 'days').toDate();
-        date = formatDate(date);
-
-        let badge = '';
-        if(data.length > 0)
-            badge = `<span class="badge badge-danger badge-pill">${data.length}</span>`;
-
-        resultList.append(`
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span href="#submenu${assign.id}" data-toggle="collapse" aria-expanded="false">
-                    <b>${assign.teacher}</b> - ${assign.lecture} ${date}
-                    ${formatStringTime(assign.block.startTime)}-${formatStringTime(assign.block.endTime)}
-                </span>
-                ${badge}
-            </li>
-            <li class="list-group-item d-flex justify-content-between align-items-center conflicts-content">
-                <ul class="collapse" id="submenu${assign.id}">
-                    ${listConflict}
-                </ul>
-            </li>
-        `);
-    });        
-}
-function checkReplicateWeek(){
-    let startDate = moment($('#date_start').val(), "MM/DD/YYYY").toDate();
-    let endDate = moment($('#date_end').val(), "MM/DD/YYYY").toDate();
+    let res = await $.ajax({
+        type: 'POST',
+        url: url,
+        data: data
+    });
 
     let resultBox = $("#replicateResult");
     resultBox.empty();
     resultBox.append(`
-        <b>Result:</b>
-        <ul class="list-group">
+        <b>${_TRANS['teacher_conflicts']}:</b>
+        <span class="badge badge-pill ${res.teacher_conflicts.length > 0 ? 'badge-danger' : 'badge-success'}">
+            ${res.teacher_conflicts.length}
+        </span>
+        <ul class="list-group" id="teacher-conflicts">
+        </ul>
+        <b>${_TRANS['course_conflicts']}:</b>
+        <span class="badge badge-pill ${res.course_conflicts.length > 0 ? 'badge-danger' : 'badge-success'}">
+            ${res.course_conflicts.length}
+        </span>
+        <ul class="list-group" id="course-conflicts">
         </ul>
     `);
 
-    let resultList = resultBox.find('ul');
+    let teacherConflicts = resultBox.find('#teacher-conflicts');
+    let courseConflicts = resultBox.find('#course-conflicts');
 
-    for (let block of Object.keys(timetable.blocks)){
-        for(let event of timetable.getBlock(block).events){
-            checkReplicationAssignment(event, startDate, endDate, resultList);
-        }
+    for(let conflict of res.teacher_conflicts){
+        teacherConflicts.append(`
+            <li class="list-group-item">
+                <b>${conflict.teacher.first_name} ${conflict.teacher.last_name}</b> - ${conflict.subject.name}<br/>
+                ${moment(conflict.date).format('DD-MM-YYYY')} 
+                <b>${conflict.course.year} ${conflict.course.section}</b>
+                ${conflict.hour_start.substring(0,5)} - ${conflict.hour_end.substring(0,5)}
+            </li>`);
     }
+
+    for(let conflict of res.course_conflicts){
+        courseConflicts.append(`
+            <li class="list-group-item">
+                <b>${conflict.teacher.first_name} ${conflict.teacher.last_name}</b> - ${conflict.subject.name}<br/>
+                ${moment(conflict.date).format('DD-MM-YYYY')} ${conflict.hour_start.substring(0,5)} - ${conflict.hour_end.substring(0,5)}
+            </li>`);
+    }
+
 }
 
 async function replicateAssignment(assign, startDate, endDate){

@@ -15,7 +15,7 @@ from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, C
     Stage, Subject, HoursPerTeacherInClass, Assignment
 from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer, \
     HolidaySerializer, StageSerializer, HourSlotSerializer, HoursPerTeacherInClassSerializer, AssignmentSerializer, \
-    AbsenceBlockSerializer, TeacherSubstitutionSerializer, SubjectSerializer
+    AbsenceBlockSerializer, TeacherSubstitutionSerializer, SubjectSerializer, ReplicationConflictsSerializer
 from timetable.permissions import SchoolAdminCanWriteDelete, TeacherCanView
 from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
     StageFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
@@ -192,35 +192,45 @@ class AbsenceBlocksPerTeacherViewSet(UserPassesTestMixin, ListModelMixin, Generi
                                            school_year=school_year)
 
 
-class ReplicateAssignmentViewSet(UserPassesTestMixin, ListModelMixin, GenericViewSet):
-    queryset = Assignment.objects.all()
-    serializer_class = AssignmentSerializer
-    filter_backends = (DjangoFilterBackend,)
-    lookup_url_kwarg = ['assignment_pk', 'from', 'to']
-
+class ReplicateAssignmentView(UserPassesTestMixin, View):
     def test_func(self):
-        assignment_pk = self.kwargs.get('assignment_pk')
-        return utils.is_adminschool(self.request.user) and Assignment.objects.filter(id=assignment_pk).exists() and \
-               Assignment.objects.get(id=assignment_pk).school == utils.get_school_from_user(self.request.user)
+        assignments = self.request.POST.getlist('assignments[]')
 
-    def get_queryset(self):
+        for assign in assignments:
+            if not (utils.is_adminschool(self.request.user) and Assignment.objects.filter(id=assign).exists() and
+               Assignment.objects.get(id=assign).school == utils.get_school_from_user(self.request.user)):
+                return False
+        return True
+
+    def post(self, request, *args, **kwargs):
+        """
+        Check conflicts with the assignments of a week if repeated in a specific date range
+        """
+        assignments = request.POST.getlist('assignments[]')
         try:
-            a = Assignment.objects.get(pk=self.kwargs.get('assignment_pk'))
-            from_date = self.kwargs.get('from')
-            to_date = self.kwargs.get('to')
-            # Return all assignments from the same course or teacher that would collide in the future.
-            # excluding the assignment in the url.
-            conflicts = Assignment.objects.filter(school_year=a.school_year,
-                                                  # _week_day returns dates Sun-Sat (1,7), while weekday (Mon, Sun) (0,6)
-                                                  date__week_day=(a.date.weekday() + 2) % 7,
-                                                  hour_start=a.hour_start) \
-                .filter(Q(teacher=a.teacher) | Q(course=a.course)) \
-                .filter(date__gte=from_date, date__lte=to_date) \
-                .exclude(id=a.pk)
+            from_date = datetime.datetime.strptime(kwargs.get('from'), '%Y-%m-%d').date()
+            to_date = datetime.datetime.strptime(kwargs.get('to'), '%Y-%m-%d').date()
+            course_conflicts = Assignment.objects.none()
+            teacher_conflicts = Assignment.objects.none()
+            for assign in assignments:
+                a = Assignment.objects.get(pk=assign)
+                # Return all assignments from the same course or teacher that would collide in the future.
+                # excluding the assignment in the url.
+                conflicts = Assignment.objects.filter(school_year=a.school_year,
+                                                      # _week_day returns dates Sun-Sat (1,7), while weekday (Mon, Sun) (0,6)
+                                                      date__week_day=(a.date.weekday() + 2) % 7,
+                                                      hour_start=a.hour_start) \
+                    .filter(date__gte=from_date, date__lte=to_date) \
+                    .exclude(id=a.pk)
+                course_conflicts |= conflicts.filter(course=a.course)
+                teacher_conflicts |= conflicts.filter(teacher=a.teacher)
 
-            return conflicts
+            data = dict(course_conflicts=course_conflicts, teacher_conflicts=teacher_conflicts)
+            serializer = ReplicationConflictsSerializer(data=data, context={'request': request})
+            serializer.is_valid()
+            return JsonResponse(serializer.data)
         except ObjectDoesNotExist:
-            return Assignment.objects.none()
+            return HttpResponse(_("One of the assignments specified doesn't exist"), 400)
 
 
 class CreateMultipleAssignmentsView(UserPassesTestMixin, View):

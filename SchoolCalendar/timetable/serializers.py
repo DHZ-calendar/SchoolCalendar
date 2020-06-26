@@ -387,3 +387,24 @@ class TeacherSubstitutionSerializer(ModelSerializer):
                                          school_year=self.assignment_to_substitute.school_year,
                                          hour_start=previous_hour_slot.starts_at,
                                          hour_end=previous_hour_slot.ends_at).exists()
+
+
+class ReplicationConflictsSerializer(Serializer):
+    teacher_conflicts = SerializerMethodField('get_teacher_conflicts')
+    course_conflicts = SerializerMethodField('get_course_conflicts')
+
+    def get_teacher_conflicts(self, obj):
+        serializer_context = {'request': self.context.get('request')}
+        serializer = AssignmentSerializer(self.initial_data['teacher_conflicts'], many=True, context=serializer_context)
+        return serializer.data
+
+    def get_course_conflicts(self, obj):
+        serializer_context = {'request': self.context.get('request')}
+        serializer = AssignmentSerializer(self.initial_data['course_conflicts'], many=True, context=serializer_context)
+        return serializer.data
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass

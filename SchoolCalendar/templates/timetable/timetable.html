@@ -145,10 +145,10 @@
             </div>
             <div class="modal-body">
                 {% trans 'Date start' %}:
-                <input type="text" id="date_start" class="form-control datepicker" />
+                <input type="text" id="date_start" class="form-control datepicker" data-date-format='dd/mm/yyyy' />
 
                 {% trans 'Date end' %}:
-                <input type="text" id="date_end" class="form-control datepicker" />
+                <input type="text" id="date_end" class="form-control datepicker" data-date-format='dd/mm/yyyy' />
                 <hr/>
                 <div id="replicateResult">
 
@@ -179,6 +179,10 @@
         });
         $('.datepicker').datepicker({
             dateFormat: 'dd-mm-yy'
+        });
+
+        $('#date_start, #date_end').change(() => {
+            $("#replicateResult").empty();
         });
 
         let cal = $("#calendar");
@@ -215,7 +219,9 @@
         'assign_bes': "{% trans 'Assign B.E.S.' %}",
         'delete_lecture_msg': "{% trans 'Are you sure to delete this lecture?' %}",
         'week_replicated_msg': "{% trans 'Week replicated!' %}",
-        'conflict_dates_msg': "{% trans 'Conflict on date' %}"
+        'conflict_dates_msg': "{% trans 'Conflict on date' %}",
+        'teacher_conflicts': "{% trans 'Teacher conflicts' %}",
+        'course_conflicts': "{% trans 'Course conflicts' %}"
     };
 
     _URL = {
@@ -228,7 +234,7 @@
         'stage': "{% url 'stage-list' %}",
         'teacher_assignments': "{% url 'teacher_assignments-list' 12345 99999 %}",
         'teacher_absence_blocks': "{% url 'teacher_absence_blocks-list' 12345 99999 %}",
-        'replicate_assignment': "{% url 'replicate_assignment-list' 12345 '0000-00-00' '9999-99-99' %}",
+        'replicate_assignments': "{% url 'replicate_assignments-view' '0000-00-00' '9999-99-99' %}",
         'multiple_assignment': "{% url 'multiple_assignment-add' 12345 '0000-00-00' '9999-99-99' %}",
     };
 {% endblock %}

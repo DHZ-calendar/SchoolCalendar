@@ -11,7 +11,7 @@ from timetable.views.CRUD_views import SchoolCreate, TeacherCreate, AdminSchoolC
 from timetable.views.rest_framework_views import TeacherViewSet, \
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
-    AbsenceBlocksPerTeacherViewSet, ReplicateAssignmentViewSet, CreateMultipleAssignmentsView, \
+    AbsenceBlocksPerTeacherViewSet, ReplicateAssignmentView, CreateMultipleAssignmentsView, \
     TeacherSubstitutionViewSet, TeacherTimetableViewSet, AbsenceBlockViewSet, SubjectViewSet
 from timetable.views.other_views import TimetableView, SubstituteTeacherView, TeacherTimetableView, \
     LoggedUserRedirectView, TeacherReportView, TeacherPDFReportView, SendInvitationTeacherEmailView, \
@@ -33,9 +33,6 @@ router.register(r'teacher_assignments/(?P<teacher_pk>[0-9]+)/(?P<school_year_pk>
                 basename='teacher_assignments')
 router.register(r'teacher_absence_block/(?P<teacher_pk>[0-9]+)/(?P<school_year_pk>[0-9]+)',
                 AbsenceBlocksPerTeacherViewSet, basename='teacher_absence_blocks')
-router.register(
-    r'replicated_assignment/(?P<assignment_pk>[0-9]+)/(?P<from>\d\d\d\d-\d\d-\d\d)/(?P<to>\d\d\d\d-\d\d-\d\d)',
-    ReplicateAssignmentViewSet, basename='replicate_assignment')
 router.register(r'teacher_can_substitute/(?P<assignment_pk>\d+)', TeacherSubstitutionViewSet,
                 basename='teacher_substitution')
 router.register(r'teacher_timetable', TeacherTimetableViewSet, basename='teacher_timetable')
@@ -102,5 +99,7 @@ urlpatterns = [
     path('hours_per_teacher_in_class/', HoursPerTeacherInClassList.as_view(), name='hours_per_teacher_in_class-listview'),
     path('assignment/add/', AssignmentCreate.as_view(), name='assignment-add'),
     re_path(r'multiple_assignments/add/(?P<assignment_pk>[0-9]+)/(?P<from>\d\d\d\d-\d\d-\d\d)/(?P<to>\d\d\d\d-\d\d-\d\d)'
-            , CreateMultipleAssignmentsView.as_view(), name='multiple_assignment-add')
+            , CreateMultipleAssignmentsView.as_view(), name='multiple_assignment-add'),
+    re_path(r'replicated_assignment/(?P<from>\d\d\d\d-\d\d-\d\d)/(?P<to>\d\d\d\d-\d\d-\d\d)',
+            ReplicateAssignmentView.as_view(), name='replicate_assignments-view')
 ]
