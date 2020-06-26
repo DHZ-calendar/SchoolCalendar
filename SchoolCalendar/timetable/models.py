@@ -34,6 +34,20 @@ class School(models.Model):
         return self.name
 
 
+class Room(models.Model):
+    """
+    Every assignment can (optionally) be put in a Room.
+    Every Room object has a certain capacity, so that if necessary more assignments can be held concurrently.
+    If no room is specified for the assignment, it means that room conflicts are not a problem for that assignment.
+    """
+    name = models.CharField(max_length=256, null=False, blank=False, verbose_name=_("name"))
+    capacity = models.IntegerField(null=False, blank=False, verbose_name=_("capacity"))
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("school"))
+
+    def __str__(self):
+        return self.name
+
+
 class Teacher(MyUser):
     """
     The teacher class inherits from MyUser, is only able to see her timetable
@@ -197,7 +211,7 @@ class Assignment(models.Model):
     """
     Assignment for a teacher in a class.
     Every hour has a different assignment.
-    (Monday the 1st and Monday the 8th have two different assignments for the same teacher, hour_slot and class).
+    (Monday the 1st and Monday the 8th have two different assignments for the same teacher, hour_slot, class and room).
     """
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("teacher"))
     course = models.ForeignKey(Course, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("course"))
@@ -205,6 +219,7 @@ class Assignment(models.Model):
     school_year = models.ForeignKey(SchoolYear, null=False, blank=False, on_delete=models.CASCADE,
                                     verbose_name=_("school year"))
     school = models.ForeignKey(School, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("school"))
+    room = models.ForeignKey(Room, null=True, blank=True, on_delete=models.CASCADE, verbose_name=_("room"))
 
     date = models.DateField(null=False, blank=False, verbose_name=_("date"))
 
@@ -216,6 +231,11 @@ class Assignment(models.Model):
     absent = models.BooleanField(null=False, blank=False, default=False, verbose_name=_("absence"))   # for substituted teachers
 
     def __str__(self):
-        return "{}; {}; {}; {} - {}".format(
-            self.teacher, self.course, self.date, self.hour_start, self.hour_end
+        return "{}; {}; {}; {}; {} - {}".format(
+            self.teacher,
+            self.course,
+            self.room if self.room is not None else _("No room"),
+            self.date,
+            self.hour_start,
+            self.hour_end
         )
