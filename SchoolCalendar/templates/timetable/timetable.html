@@ -204,6 +204,10 @@
             dateFormat: 'dd-mm-yy'
         });
 
+        $("#modalReplicateWeek").on("hidden.bs.modal", function() {
+            $("#replicateResult").html("");
+        });
+
         $('#date_start, #date_end').change(() => {
             $("#replicateResult").empty();
         });
@@ -245,6 +249,7 @@
         'conflict_dates_msg': "{% trans 'Conflict on date' %}",
         'teacher_conflicts': "{% trans 'Teacher conflicts' %}",
         'course_conflicts': "{% trans 'Course conflicts' %}",
+        'room_conflicts': "{% trans 'Room conflicts' %}",
         'no_room': "{% trans 'No room' %}"
     };
 

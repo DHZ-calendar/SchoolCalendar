@@ -141,12 +141,13 @@ class CheckWeekReplicationView(UserPassesTestMixin, View):
                 teacher_conflicts |= conflicts.filter(teacher=a.teacher)
                 # TODO: Check if it is correct
                 # Check both that the room is not null, and is the same as the current room!
-                r_c = conflicts.filter(room__isnull=False, room=a.room) if \
-                    a.room is not None and conflicts.filter(room__isnull=False, room=a.room).count() > a.room.capacity \
-                    else Assignment.object.none()
-                room_conflicts |= r_c
+                if a.room is not None and \
+                        conflicts.filter(room__isnull=False, room=a.room).count() >= a.room.capacity:
+                    room_conflicts |= conflicts.filter(room__isnull=False, room=a.room)
+
             data = dict(course_conflicts=course_conflicts,
-                        teacher_conflicts=teacher_conflicts)
+                        teacher_conflicts=teacher_conflicts,
+                        room_conflicts=room_conflicts)
             serializer = ReplicationConflictsSerializer(data=data, context={'request': request})
             serializer.is_valid()
             return JsonResponse(serializer.data)

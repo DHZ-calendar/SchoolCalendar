@@ -617,10 +617,17 @@ async function checkReplicateWeek(){
         </span>
         <ul class="list-group" id="course-conflicts">
         </ul>
+        <b>${_TRANS['room_conflicts']}:</b>
+        <span class="badge badge-pill ${res.room_conflicts.length > 0 ? 'badge-danger' : 'badge-success'}">
+            ${res.room_conflicts.length}
+        </span>
+        <ul class="list-group" id="room-conflicts">
+        </ul>
     `);
 
     let teacherConflicts = resultBox.find('#teacher-conflicts');
     let courseConflicts = resultBox.find('#course-conflicts');
+    let roomConflicts = resultBox.find('#room-conflicts');
 
     for(let conflict of res.teacher_conflicts){
         teacherConflicts.append(`
@@ -640,6 +647,15 @@ async function checkReplicateWeek(){
             </li>`);
     }
 
+    for(let conflict of res.room_conflicts){
+        roomConflicts.append(`
+            <li class="list-group-item">
+                <b>${conflict.room.name} [${conflict.room.capacity}] - ${conflict.teacher.first_name} ${conflict.teacher.last_name}</b> - ${conflict.subject.name}<br/>
+                ${moment(conflict.date).format('DD-MM-YYYY')}
+                <b>${conflict.course.year} ${conflict.course.section}</b>
+                ${conflict.hour_start.substring(0,5)} - ${conflict.hour_end.substring(0,5)}
+            </li>`);
+    }
 }
 
 async function replicateWeek(){
