@@ -60,8 +60,8 @@
             for(let teacher of data){
                 let html = `
                     <tr>
-                        <td scope="row">${ teacher.first_name }</td>
                         <td scope="row">${ teacher.last_name }</td>
+                        <td scope="row">${ teacher.first_name }</td>
                         <td>
                             <button class="btn btn-outline-primary" onclick="sendInvite('${ teacher.email }')">
                                 {% trans 'Send invite' %}

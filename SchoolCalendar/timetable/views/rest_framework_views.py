@@ -25,7 +25,8 @@ class TeacherViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, Li
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
-    filter_backends = [QuerysetFromSameSchool]
+    filter_backends = [OrderingFilter, QuerysetFromSameSchool]
+    ordering = ['last_name', 'first_name']
 
 
 class AbsenceBlockViewSet(ListModelMixin, GenericViewSet):
@@ -33,14 +34,16 @@ class AbsenceBlockViewSet(ListModelMixin, GenericViewSet):
     serializer_class = AbsenceBlockSerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filterset_class = AbsenceBlockFilter
-    filter_backends = [DjangoFilterBackend, TeacherFromSameSchoolFilterBackend]
+    filter_backends = [DjangoFilterBackend, OrderingFilter, TeacherFromSameSchoolFilterBackend]
+    ordering = ['teacher__last_name', 'teacher__first_name', 'hour_slot__day_of_week', 'hour_slot__starts_at']
 
 
 class SubjectViewSet(ListModelMixin, GenericViewSet):
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
-    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool)
+    ordering = ['name']
 
 
 class RoomViewSet(ListModelMixin, GenericViewSet):
@@ -48,7 +51,8 @@ class RoomViewSet(ListModelMixin, GenericViewSet):
     serializer_class = RoomSerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filterset_class = RoomFilter
-    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool)
+    ordering = ['name']
 
 
 class CourseYearOnlyListViewSet(ListModelMixin, GenericViewSet):
@@ -56,7 +60,8 @@ class CourseYearOnlyListViewSet(ListModelMixin, GenericViewSet):
     queryset = Course.objects.all()  # I think it gets overridden by get_queryset
     permission_classes = [IsAuthenticated]
     filterset_class = CourseYearOnlyFilter
-    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool)
+    ordering = ['year']
 
     def get_queryset(self):
         """
@@ -73,31 +78,35 @@ class CourseSectionOnlyListViewSet(RetrieveModelMixin, UpdateModelMixin, Destroy
     queryset = Course.objects.all()
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filterset_class = CourseSectionOnlyFilter
-    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool)
+    ordering = ['year', 'section']
 
 
 class HolidayViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
     queryset = Holiday.objects.all()
     serializer_class = HolidaySerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
-    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool)
     filterset_class = HolidayPeriodFilter
+    ordering = ['date_start', 'name']
 
 
 class StageViewSet(ListModelMixin, GenericViewSet):
     queryset = Stage.objects.all()
     serializer_class = StageSerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
-    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool)
     filterset_class = StageFilter
+    ordering = ['date_start', 'name']
 
 
 class HourSlotViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
     queryset = HourSlot.objects.all()
     serializer_class = HourSlotSerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
-    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool,)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool,)
     filterset_class = HourSlotFilter
+    ordering = ['day_of_week', 'starts_at']
 
 
 class HoursPerTeacherInClassViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin,
@@ -111,7 +120,7 @@ class HoursPerTeacherInClassViewSet(RetrieveModelMixin, UpdateModelMixin, Destro
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool,)
     filterset_class = HoursPerTeacherInClassFilter
-    ordering = ['teacher__last_name', 'teacher__first_name']
+    ordering = ['teacher__last_name', 'teacher__first_name', 'course__year', 'course__section', 'subject__name']
 
 
 class AssignmentViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, CreateModelMixin,
@@ -119,16 +128,18 @@ class AssignmentViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin,
     queryset = Assignment.objects.all()
     serializer_class = AssignmentSerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
-    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool,)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool,)
     filterset_class = AssignmentFilter
+    ordering = ['teacher__last_name', 'teacher__first_name', 'course__year', 'course__section', 'hour_start']
 
 
 class TeacherAssignmentsViewSet(UserPassesTestMixin, ListModelMixin, GenericViewSet):
     queryset = Assignment.objects.all()
     serializer_class = AssignmentSerializer
-    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool,)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool,)
     filterset_class = AssignmentFilter  # Here you should not specify any course
     lookup_url_kwarg = ['teacher_pk', 'school_year_pk']
+    ordering = ['hour_start']
 
     def test_func(self):
         """
