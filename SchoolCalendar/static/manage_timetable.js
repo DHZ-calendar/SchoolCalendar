@@ -486,6 +486,7 @@ async function addAssignment(teaId, teacherId, subjId, schoolId, block, bes){
         csrfmiddlewaretoken: Cookies.get('csrftoken'),
         teacher_id: teacherId,
         course_id: $('#course_section').val(),
+        room_id: null,
         subject_id: subjId,
         school_year: $('#school_year').val(),
         school: schoolId,

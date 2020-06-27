@@ -213,7 +213,7 @@ class AssignmentSerializer(ModelSerializer):
     hour_slot = SerializerMethodField(read_only=True)
     course_id = PrimaryKeyRelatedField(write_only=True, queryset=Course.objects.all(), source='course')
     course = CourseSerializer(read_only=True)
-    room_id = PrimaryKeyRelatedField(write_only=True, queryset=Room.objects.all(), source='room')
+    room_id = PrimaryKeyRelatedField(write_only=True, required=False, queryset=Room.objects.all(), source='room')
     room = RoomSerializer(read_only=True)
 
     def __init__(self, *args, **kwargs):
