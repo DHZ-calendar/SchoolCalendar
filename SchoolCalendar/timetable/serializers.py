@@ -434,3 +434,24 @@ class ReplicationConflictsSerializer(Serializer):
 
     def update(self, instance, validated_data):
         pass
+
+
+class SubstitutionSerializer(Serializer):
+    available_teachers = SerializerMethodField('get_available_teachers')
+    other_teachers = SerializerMethodField('get_other_teachers')
+
+    def get_available_teachers(self, obj):
+        serializer_context = {'request': self.context.get('request')}
+        serializer = TeacherSubstitutionSerializer(self.initial_data['available_teachers'], many=True, context=serializer_context)
+        return serializer.data
+
+    def get_other_teachers(self, obj):
+        serializer_context = {'request': self.context.get('request')}
+        serializer = TeacherSubstitutionSerializer(self.initial_data['other_teachers'], many=True, context=serializer_context)
+        return serializer.data
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass

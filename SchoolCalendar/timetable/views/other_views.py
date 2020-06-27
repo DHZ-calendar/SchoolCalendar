@@ -22,7 +22,7 @@ from timetable.mixins import AdminSchoolPermissionMixin, SuperUserPermissionMixi
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
     Stage, Subject, HoursPerTeacherInClass, Assignment
 from timetable import utils
-from timetable.serializers import ReplicationConflictsSerializer, AssignmentSerializer
+from timetable.serializers import ReplicationConflictsSerializer, AssignmentSerializer, SubstitutionSerializer
 
 
 class TimetableView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateView):
@@ -263,6 +263,94 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
             return HttpResponse(status=201)
         except ObjectDoesNotExist:
             return HttpResponse(_("One of the Assignments specified doesn't exist"), 404)
+
+
+class TeacherSubstitutionView(UserPassesTestMixin, View):
+    def test_func(self):
+        """
+        Returns True only when the user logged is an admin, and it is substituting the assignment that
+        are in the correct school
+        :return:
+        """
+        assign = self.kwargs.get('assignment_pk')
+
+        if not(utils.is_adminschool(self.request.user) and Assignment.objects.filter(id=assign).exists() and
+               Assignment.objects.get(id=assign).school == utils.get_school_from_user(self.request.user)):
+            return False
+
+        if not Assignment.objects.filter(id=assign,
+                                         school=utils.get_school_from_user(self.request.user).id).exists():
+            return False
+        return True
+
+    def get(self, request, *args, **kwargs):
+        # Return all teachers for a certain school.
+        # May need to add only teachers for which there is at least one hour_per_teacher_in_class instance in
+        # the given school_year
+        request.assignment_pk = self.kwargs.get('assignment_pk')
+
+        a = Assignment.objects.get(id=self.kwargs.get('assignment_pk'),
+                                   school=utils.get_school_from_user(self.request.user).id)
+
+        teachers_list = Teacher.objects.filter(school=utils.get_school_from_user(self.request.user)) \
+            .exclude(id=a.teacher.id) \
+            .filter(hoursperteacherinclass__school_year=a.school_year).distinct()
+
+        # Remove all teachers who already have assignments in that hour
+        teachers_list = teachers_list.exclude(assignment__date=a.date,
+                                              assignment__hour_start=a.hour_start,
+                                              assignment__hour_end=a.hour_end).distinct()
+
+        # Remove all teachers who have an absence block there.
+        hour_slot = HourSlot.objects.filter(school=a.school,
+                                            school_year=a.school_year,
+                                            starts_at=a.hour_start,
+                                            ends_at=a.hour_end).first()
+        if hour_slot:
+            # If there is the hour_slot, then exclude all teachers that have an absence block in that period.
+            # TODO: do some tests with absence blocks!!
+            teachers_list = teachers_list.exclude(absenceblock__hour_slot=hour_slot)
+
+        other_teachers = Teacher.objects.exclude(id__in=teachers_list.values('id'))
+
+        data = dict(available_teachers=teachers_list,
+                    other_teachers=other_teachers)
+        serializer = SubstitutionSerializer(data=data, context={'request': request})
+        serializer.is_valid()
+        return JsonResponse(serializer.data)
+
+
+class SubstituteTeacherApiView(UserPassesTestMixin, View):
+    def test_func(self):
+        """
+        Returns True only when the user logged is an admin, it is substituting the assignments that
+        are in the correct school and the teacher is in the same school too.
+        :return:
+        """
+        assign = self.kwargs.get('assignment_pk')
+        teacher = self.kwargs.get('teacher_pk')
+        school = utils.get_school_from_user(self.request.user)
+
+        if not(utils.is_adminschool(self.request.user) and Assignment.objects.filter(id=assign).exists() and
+               Assignment.objects.get(id=assign).school == school):
+            return False
+
+        if not Assignment.objects.filter(id=assign, school=school.id).exists():
+            return False
+
+        if not Teacher.objects.filter(id=teacher, school=school.id).exists():
+            return False
+        return True
+
+    def post(self, request, *args, **kwargs):
+        # Insert the substitution assignment
+        assign = self.kwargs.get('assignment_pk')
+        teacher = self.kwargs.get('teacher_pk')
+
+        print(assign, teacher)
+
+        # TODO: implement checks and decide if the substitution counts or not
+        raise Exception("Not implemented!")
 
 
 class LoggedUserRedirectView(LoginRequiredMixin, RedirectView):

@@ -12,11 +12,12 @@ from timetable.views.CRUD_views import SchoolCreate, TeacherCreate, AdminSchoolC
 from timetable.views.rest_framework_views import TeacherViewSet, \
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
-    AbsenceBlocksPerTeacherViewSet, TeacherSubstitutionViewSet, TeacherTimetableViewSet, AbsenceBlockViewSet, \
+    AbsenceBlocksPerTeacherViewSet, TeacherTimetableViewSet, AbsenceBlockViewSet, \
     SubjectViewSet, RoomViewSet
 from timetable.views.other_views import TimetableView, SubstituteTeacherView, TeacherTimetableView, \
     LoggedUserRedirectView, TeacherReportView, TeacherPDFReportView, SendInvitationTeacherEmailView, \
-    SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView
+    SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView, \
+    TeacherSubstitutionView, SubstituteTeacherApiView
 
 from rest_framework.routers import DefaultRouter
 
@@ -35,8 +36,6 @@ router.register(r'teacher_assignments/(?P<teacher_pk>[0-9]+)/(?P<school_year_pk>
                 basename='teacher_assignments')
 router.register(r'teacher_absence_block/(?P<teacher_pk>[0-9]+)/(?P<school_year_pk>[0-9]+)',
                 AbsenceBlocksPerTeacherViewSet, basename='teacher_absence_blocks')
-router.register(r'teacher_can_substitute/(?P<assignment_pk>\d+)', TeacherSubstitutionViewSet,
-                basename='teacher_substitution')
 router.register(r'teacher_timetable', TeacherTimetableViewSet, basename='teacher_timetable')
 router.register(r'absence_blocks', AbsenceBlockViewSet, basename='absence_block')
 
@@ -108,5 +107,9 @@ urlpatterns = [
             r'(?P<to>\d\d\d\d-\d\d-\d\d)',
             ReplicateWeekAssignmentsView.as_view(), name='replicate_week-view'),
     re_path(r'check_week_replication/(?P<from>\d\d\d\d-\d\d-\d\d)/(?P<to>\d\d\d\d-\d\d-\d\d)',
-            CheckWeekReplicationView.as_view(), name='check_week_replication-view')
+            CheckWeekReplicationView.as_view(), name='check_week_replication-view'),
+    re_path(r'teacher_can_substitute/(?P<assignment_pk>\d+)', TeacherSubstitutionView.as_view(),
+            name='teacher_substitution-view'),
+    re_path(r'substitute_teacher_api/(?P<assignment_pk>\d+)/(?P<teacher_pk>\d+)', SubstituteTeacherApiView.as_view(),
+            name='substitute_teacher_api-view')
 ]

@@ -17,6 +17,10 @@
     max-height: 350px;
     overflow-y: auto;
 }
+.teachers-list-others{
+    max-height: 200px;
+    overflow-y: auto;
+}
 {% endblock %}
 
 {% block body %}
@@ -92,8 +96,8 @@
             'from_date': date,
             'to_date': date
         };
+        $("#lectures").empty();
         $.get(url, data=data, function(data) {
-            $("#lectures").empty();
             for(let assign of data){
                 $("#lectures").append(`
                     <div class="card" id="card-${assign.id}">
@@ -105,34 +109,54 @@
                             </h2>
                         </div>
                         <div id="collapse-${assign.id}" class="collapse" aria-labelledby="card-${assign.id}" data-parent="#lectures">
-                            <div class="card-body">
-                                {% trans 'Available teachers:' %}
-                                <ul class="list-group teachers-list col-12 my-2" id="sub_teachers-${assign.id}">
+                            <div class="card-body text-center">
+                                <b>{% trans 'Available teachers:' %}</b>
+                                <ul class="list-group teachers-list col-12 my-2 text-left" id="sub_teachers-${assign.id}">
                                 </ul>
-                                <button type="button" class="btn btn-success" assignId="${assign.id}" teaId="${assign.teacher.id}" subId="${assign.subject.id}" date="${assign.date}"
-                                    hourStart="${assign.hour_start}" hourEnd="${assign.hour_end}" course="${assign.course.id}" schoolYear="${assign.school_year}" school="${assign.school}"
-                                    onclick="substituteTeacher($(this))">{% trans 'Make substitution' %}</button>
+                                <hr/>
+                                <b>{% trans 'Other teachers: (the substitution will not be counted)' %}</b>
+                                <ul class="list-group teachers-list teachers-list-others col-12 my-2 text-left" id="sub_teachers-others-${assign.id}">
+                                </ul>
+                                <button type="button" class="btn btn-success mt-2" assignId="${assign.id}" onclick="substituteTeacher($(this))">
+                                    {% trans 'Make substitution' %}
+                                </button>
                             </div>
                         </div>
                     </div>
                 `);
 
                 let substituteBlock = $("#lectures").find("ul#sub_teachers-" + assign.id);
-                getSubstituteTeachers(assign.id, substituteBlock);
+                let substituteOthersBlock = $("#lectures").find("ul#sub_teachers-others-" + assign.id);
+                getSubstituteTeachers(assign.id, substituteBlock, substituteOthersBlock);
             }
             if(data.length === 0){
-                $("#lectures").append(`<b>{% trans 'No lectures found!' %}</b>`);
+                $("#lectures").html(`<b>{% trans 'No lectures found!' %}</b>`);
             }
         });
     }
 
-    function getSubstituteTeachers(assignId, substSelect){
-        let url = "{% url 'teacher_substitution-list' 1234 %}"
+    function getSubstituteTeachers(assignId, substSelect, substOthersSelect){
+        let url = "{% url 'teacher_substitution-view' 1234 %}"
             .replace('1234', assignId);
         $.get(url, function(data) {
             substSelect.empty();
-            for(let tea of data){
+            for(let tea of data.available_teachers){
                 substSelect.append(`
+                    <li class="list-group-item row" style="display: flex;">
+                        <div class="col-1 text-center">
+                            <input class="check-subsitute" type="radio" name="radio-${assignId}" value="${tea.id}">
+                        </div>
+                        <div class="col-11">
+                            <b>${tea.first_name} ${tea.last_name}</b><br/>
+                            {% trans 'Hours of substitutions made:' %} ${tea.substitutions_made_so_far}<br/>
+                            {% trans 'Has a lesson before:' %} ${tea.has_hour_before}<br/>
+                            {% trans 'Has a lesson after:' %} ${tea.has_hour_after}<br/>
+                        </div>
+                    </li>
+                `);
+            }
+            for(let tea of data.other_teachers){
+                substOthersSelect.append(`
                     <li class="list-group-item row" style="display: flex;">
                         <div class="col-1 text-center">
                             <input class="check-subsitute" type="radio" name="radio-${assignId}" value="${tea.id}">
@@ -151,43 +175,17 @@
 
     async function substituteTeacher(btn){
         let assignId = btn.attr("assignId");
-        console.log(assignId)
         let teacherId = $("input[name=radio-" + assignId + "]:checked").val();
         
         if(teacherId !== undefined){
-            let url = "{% url 'assignments-list' %}" + assignId + "/";
+            let url = "{% url 'substitute_teacher_api-view' 1234 9999 %}"
+                    .replace("1234", assignId)
+                    .replace("9999", teacherId);
             let data = {
-                csrfmiddlewaretoken: Cookies.get('csrftoken'),
-                absent: true,
-                teacher_id: btn.attr("teaId"),
-                subject_id: btn.attr("subId"),
-                date: btn.attr("date"),
-                hour_start: btn.attr("hourStart"),
-                hour_end: btn.attr("hourEnd"),
-                course_id: btn.attr("course"),
-                school_year: btn.attr("schoolYear"),
-                school: btn.attr("school")
+                csrfmiddlewaretoken: Cookies.get('csrftoken')
             }
-            $.ajax({
-                url: url,
-                type: 'PUT',
-                headers: { "X-CSRFToken": Cookies.get('csrftoken') },
-                data: data,
-                statusCode: {
-                    200: function(xhr) {
-                        getTeacherAssignments();
-                    }
-                }
-            });
 
-            url = "{% url 'assignments-list' %}";
-
-            data.teacher_id = teacherId;
-            data.substitution = true;
-            data.absent = false;
-
-            $.post(url, data=data, function(data) {
-            });
+            let res = await $.post(url, data=data);
         }
     }
 {% endblock %}
