@@ -14,7 +14,7 @@ import io
 from django.http import FileResponse, HttpResponse, JsonResponse
 
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 
@@ -112,7 +112,7 @@ class CheckWeekReplicationView(UserPassesTestMixin, View):
         # TODO: improve this if statement, it is going to be super slow for long queries!
         for assign in assignments:
             if not (utils.is_adminschool(self.request.user) and Assignment.objects.filter(id=assign).exists() and
-               Assignment.objects.get(id=assign).school == utils.get_school_from_user(self.request.user)):
+                    Assignment.objects.get(id=assign).school == utils.get_school_from_user(self.request.user)):
                 return False
         return True
 
@@ -165,8 +165,8 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
         assignments = self.request.POST.getlist('assignments[]')
 
         for assign in assignments:
-            if not(utils.is_adminschool(self.request.user) and Assignment.objects.filter(id=assign).exists() and
-                   Assignment.objects.get(id=assign).school == utils.get_school_from_user(self.request.user)):
+            if not (utils.is_adminschool(self.request.user) and Assignment.objects.filter(id=assign).exists() and
+                    Assignment.objects.get(id=assign).school == utils.get_school_from_user(self.request.user)):
                 return False
         return True
 
@@ -220,7 +220,7 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
                                                       course=course_pk,
                                                       school_year=school_year_pk,
                                                       date__gte=from_date,
-                                                      date__lte=to_date).\
+                                                      date__lte=to_date). \
                 exclude(id__in=assignments)  # avoid removing replicating assignments
             assign_to_del.delete()
 
@@ -274,8 +274,8 @@ class TeacherSubstitutionView(UserPassesTestMixin, View):
         """
         assign = self.kwargs.get('assignment_pk')
 
-        if not(utils.is_adminschool(self.request.user) and Assignment.objects.filter(id=assign).exists() and
-               Assignment.objects.get(id=assign).school == utils.get_school_from_user(self.request.user)):
+        if not (utils.is_adminschool(self.request.user) and Assignment.objects.filter(id=assign).exists() and
+                Assignment.objects.get(id=assign).school == utils.get_school_from_user(self.request.user)):
             return False
 
         if not Assignment.objects.filter(id=assign,
@@ -331,11 +331,8 @@ class SubstituteTeacherApiView(UserPassesTestMixin, View):
         teacher = self.kwargs.get('teacher_pk')
         school = utils.get_school_from_user(self.request.user)
 
-        if not(utils.is_adminschool(self.request.user) and Assignment.objects.filter(id=assign).exists() and
-               Assignment.objects.get(id=assign).school == school):
-            return False
-
-        if not Assignment.objects.filter(id=assign, school=school.id).exists():
+        if not (utils.is_adminschool(self.request.user) and Assignment.objects.filter(id=assign).exists() and
+                Assignment.objects.get(id=assign).school == school):
             return False
 
         if not Teacher.objects.filter(id=teacher, school=school.id).exists():
@@ -351,6 +348,122 @@ class SubstituteTeacherApiView(UserPassesTestMixin, View):
 
         # TODO: implement checks and decide if the substitution counts or not
         raise Exception("Not implemented!")
+
+
+class TimetableReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateView):
+    template_name = 'timetable/timetable_report.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['school_years'] = SchoolYear.objects.all()
+        return context
+
+
+class TimetableTeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):
+    def test_func(self):
+        """
+        Returns True only when the user logged is an admin, it is substituting the assignments that
+        are in the correct school and the teacher is in the same school too.
+        :return:
+        """
+        school_year = self.kwargs.get('school_year_pk')
+        teacher = self.kwargs.get('teacher_pk')
+        school = utils.get_school_from_user(self.request.user)
+
+        if not (utils.is_adminschool(self.request.user) and SchoolYear.objects.filter(id=school_year).exists()):
+            return False
+
+        if not Teacher.objects.filter(id=teacher, school=school.id).exists():
+            return False
+        return True
+
+    def get(self, request, *args, **kwargs):
+        try:
+            school_year = kwargs.get('school_year_pk')
+            teacher = kwargs.get('teacher_pk')
+            monday_date = datetime.datetime.strptime(kwargs.get('monday_date'), '%Y-%m-%d').date()
+            end_date = monday_date + datetime.timedelta(days=6)
+            school = utils.get_school_from_user(request.user)
+        except ValueError:
+            # Wrong format of date: yyyy-mm-dd
+            return HttpResponse(_('Wrong format of date: yyyy-mm-dd'), 400)
+
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=landscape(letter))
+        styles = getSampleStyleSheet()
+        styles.add(ParagraphStyle(name='title_style', fontName="Helvetica-Bold", fontSize=12, leftIndent=300))
+        title_style = styles['title_style']
+
+        table = []
+        hour_slots = HourSlot.objects.filter(school=school, school_year=school_year)
+        hours_hour_slots = hour_slots.extra(
+            select={
+                'hour_start': 'starts_at',
+                'hour_end': 'ends_at'
+            }
+        ).order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
+        assignments = Assignment.objects.filter(school=school, school_year=school_year, teacher=teacher,
+                                                date__gte=monday_date, date__lte=end_date)
+        hours_assign = assignments.order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
+
+        for lecture in hours_assign:
+            table.append(
+                [lecture] + [''] * 6
+            )
+
+        for i, slot in enumerate(hours_hour_slots):
+            found = False
+            for row in table:
+                if row[0]['hour_start'] == slot['hour_start'] and \
+                        row[0]['hour_end'] == slot['hour_end']:
+                    found = True
+                    break
+            if not found:
+                table.insert(i,
+                    [slot] + [''] * 6
+                )
+
+        for assign in assignments:
+            for row in table:
+                if row[0]['hour_start'] == assign.hour_start and \
+                        row[0]['hour_end'] == assign.hour_end:
+                    day_of_week = assign.date.weekday()
+                    row[day_of_week + 1] = [
+                        Paragraph(str(assign.subject), styles['Normal']),
+                        Paragraph(str(assign.course.year) + ' ' + str(assign.course.section), styles['Normal'])
+                    ]
+                    break
+
+        # format the hours of the row
+        for row in table:
+            row[0] = row[0]['hour_start'].strftime("%H:%M") + '\n' + row[0]['hour_end'].strftime("%H:%M")
+
+        teacher = Teacher.objects.get(id=teacher)
+        elements = [
+            Paragraph(_("Teacher timetable"), title_style),
+            Spacer(0, 6),
+            Paragraph(_('Teacher') + ': ' + str(teacher), styles['Normal']),
+            Spacer(0, 12)
+        ]
+
+        headers = ['', _('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday')]
+        data = [headers] + table
+        t = Table(data)
+
+        t.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, 0), 'Courier-Bold'),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+        ]))
+
+        elements.append(t)
+
+        doc.build(elements)
+
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename=str(teacher) + '.pdf')
 
 
 class LoggedUserRedirectView(LoginRequiredMixin, RedirectView):

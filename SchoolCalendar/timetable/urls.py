@@ -17,7 +17,7 @@ from timetable.views.rest_framework_views import TeacherViewSet, \
 from timetable.views.other_views import TimetableView, SubstituteTeacherView, TeacherTimetableView, \
     LoggedUserRedirectView, TeacherReportView, TeacherPDFReportView, SendInvitationTeacherEmailView, \
     SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView, \
-    TeacherSubstitutionView, SubstituteTeacherApiView
+    TeacherSubstitutionView, SubstituteTeacherApiView, TimetableReportView, TimetableTeacherPDFReportView
 
 from rest_framework.routers import DefaultRouter
 
@@ -30,7 +30,8 @@ router.register(r'rooms', RoomViewSet, basename='room')
 router.register(r'stages', StageViewSet, basename='stage')
 router.register(r'subjects', SubjectViewSet, basename='subject')
 router.register(r'hour_slots', HourSlotViewSet, basename='hour_slot')
-router.register(r'hour_per_teacher_in_class/?(start_date=\d\d\d\d-\d\d-\d\d)?(end_date=\d\d\d\d-\d\d-\d\d)?', HoursPerTeacherInClassViewSet, basename='hour_per_teacher_in_class')
+router.register(r'hour_per_teacher_in_class/?(start_date=\d\d\d\d-\d\d-\d\d)?(end_date=\d\d\d\d-\d\d-\d\d)?',
+                HoursPerTeacherInClassViewSet, basename='hour_per_teacher_in_class')
 router.register(r'assignments', AssignmentViewSet, basename='assignments')
 router.register(r'teacher_assignments/(?P<teacher_pk>[0-9]+)/(?P<school_year_pk>[0-9]+)', TeacherAssignmentsViewSet,
                 basename='teacher_assignments')
@@ -39,7 +40,6 @@ router.register(r'teacher_absence_block/(?P<teacher_pk>[0-9]+)/(?P<school_year_p
 router.register(r'teacher_timetable', TeacherTimetableViewSet, basename='teacher_timetable')
 router.register(r'absence_blocks', AbsenceBlockViewSet, basename='absence_block')
 
-
 urlpatterns = [
     path('', LoggedUserRedirectView.as_view(), name='user_redirect-view'),
     path('admin_school', TimetableView.as_view(), name='timetable-view'),
@@ -47,9 +47,14 @@ urlpatterns = [
     path('teacher_view', TeacherTimetableView.as_view(), name='teacher_timetable-view'),
     path('teacher_report_view', TeacherReportView.as_view(), name='teacher_report-view'),
     path('teacher_pdf_report_view', TeacherPDFReportView.as_view(), name='teacher_pdf_report-view'),
+    path('timetable_report_view', TimetableReportView.as_view(), name='timetable_report-view'),
+    re_path(r'timetable_teacher_pdf_report_view/(?P<school_year_pk>[0-9]+)/(?P<teacher_pk>\d+)/'
+            r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)',
+            TimetableTeacherPDFReportView.as_view(), name='timetable_teacher_pdf_report-view'),
     path('invite_teacher/<email>', SendInvitationTeacherEmailView.as_view(), name='teacher_invitation-view'),
-    path('invite_adminschool/<email>', SendInvitationAdminSchoolEmailView.as_view(), name='adminschool_invitation-view'),
-    re_path(r'^api-auth/', include('rest_framework.urls')),    # Django Rest Framework
+    path('invite_adminschool/<email>', SendInvitationAdminSchoolEmailView.as_view(),
+         name='adminschool_invitation-view'),
+    re_path(r'^api-auth/', include('rest_framework.urls')),  # Django Rest Framework
     re_path(r'^api/', include(router.urls)),
     path('school/add/', SchoolCreate.as_view(), name='school-add'),
     path('school/<pk>/edit/', SchoolUpdate.as_view(), name='school-edit'),
@@ -101,7 +106,8 @@ urlpatterns = [
          name='hours_per_teacher_in_class-edit'),
     path('hours_per_teacher_in_class/<pk>/delete/', HoursPerTeacherInClassDelete.as_view(),
          name='hours_per_teacher_in_class-delete'),
-    path('hours_per_teacher_in_class/', HoursPerTeacherInClassList.as_view(), name='hours_per_teacher_in_class-listview'),
+    path('hours_per_teacher_in_class/', HoursPerTeacherInClassList.as_view(),
+         name='hours_per_teacher_in_class-listview'),
     path('assignment/add/', AssignmentCreate.as_view(), name='assignment-add'),
     re_path(r'replicate_week/add/(?P<school_year_pk>[0-9]+)/(?P<course_pk>[0-9]+)/(?P<from>\d\d\d\d-\d\d-\d\d)/'
             r'(?P<to>\d\d\d\d-\d\d-\d\d)',
