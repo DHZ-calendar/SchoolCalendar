@@ -444,6 +444,8 @@ class TimetableTeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMix
             Paragraph(_("Teacher timetable"), title_style),
             Spacer(0, 6),
             Paragraph(_('Teacher') + ': ' + str(teacher), styles['Normal']),
+            Paragraph(_('Week of') + ': ' + monday_date.strftime("%d/%m/%Y") + ' - ' +
+                      end_date.strftime("%d/%m/%Y"), styles['Normal']),
             Spacer(0, 12)
         ]
 
