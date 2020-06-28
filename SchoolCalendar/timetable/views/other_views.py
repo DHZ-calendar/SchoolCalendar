@@ -12,10 +12,13 @@ from django.utils.translation import gettext as _
 
 import io
 from django.http import FileResponse, HttpResponse, JsonResponse
+from reportlab.graphics.shapes import String
 
 from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import mm
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 
 from timetable.mixins import AdminSchoolPermissionMixin, SuperUserPermissionMixin, TeacherPermissionMixin
@@ -73,7 +76,7 @@ class TeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View)
 
         doc = SimpleDocTemplate(buffer, pagesize=letter)
         styles = getSampleStyleSheet()
-        styles.add(ParagraphStyle(name='title_style', fontName="Helvetica-Bold", fontSize=12, leftIndent=200))
+        styles.add(ParagraphStyle(name='title_style', fontName="Helvetica-Bold", fontSize=12, alignment=TA_CENTER))
         title_style = styles['title_style']
         elements = [
             Paragraph(_("Teachers report"), title_style),
@@ -391,7 +394,7 @@ class TimetableTeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMix
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=landscape(letter))
         styles = getSampleStyleSheet()
-        styles.add(ParagraphStyle(name='title_style', fontName="Helvetica-Bold", fontSize=12, leftIndent=300))
+        styles.add(ParagraphStyle(name='title_style', fontName="Helvetica-Bold", fontSize=12, alignment=TA_CENTER))
         title_style = styles['title_style']
 
         table = []
@@ -420,8 +423,8 @@ class TimetableTeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMix
                     break
             if not found:
                 table.insert(i,
-                    [slot] + [''] * 6
-                )
+                             [slot] + [''] * 6
+                             )
 
         for assign in assignments:
             for row in table:
@@ -498,7 +501,7 @@ class TimetableCoursePDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixi
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=landscape(letter))
         styles = getSampleStyleSheet()
-        styles.add(ParagraphStyle(name='title_style', fontName="Helvetica-Bold", fontSize=12, leftIndent=300))
+        styles.add(ParagraphStyle(name='title_style', fontName="Helvetica-Bold", fontSize=12, alignment=TA_CENTER))
         styles.add(ParagraphStyle(name='text_bold', fontName="Helvetica-Bold", fontSize=10))
         title_style = styles['title_style']
 
@@ -528,8 +531,8 @@ class TimetableCoursePDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixi
                     break
             if not found:
                 table.insert(i,
-                    [slot] + [''] * 6
-                )
+                             [slot] + [''] * 6
+                             )
 
         for assign in assignments:
             for row in table:
@@ -573,6 +576,130 @@ class TimetableCoursePDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixi
 
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename=str(course) + '.pdf')
+
+
+class TimetableGeneralPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):
+    def test_func(self):
+        """
+        Returns True only when the user logged is an admin and the School Year exists.
+        :return:
+        """
+        school_year = self.kwargs.get('school_year_pk')
+
+        if not (utils.is_adminschool(self.request.user) and SchoolYear.objects.filter(id=school_year).exists()):
+            return False
+
+        return True
+
+    def get(self, request, *args, **kwargs):
+        try:
+            school_year = kwargs.get('school_year_pk')
+            monday_date = datetime.datetime.strptime(kwargs.get('monday_date'), '%Y-%m-%d').date()
+            end_date = monday_date + datetime.timedelta(days=6)
+            school = utils.get_school_from_user(request.user)
+        except ValueError:
+            # Wrong format of date: yyyy-mm-dd
+            return HttpResponse(_('Wrong format of date: yyyy-mm-dd'), 400)
+
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=landscape(letter),
+                                leftMargin=0, rightMargin=0, topMargin=0, bottomMargin=0)
+        styles = getSampleStyleSheet()
+        styles.add(ParagraphStyle(name='title_style', fontName="Helvetica-Bold", fontSize=10, alignment=TA_CENTER))
+        styles.add(ParagraphStyle(name='text_bold', fontName="Helvetica-Bold", fontSize=7, alignment=TA_CENTER))
+        styles.add(ParagraphStyle(name='text_small', fontName="Helvetica", fontSize=4, alignment=TA_CENTER,
+                                  borderPadding=0, leading=4))
+        title_style = styles['title_style']
+
+        table = []
+        hour_slots = HourSlot.objects.filter(school=school, school_year=school_year)
+        hours_hour_slots = hour_slots.extra(
+            select={
+                'hour_start': 'starts_at',
+                'hour_end': 'ends_at'
+            }
+        ).order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
+        assignments = Assignment.objects.filter(school=school, school_year=school_year,
+                                                date__gte=monday_date, date__lte=end_date). \
+            order_by('teacher__last_name', 'teacher__first_name')
+        hours_assign = assignments.order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
+
+        hours = list(hours_assign)
+
+        for i, slot in enumerate(hours_hour_slots):
+            found = False
+            for row in hours:
+                if row['hour_start'] == slot['hour_start'] and \
+                        row['hour_end'] == slot['hour_end']:
+                    found = True
+                    break
+            if not found:
+                hours.insert(i, slot)
+
+        teacher_id = None
+        for assign in assignments:
+            if teacher_id != assign.teacher.id:
+                table.append([Paragraph(str(assign.teacher), styles['text_small'])] +
+                             [''] * len(hours) * 6)
+                teacher_id = assign.teacher.id
+
+            i = 0
+            for hour in hours:
+                if hour['hour_start'] == assign.hour_start and \
+                        hour['hour_end'] == assign.hour_end:
+                    break
+                i += 1
+            column = assign.date.weekday() * i + 1
+
+            table[-1][column] = Paragraph(str(assign.course.year) + ' ' + assign.course.section, styles['text_small'])
+
+        elements = [
+            Paragraph(_("General timetable"), title_style),
+            Spacer(0, 6),
+            Paragraph(_('Week of') + ': ' + monday_date.strftime("%d/%m/%Y") + ' - ' +
+                      end_date.strftime("%d/%m/%Y"), styles['Normal']),
+            Spacer(0, 12)
+        ]
+
+        fill_spaces = [''] * (len(hours) - 1)
+        headers = ['', Paragraph(_('Monday'), styles['text_small'])] + fill_spaces + \
+                  [Paragraph(_('Tuesday'), styles['text_small'])] + fill_spaces + \
+                  [Paragraph(_('Wednesday'), styles['text_small'])] + fill_spaces + \
+                  [Paragraph(_('Thursday'), styles['text_small'])] + fill_spaces + \
+                  [Paragraph(_('Friday'), styles['text_small'])] + fill_spaces + \
+                  [Paragraph(_('Saturday'), styles['text_small'])] + fill_spaces
+
+        days = ['']
+        spans = []
+        for day in range(6):
+            days += [
+                Paragraph(str(i + 1), styles['text_small']) for i in range(len(hours))
+            ]
+            start = 1 + len(hours) * day
+            end = start + len(hours) - 1
+            spans.append(('SPAN', (start, 0), (end, 0)), )
+
+        data = [headers] + [days] + table
+        t = Table(data, colWidths=[None] + [7*mm] *(len(headers)-2))
+
+        t.setStyle(TableStyle(
+            spans +
+            [
+                ('LEFTPADDING', (0, 0), (-1, -1), 0),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+                ('FONTNAME', (0, 0), (-1, 0), 'Courier-Bold'),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+                ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+            ]))
+
+        elements.append(t)
+
+        doc.build(elements)
+
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename=str(monday_date) + '.pdf')
 
 
 class LoggedUserRedirectView(LoginRequiredMixin, RedirectView):
