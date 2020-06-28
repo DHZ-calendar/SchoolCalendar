@@ -363,8 +363,7 @@ class TimetableReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, Templa
 class TimetableTeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):
     def test_func(self):
         """
-        Returns True only when the user logged is an admin, it is substituting the assignments that
-        are in the correct school and the teacher is in the same school too.
+        Returns True only when the user logged is an admin, the teacher exists and is in the same school.
         :return:
         """
         school_year = self.kwargs.get('school_year_pk')
@@ -466,6 +465,114 @@ class TimetableTeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMix
 
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename=str(teacher) + '.pdf')
+
+
+class TimetableCoursePDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):
+    def test_func(self):
+        """
+        Returns True only when the user logged is an admin and the Course exists and is in the same school.
+        :return:
+        """
+        school_year = self.kwargs.get('school_year_pk')
+        course = self.kwargs.get('course_pk')
+        school = utils.get_school_from_user(self.request.user)
+
+        if not (utils.is_adminschool(self.request.user) and SchoolYear.objects.filter(id=school_year).exists()):
+            return False
+
+        if not Course.objects.filter(id=course, school=school.id, school_year=school_year).exists():
+            return False
+        return True
+
+    def get(self, request, *args, **kwargs):
+        try:
+            school_year = kwargs.get('school_year_pk')
+            course = self.kwargs.get('course_pk')
+            monday_date = datetime.datetime.strptime(kwargs.get('monday_date'), '%Y-%m-%d').date()
+            end_date = monday_date + datetime.timedelta(days=6)
+            school = utils.get_school_from_user(request.user)
+        except ValueError:
+            # Wrong format of date: yyyy-mm-dd
+            return HttpResponse(_('Wrong format of date: yyyy-mm-dd'), 400)
+
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=landscape(letter))
+        styles = getSampleStyleSheet()
+        styles.add(ParagraphStyle(name='title_style', fontName="Helvetica-Bold", fontSize=12, leftIndent=300))
+        styles.add(ParagraphStyle(name='text_bold', fontName="Helvetica-Bold", fontSize=10))
+        title_style = styles['title_style']
+
+        table = []
+        hour_slots = HourSlot.objects.filter(school=school, school_year=school_year)
+        hours_hour_slots = hour_slots.extra(
+            select={
+                'hour_start': 'starts_at',
+                'hour_end': 'ends_at'
+            }
+        ).order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
+        assignments = Assignment.objects.filter(school=school, school_year=school_year, course=course,
+                                                date__gte=monday_date, date__lte=end_date)
+        hours_assign = assignments.order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
+
+        for lecture in hours_assign:
+            table.append(
+                [lecture] + [''] * 6
+            )
+
+        for i, slot in enumerate(hours_hour_slots):
+            found = False
+            for row in table:
+                if row[0]['hour_start'] == slot['hour_start'] and \
+                        row[0]['hour_end'] == slot['hour_end']:
+                    found = True
+                    break
+            if not found:
+                table.insert(i,
+                    [slot] + [''] * 6
+                )
+
+        for assign in assignments:
+            for row in table:
+                if row[0]['hour_start'] == assign.hour_start and \
+                        row[0]['hour_end'] == assign.hour_end:
+                    day_of_week = assign.date.weekday()
+                    row[day_of_week + 1] = [
+                        Paragraph(str(assign.subject), styles['text_bold']),
+                        Paragraph(str(assign.teacher), styles['Normal'])
+                    ]
+                    break
+
+        # format the hours of the row
+        for row in table:
+            row[0] = row[0]['hour_start'].strftime("%H:%M") + '\n' + row[0]['hour_end'].strftime("%H:%M")
+
+        course = Course.objects.get(id=course)
+        elements = [
+            Paragraph(_("Course timetable"), title_style),
+            Spacer(0, 6),
+            Paragraph(_('Course') + ': ' + str(course), styles['Normal']),
+            Paragraph(_('Week of') + ': ' + monday_date.strftime("%d/%m/%Y") + ' - ' +
+                      end_date.strftime("%d/%m/%Y"), styles['Normal']),
+            Spacer(0, 12)
+        ]
+
+        headers = ['', _('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday')]
+        data = [headers] + table
+        t = Table(data)
+
+        t.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, 0), 'Courier-Bold'),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+        ]))
+
+        elements.append(t)
+
+        doc.build(elements)
+
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename=str(course) + '.pdf')
 
 
 class LoggedUserRedirectView(LoginRequiredMixin, RedirectView):

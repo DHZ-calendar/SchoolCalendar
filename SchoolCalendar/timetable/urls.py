@@ -17,7 +17,8 @@ from timetable.views.rest_framework_views import TeacherViewSet, \
 from timetable.views.other_views import TimetableView, SubstituteTeacherView, TeacherTimetableView, \
     LoggedUserRedirectView, TeacherReportView, TeacherPDFReportView, SendInvitationTeacherEmailView, \
     SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView, \
-    TeacherSubstitutionView, SubstituteTeacherApiView, TimetableReportView, TimetableTeacherPDFReportView
+    TeacherSubstitutionView, SubstituteTeacherApiView, TimetableReportView, TimetableTeacherPDFReportView, \
+    TimetableCoursePDFReportView
 
 from rest_framework.routers import DefaultRouter
 
@@ -51,6 +52,9 @@ urlpatterns = [
     re_path(r'timetable_teacher_pdf_report_view/(?P<school_year_pk>[0-9]+)/(?P<teacher_pk>\d+)/'
             r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)',
             TimetableTeacherPDFReportView.as_view(), name='timetable_teacher_pdf_report-view'),
+    re_path(r'timetable_course_pdf_report_view/(?P<school_year_pk>[0-9]+)/(?P<course_pk>\d+)/'
+            r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)',
+            TimetableCoursePDFReportView.as_view(), name='timetable_course_pdf_report-view'),
     path('invite_teacher/<email>', SendInvitationTeacherEmailView.as_view(), name='teacher_invitation-view'),
     path('invite_adminschool/<email>', SendInvitationAdminSchoolEmailView.as_view(),
          name='adminschool_invitation-view'),
