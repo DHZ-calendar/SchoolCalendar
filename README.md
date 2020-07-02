@@ -2,8 +2,6 @@
 ![Django CI](https://github.com/DHZ-calendar/SchoolCalendar/workflows/Django%20CI/badge.svg)
 [![CodeFactor](https://www.codefactor.io/repository/github/dhz-calendar/schoolcalendar/badge)](https://www.codefactor.io/repository/github/dhz-calendar/schoolcalendar)
 
-School Calendar
-
 ## Traduzione in Italiano
 [Traduzione in Italiano](##Italian-translation)
 
@@ -69,8 +67,11 @@ You will have to play with the settings.py file too, in order to setup your Data
 
 Lastly, you have to setup an email that our website uses to invite teachers to join the service. 
 
+## Italian Translation
+Ancora da fare!
 
-## Update translations
+## How to contribute
+### Update translations
 - Update the .po files executing:
 ```
 python manage.py makemessages
@@ -80,6 +81,3 @@ python manage.py makemessages
 ```
 django-admin compilemessages
 ```
-
-### Italian Translation
-Ancora da fare!
