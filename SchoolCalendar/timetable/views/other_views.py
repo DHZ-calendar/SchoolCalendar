@@ -112,12 +112,12 @@ class TeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View)
 class CheckWeekReplicationView(UserPassesTestMixin, View):
     def test_func(self):
         assignments = self.request.POST.getlist('assignments[]')
-        # TODO: improve this if statement, it is going to be super slow for long queries!
-        for assign in assignments:
-            if not (utils.is_adminschool(self.request.user) and Assignment.objects.filter(id=assign).exists() and
-                    Assignment.objects.get(id=assign).school == utils.get_school_from_user(self.request.user)):
-                return False
-        return True
+        if not (utils.is_adminschool(self.request.user)):
+            return False
+        school = utils.get_school_from_user(self.request.user)
+
+        # They should be in the same school of the admin and all of them should exist
+        return Assignment.objects.filter(id__in=assignments, school=school).count() == len(assignments)
 
     def post(self, request, *args, **kwargs):
         """
@@ -142,7 +142,7 @@ class CheckWeekReplicationView(UserPassesTestMixin, View):
                     .exclude(id=a.pk)
                 course_conflicts |= conflicts.filter(course=a.course)
                 teacher_conflicts |= conflicts.filter(teacher=a.teacher)
-                # TODO: Check if it is correct
+
                 # Check both that the room is not null, and is the same as the current room!
                 if a.room is not None and \
                         conflicts.filter(room__isnull=False, room=a.room).count() >= a.room.capacity:
@@ -200,7 +200,6 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
 
                 # There can't be conflicts among the newly created assignments and the teaching hours of the same teacher!
                 # The same is not true for conflicts of the same class.
-                # TODO: is the sentence above correctly? Why is it not true for the same class? Because of overriding?
                 conflicts = Assignment.objects.filter(school=a.school,
                                                       teacher=a.teacher,
                                                       room__isnull=False,

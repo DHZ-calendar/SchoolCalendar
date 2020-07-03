@@ -222,7 +222,8 @@ class AssignmentSerializer(ModelSerializer):
 
     def get_hour_slot(self, obj, *args, **kwargs):
         """
-        TODO: should better add the hour slot as as a FK in the Assignment model
+        OLDTODO: should better add the hour slot as as a FK in the Assignment model
+        RESP: No, otherwise we could not support lecture extra from the standard hour_slots
         Per each Assignment, it returns the corresponding HourSlot (if it exists), otherwise None
         The problem is that it makes a query for each instance of assignment!
         :param obj: the assignment instance
