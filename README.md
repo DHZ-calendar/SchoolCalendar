@@ -3,7 +3,7 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/dhz-calendar/schoolcalendar/badge)](https://www.codefactor.io/repository/github/dhz-calendar/schoolcalendar)
 
 ## Traduzione in Italiano
-[Traduzione in Italiano](##Italian-translation)
+[Traduzione in Italiano](#Italian-translation)
 
 ## Presentation
 We know how hard is the process of creating the calendar of a school: all classes cannot be left without a teacher, still no teacher can be assigned to multiple classes at the same time - unless time travel were possible, but this is definitely another story ;). And moreover, at the end of the year all teachers must have done their yearly amount of hours per class. And what if some teacher substitutions were necessary during the year due to illness? It's a nightmare!
