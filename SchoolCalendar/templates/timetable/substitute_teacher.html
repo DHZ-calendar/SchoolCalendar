@@ -49,7 +49,7 @@
             <input type="text" class="form-control form-control-custom datepicker" id="date" data-date-format='dd/mm/yyyy' />
         </div>
         <div class="col-6">
-            <button type="button" class="btn btn-success" onclick="getTeacherAssignments($(this))">{% trans 'Load lectures' %}</button>
+            <button type="button" class="btn btn-success" onclick="getTeacherAssignments()">{% trans 'Load lectures' %}</button>
         </div>
     </div>
     <div class="row">
@@ -80,7 +80,7 @@
             $("#teachers").empty();
             for(let tea of data){
                 $("#teachers").append(`
-                    <option value="${tea.id}">${tea.first_name} ${tea.last_name}</option>
+                    <option value="${tea.id}">${tea.last_name} ${tea.first_name}</option>
                 `);
             }
         });
@@ -186,6 +186,8 @@
             }
 
             let res = await $.post(url, data=data);
+
+            getTeacherAssignments();
         }
     }
 {% endblock %}

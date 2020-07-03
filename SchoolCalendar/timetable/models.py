@@ -230,6 +230,9 @@ class Assignment(models.Model):
     substitution = models.BooleanField(null=False, blank=False, default=False, verbose_name=_("substitution"))
     absent = models.BooleanField(null=False, blank=False, default=False, verbose_name=_("absence"))   # for substituted teachers
 
+    # it means that the substitution should not be considered when counting the total hours of substitutions
+    free_substitution = models.BooleanField(null=False, blank=False, default=False, verbose_name=_("free_substitution"))
+
     def __str__(self):
         return "{}; {}; {}; {}; {} - {}".format(
             self.teacher,

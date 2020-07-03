@@ -292,29 +292,14 @@ class TeacherSubstitutionView(UserPassesTestMixin, View):
         # the given school_year
         request.assignment_pk = self.kwargs.get('assignment_pk')
 
+        school = utils.get_school_from_user(self.request.user)
+
         a = Assignment.objects.get(id=self.kwargs.get('assignment_pk'),
-                                   school=utils.get_school_from_user(self.request.user).id)
+                                   school=school.id)
 
-        teachers_list = Teacher.objects.filter(school=utils.get_school_from_user(self.request.user)) \
-            .exclude(id=a.teacher.id) \
-            .filter(hoursperteacherinclass__school_year=a.school_year).distinct()
+        teachers_list = utils.get_available_teachers(a, school)
 
-        # Remove all teachers who already have assignments in that hour
-        teachers_list = teachers_list.exclude(assignment__date=a.date,
-                                              assignment__hour_start=a.hour_start,
-                                              assignment__hour_end=a.hour_end).distinct()
-
-        # Remove all teachers who have an absence block there.
-        hour_slot = HourSlot.objects.filter(school=a.school,
-                                            school_year=a.school_year,
-                                            starts_at=a.hour_start,
-                                            ends_at=a.hour_end).first()
-        if hour_slot:
-            # If there is the hour_slot, then exclude all teachers that have an absence block in that period.
-            # TODO: do some tests with absence blocks!!
-            teachers_list = teachers_list.exclude(absenceblock__hour_slot=hour_slot)
-
-        other_teachers = Teacher.objects.exclude(id__in=teachers_list.values('id'))
+        other_teachers = Teacher.objects.filter(school=school).exclude(id__in=teachers_list.values('id'))
 
         data = dict(available_teachers=teachers_list,
                     other_teachers=other_teachers)
@@ -346,11 +331,41 @@ class SubstituteTeacherApiView(UserPassesTestMixin, View):
         # Insert the substitution assignment
         assign = self.kwargs.get('assignment_pk')
         teacher = self.kwargs.get('teacher_pk')
+        school = utils.get_school_from_user(self.request.user)
 
-        print(assign, teacher)
+        a = Assignment.objects.get(id=self.kwargs.get('assignment_pk'),
+                                   school=school.id)
+        teachers_list = utils.get_available_teachers(a, school)
+        other_teachers = Teacher.objects.filter(school=school).exclude(id__in=teachers_list.values('id'))
 
-        # TODO: implement checks and decide if the substitution counts or not
-        raise Exception("Not implemented!")
+        new_assign = Assignment(
+            teacher=Teacher.objects.get(id=teacher),
+            course=a.course,
+            subject=a.subject,
+            school_year=a.school_year,
+            school=a.school,
+            room=a.room,
+            date=a.date,
+            hour_start=a.hour_start,
+            hour_end=a.hour_end,
+            bes=a.bes,
+            substitution=True,
+            absent=False,
+            free_substitution=False
+        )
+
+        if teachers_list.filter(id=teacher).exists():
+            # The substitution counts and it's a normal one
+            a.absent = True
+        elif other_teachers.filter(id=teacher).exists():
+            # The substitution does not count
+            new_assign.free_substitution = True
+        else:
+            return HttpResponse(_("The teacher is not valid!"), 400)
+
+        a.save()
+        new_assign.save()
+        return HttpResponse(status=200)
 
 
 class TimetableReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateView):
