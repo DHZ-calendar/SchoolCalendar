@@ -111,7 +111,13 @@ def get_teachers_hours_info():
         total_normal_done = compute_total_hours_assignments(normal_done_assign, hours_slots)
 
         # Substitution assignments
-        subst_done_assign = assignments.filter(substitution=True, free_substitution=False)
+        subst_done_assign = Assignment.objects.filter(teacher=hptic.teacher,
+                                                      school=hptic.school,
+                                                      school_year=hptic.school_year,
+                                                      substitution=True, free_substitution=False).values(
+            'date__week_day', 'hour_start', 'hour_end')
+        for el in subst_done_assign:
+            el['date__week_day'] = convert_weekday_into_0_6_format(el['date__week_day'])
         total_subst_done = compute_total_hours_assignments(subst_done_assign, hours_slots)
 
         # BES assignments
