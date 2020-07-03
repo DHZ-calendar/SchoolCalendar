@@ -64,13 +64,15 @@ class TeacherReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, Template
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['teachers_report'] = utils.get_teachers_hours_info()
+        school = utils.get_school_from_user(self.request.user)
+        context['teachers_report'] = utils.get_teachers_hours_info(school)
         return context
 
 
 class TeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):
     def get(self, request, *args, **kwargs):
-        teachers_report = utils.get_teachers_hours_info()
+        school = utils.get_school_from_user(self.request.user)
+        teachers_report = utils.get_teachers_hours_info(school)
 
         buffer = io.BytesIO()
 
