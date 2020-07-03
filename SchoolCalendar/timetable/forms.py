@@ -1,9 +1,11 @@
 from django import forms
+from django.db.models import Q
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 from durationwidget.widgets import TimeDurationWidget
 from django.utils.translation import gettext as _
 
+from timetable import models
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
     Stage, Subject, HoursPerTeacherInClass, Assignment, Room
 from timetable.utils import get_school_from_user, assign_html_style_to_visible_forms_fields, generate_random_password
@@ -300,6 +302,7 @@ class HourSlotForm(BaseFormWithSchoolCheck):
         """
         Of course, the starts_at must be smaller than ends_at.
         Moreover, we cannot have another hour-slot with the same hour_number in the same day, school and school_year.
+        Lastly, no hour slot can be held in the same interval of another existing one, the same day.
         :return:
         """
         if self.cleaned_data['starts_at'] >= self.cleaned_data['ends_at']:
@@ -324,6 +327,36 @@ class HourSlotForm(BaseFormWithSchoolCheck):
                                                                 _("st") if self.cleaned_data['hour_number'] % 10 == 1 else
                                                                 _("nd") if self.cleaned_data['hour_number'] % 10 == 2 else
                                                                 _("rd")))))
+
+            conflicting_time_interval = HourSlot.objects.filter(
+                school=self.cleaned_data['school'],
+                school_year=self.cleaned_data['school_year'],
+                day_of_week=self.cleaned_data['day_of_week']
+            ).filter(
+                # Conflicting interval is when the start of the new interval is above the end of an existing one,
+                # and the end is before the start of the existing one.
+                Q(starts_at__lt=self.cleaned_data['ends_at']) & Q(ends_at__gt=self.cleaned_data['starts_at'])
+            )
+            if conflicting_time_interval.exists():
+                if self.instance is None:
+                    # We are creating the hour slot, and we already have one in the same time interval.
+                    self.add_error(None, forms.ValidationError(
+                        "You cannot create an hour slot in this time interval,"
+                        " since there is already one on {} from {} to {}".format(
+                            models.DAYS_OF_WEEK[conflicting_time_interval.first().day_of_week][1],
+                            conflicting_time_interval.first().starts_at,
+                            conflicting_time_interval.first().ends_at
+                        )))
+                elif conflicting_time_interval.count() > 1 or conflicting_time_interval.first().pk != self.instance.pk:
+                    # We are editing an existing hour slot, but there is an hour slot which is not the current one
+                    # in the same time interval.
+                    self.add_error(None, forms.ValidationError(
+                        "You cannot create an hour slot in this time interval,"
+                        " since there is already one on {} from {} to {}".format(
+                            models.DAYS_OF_WEEK[conflicting_time_interval.first().day_of_week][1],
+                            conflicting_time_interval.first().starts_at,
+                            conflicting_time_interval.first().ends_at
+                        )))
 
         return self.cleaned_data
 
