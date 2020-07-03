@@ -2,6 +2,7 @@ import datetime
 
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from django.shortcuts import render, redirect, reverse
 
 from django.views.generic import TemplateView
@@ -146,9 +147,9 @@ class CheckWeekReplicationView(UserPassesTestMixin, View):
                 teacher_conflicts |= conflicts.filter(teacher=a.teacher)
 
                 # Check both that the room is not null, and is the same as the current room!
-                if a.room is not None and \
-                        conflicts.filter(room__isnull=False, room=a.room).count() >= a.room.capacity:
-                    room_conflicts |= conflicts.filter(room__isnull=False, room=a.room)
+                conf_room = conflicts.filter(room__isnull=False, room=a.room, substitution=False)
+                if a.room is not None and conf_room.count() >= a.room.capacity:
+                    room_conflicts |= conf_room
 
             data = dict(course_conflicts=course_conflicts,
                         teacher_conflicts=teacher_conflicts,
@@ -203,20 +204,22 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
                 # There can't be conflicts among the newly created assignments and the teaching hours of the same teacher!
                 # The same is not true for conflicts of the same class.
                 conflicts = Assignment.objects.filter(school=a.school,
-                                                      teacher=a.teacher,
-                                                      room__isnull=False,
-                                                      room=a.room,
                                                       school_year=a.school_year,
                                                       hour_start=a.hour_start,
                                                       hour_end=a.hour_end,
                                                       date__week_day=((a.date.weekday() + 2) % 7),
                                                       date__gte=from_date,
-                                                      date__lte=to_date).exclude(id=a.id)
-                if conflicts:
+                                                      date__lte=to_date).\
+                    exclude(id=a.id). \
+                    filter(Q(teacher=a.teacher) | Q(room__isnull=False, room=a.room))
+                if conflicts.filter(teacher=a.teacher) or (
+                    a.room is not None and conflicts.filter(room=a.room).count() >= a.room.capacity
+                ):
                     # There are conflicts!
                     return JsonResponse(
                         AssignmentSerializer(conflicts, context={'request': request}, many=True).data,
                         safe=False, status=400)
+
 
             # delete the assignments of that course in the specified period of time
             school = utils.get_school_from_user(request.user)
@@ -696,7 +699,7 @@ class TimetableGeneralPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMix
             spans.append(('SPAN', (start, 0), (end, 0)), )
 
         data = [headers] + [days] + table
-        t = Table(data, colWidths=[None] + [7*mm] *(len(headers)-2))
+        t = Table(data, colWidths=[None] + [7 * mm] * (len(headers) - 2))
 
         t.setStyle(TableStyle(
             spans +
