@@ -1,9 +1,11 @@
 from django import forms
+from django.db.models import Q
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 from durationwidget.widgets import TimeDurationWidget
 from django.utils.translation import gettext as _
 
+from timetable import models
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
     Stage, Subject, HoursPerTeacherInClass, Assignment, Room
 from timetable.utils import get_school_from_user, assign_html_style_to_visible_forms_fields, generate_random_password
@@ -284,6 +286,11 @@ class HourSlotForm(BaseFormWithSchoolCheck):
                                   show_seconds=False,
                                   attrs={}),  # We need to remove form-control.
         required=False)
+    replicate_on_days = forms.MultipleChoiceField(
+        choices=models.DAYS_OF_WEEK,
+        help_text=_("Do you want to replicate the hour slot in multiple days?"
+                    " Use shift key and the mouse click to select multiple days.")
+    )
 
     def __init__(self, user, *args, **kwargs):
         super(HourSlotForm, self).__init__(user, *args, **kwargs)
@@ -300,6 +307,7 @@ class HourSlotForm(BaseFormWithSchoolCheck):
         """
         Of course, the starts_at must be smaller than ends_at.
         Moreover, we cannot have another hour-slot with the same hour_number in the same day, school and school_year.
+        Lastly, no hour slot can be held in the same interval of another existing one, the same day.
         :return:
         """
         if self.cleaned_data['starts_at'] >= self.cleaned_data['ends_at']:
@@ -307,25 +315,86 @@ class HourSlotForm(BaseFormWithSchoolCheck):
                                                          'end hour.')))
 
         if 'school' in self.cleaned_data:  # If school is not a key, clean_school has already failed.
-            # Check if there is already the n-th hour of the day:
-            conflicting_hour_number = HourSlot.objects.filter(
-                school=self.cleaned_data['school'],
-                school_year=self.cleaned_data['school_year'],
-                day_of_week=self.cleaned_data['day_of_week'],
-                hour_number=self.cleaned_data['hour_number']
-            )
-            if conflicting_hour_number.exists():
-                if self.instance is not None and conflicting_hour_number.first().pk != self.instance.id:
-                    self.add_error(None, forms.ValidationError(
-                        _("There is already the {}{} hour of the day "
-                          "for this school, day of week and school_year!".format(
-                                                                self.cleaned_data['hour_number'],
-                                                                _("th") if self.cleaned_data['hour_number'] % 10 > 3 else
-                                                                _("st") if self.cleaned_data['hour_number'] % 10 == 1 else
-                                                                _("nd") if self.cleaned_data['hour_number'] % 10 == 2 else
-                                                                _("rd")))))
+            # Add the current day of week if not already present.
+            if self.cleaned_data['day_of_week'] not in self.cleaned_data['replicate_on_days']:
+                self.cleaned_data['replicate_on_days'].append(self.cleaned_data['day_of_week'])
+            # Replicate the checks for all the day_of_week required.
+            for day_of_week in self.cleaned_data['replicate_on_days']:
+                # Check if there is already the n-th hour of the day:
+                conflicting_hour_number = HourSlot.objects.filter(
+                    school=self.cleaned_data['school'],
+                    school_year=self.cleaned_data['school_year'],
+                    day_of_week=day_of_week,
+                    hour_number=self.cleaned_data['hour_number']
+                )
+                if conflicting_hour_number.exists():
+                    if self.instance is not None and conflicting_hour_number.first().pk != self.instance.id:
+                        self.add_error(None, forms.ValidationError(
+                            _("There is already the {}{} hour of the day "
+                              "for this school, day of week and school_year!".format(
+                                                                    self.cleaned_data['hour_number'],
+                                                                    _("th") if self.cleaned_data['hour_number'] % 10 > 3 else
+                                                                    _("st") if self.cleaned_data['hour_number'] % 10 == 1 else
+                                                                    _("nd") if self.cleaned_data['hour_number'] % 10 == 2 else
+                                                                    _("rd")))))
+
+                # TODO: add tests for this check!
+                conflicting_time_interval = HourSlot.objects.filter(
+                    school=self.cleaned_data['school'],
+                    school_year=self.cleaned_data['school_year'],
+                    day_of_week=day_of_week
+                ).filter(
+                    # Conflicting interval is when the start of the new interval is above the end of an existing one,
+                    # and the end is before the start of the existing one.
+                    Q(starts_at__lt=self.cleaned_data['ends_at']) & Q(ends_at__gt=self.cleaned_data['starts_at'])
+                )
+                if conflicting_time_interval.exists():
+                    if self.instance is None:
+                        # We are creating the hour slot, and we already have one in the same time interval.
+                        self.add_error(None, forms.ValidationError(
+                            "You cannot create an hour slot in this time interval,"
+                            " since there is already one on {} from {} to {}".format(
+                                models.DAYS_OF_WEEK[conflicting_time_interval.first().day_of_week][1],
+                                conflicting_time_interval.first().starts_at,
+                                conflicting_time_interval.first().ends_at
+                            )))
+                    elif conflicting_time_interval.count() > 1 or \
+                            conflicting_time_interval.first().pk != self.instance.pk:
+                        # We are editing an existing hour slot, but there is an hour slot which is not the current one
+                        # in the same time interval.
+                        self.add_error(None, forms.ValidationError(
+                            "You cannot create an hour slot in this time interval,"
+                            " since there is already one on {} from {} to {}".format(
+                                models.DAYS_OF_WEEK[conflicting_time_interval.first().day_of_week][1],
+                                conflicting_time_interval.first().starts_at,
+                                conflicting_time_interval.first().ends_at
+                            )))
 
         return self.cleaned_data
+    
+    def save(self, commit=True):
+        """
+        Create one hour slot for every day_of_week required.
+        :param commit:
+        :return:
+        """
+        for day_of_week in self.cleaned_data['replicate_on_days']:
+            # Create an hour slot for every day_of_week required.
+            if str(day_of_week) != str(self.cleaned_data['day_of_week']):
+                # Avoid to create a second one for the current day_of_week.
+                hs = HourSlot(
+                    hour_number=self.cleaned_data['hour_number'],
+                    starts_at=self.cleaned_data['starts_at'],
+                    ends_at=self.cleaned_data['ends_at'],
+                    school=self.cleaned_data['school'],
+                    school_year=self.cleaned_data['school_year'],
+                    day_of_week=day_of_week,
+                    legal_duration=self.cleaned_data['legal_duration']
+                )
+                hs.save()
+        self.cleaned_data.pop('replicate_on_days')
+
+        return super(HourSlotForm, self).save()
 
 
 class AbsenceBlockForm(BaseFormWithHourSlotTeacherAndSchoolCheck):
