@@ -176,27 +176,41 @@ async function getTeachers(){
         for(let tea of data){
             let html = `
                 <li class="list-group-item list-teachers" data-teacher-id="${tea.id}">
-                    <b>${tea.teacher.first_name} ${tea.teacher.last_name}</b> - ${tea.subject.name}<br/>
-                    <div class="row font-italic">
-                        <span class="col-9">${_TRANS['hours_teaching']}:</span>
-                        <span class="col-3 tea-hours">${tea.hours}</span>
+                    <div class="row">
+                        <div class="col-10">
+                            <b>${tea.teacher.first_name} ${tea.teacher.last_name}</b> - ${tea.subject.name}
+                        </div>
+                        <div class="col-2 p-0">
+                            <button class="btn btn-link text-right" style="color: inherit" data-toggle="collapse" data-target="#tea-collapse-${tea.id}" aria-expanded="true" aria-controls="tea-collapse-${tea.id}">
+                                <svg class="bi bi-caret-down-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                                </svg>
+                            </button>
+                        </div>                        
                     </div>
-                    <div class="row font-italic">
-                        <span class="col-9">${_TRANS['hours_bes']}</span>
-                        <span class="col-3 tea-hours_bes">${tea.hours_bes}</span>
-                    </div>
-                    <hr/>
-                    <div class="row font-italic">
-                        <span class="col-9">${_TRANS['missing_hours']}:</span>
-                        <span class="col-3 tea-missing_hours">${tea.missing_hours}</span>
-                    </div>
-                    <div class="row font-italic">
-                        <span class="col-9">${_TRANS['hours_bes']}</span>
-                        <span class="col-3 tea-missing_bes">${tea.missing_hours_bes}</span>
+                     
+                    <div id="tea-collapse-${tea.id}" class="collapse">
+                        <div class="row font-italic">
+                            <span class="col-9">${_TRANS['hours_teaching']}:</span>
+                            <span class="col-3 tea-hours">${tea.hours}</span>
+                        </div>
+                        <div class="row font-italic">
+                            <span class="col-9">${_TRANS['hours_bes']}</span>
+                            <span class="col-3 tea-hours_bes">${tea.hours_bes}</span>
+                        </div>
+                        <hr/>
+                        <div class="row font-italic">
+                            <span class="col-9">${_TRANS['missing_hours']}:</span>
+                            <span class="col-3 tea-missing_hours">${tea.missing_hours}</span>
+                        </div>
+                        <div class="row font-italic">
+                            <span class="col-9">${_TRANS['hours_bes']}</span>
+                            <span class="col-3 tea-missing_bes">${tea.missing_hours_bes}</span>
+                        </div>
                     </div>
                     <div class="row">
-                        <button type="button" class="col-6 btn cal-event" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false)">${_TRANS['assign_lecture']}</button>
-                        <button type="button" class="col-6 btn cal-event-bes" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, true)">${_TRANS['assign_bes']}</button>
+                        <button type="button" class="col-6 btn btn-sm cal-event" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false)">${_TRANS['assign_lecture']}</button>
+                        <button type="button" class="col-6 btn btn-sm cal-event-bes" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, true)">${_TRANS['assign_bes']}</button>
                     </div>
                 </li>`;
             $('#teachers_list').append(html);
@@ -247,7 +261,13 @@ async function getAssignments(startDate, endDate){
             }
 
             let teacher = assign.teacher.first_name + " " + assign.teacher.last_name;
-            let customEvent = new Event(assign.id, teacher, assign.subject.name);
+            let subject = assign.subject.name;
+            if (assign.room)
+                subject = `
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-tag-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M2 1a1 1 0 0 0-1 1v4.586a1 1 0 0 0 .293.707l7 7a1 1 0 0 0 1.414 0l4.586-4.586a1 1 0 0 0 0-1.414l-7-7A1 1 0 0 0 6.586 1H2zm4 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                </svg> ` + subject;
+            let customEvent = new Event(assign.id, teacher, subject);
             let clickEvent = (event) => {
                 alert("Lecture " + event.lecture + ", teacher " + event.teacher);
             };
@@ -263,10 +283,14 @@ async function getAssignments(startDate, endDate){
                 customEvent.htmlElement.addClass('cal-event-substitution');
             }
 
+            let lbl_room = '';
+            if (assign.room)
+                lbl_room = 'Room: ' + assign.room.name;
             customEvent.htmlElement.tooltip({
                 title: `
                     <b>${teacher}</b><br/>
                     ${assign.subject.name}<br/>
+                    ${lbl_room}<br/>
                     ${assign.hour_start.slice(0, -3)} - ${assign.hour_end.slice(0, -3)}
                 `,
                 html: true,
@@ -297,6 +321,11 @@ async function getTeacherAssignments(startDate, endDate){
 
             let teacher = assign.teacher.first_name + " " + assign.teacher.last_name;
             let subject = assign.subject.name + ` (${assign.course.year} ${assign.course.section})`;
+            if (assign.room)
+                subject = `
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-tag-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M2 1a1 1 0 0 0-1 1v4.586a1 1 0 0 0 .293.707l7 7a1 1 0 0 0 1.414 0l4.586-4.586a1 1 0 0 0 0-1.414l-7-7A1 1 0 0 0 6.586 1H2zm4 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                </svg> ` + subject;
             let customEvent = new Event(assign.id, teacher, subject);
             let clickEvent = (event) => {
                 alert("Lecture " + event.lecture + ", teacher " + event.teacher);
@@ -313,11 +342,15 @@ async function getTeacherAssignments(startDate, endDate){
                 customEvent.htmlElement.addClass('cal-event-substitution');
             }
 
+            let lbl_room = '';
+            if (assign.room)
+                lbl_room = 'Room: ' + assign.room.name;
             customEvent.htmlElement.tooltip({
                 title: `
                     <b>${teacher}</b><br/>
                     ${assign.subject.name}<br/>
                     ${assign.course.year} ${assign.course.section}<br/>
+                    ${lbl_room}<br/>
                     ${assign.hour_start.slice(0, -3)} - ${assign.hour_end.slice(0, -3)}
                 `,
                 html: true,
@@ -385,7 +418,7 @@ async function teacherClick(btn, teaId, teacherId, subjId, schoolId, bes){
 
         for(let blk of Object.keys(timetable.blocks)){
             timetable.getBlock(blk).setState('available');
-            timetable.getBlock(blk).setOnClick((blk) => addAssignment(teaId, teacherId, subjId, schoolId, blk, bes));
+            timetable.getBlock(blk).setOnClick((blk) => chooseAssignmentRoom(teaId, teacherId, subjId, schoolId, blk, bes));
         }
 
         await setLockedBlocksTeacher(teacherId);
@@ -464,6 +497,36 @@ async function setLockedBlocksAbsenceTeacher(teacherId){
     }
 }
 
+async function chooseAssignmentRoom(teaId, teacherId, subjId, schoolId, block, bes){
+    //get free rooms without conflicts
+    let url = _URL['room'];
+    let date = moment(currentDate).add(block.day, 'days').format('YYYY-MM-DD');
+    let data = {
+        school_year: $('#school_year').val(),
+        school: schoolId,
+        date: date,
+        hour_start: block.startTime.hours + ':' + block.startTime.min,
+        hour_end: block.endTime.hours + ':' + block.endTime.min
+    };
+    let rooms = await $.get(url, data=data);
+    $('#roomSelect').html(`
+        <option value="">${_TRANS['no_room']}</option>
+    `);
+    for(let room of rooms){
+        $('#roomSelect').append(`
+            <option value="${room.id}">${room.name}</option>
+        `);
+    }
+
+    $('#btn-room-add-assignment').unbind("click");
+    //attach click event to the confirmation button
+    $('#btn-room-add-assignment').click(() => {
+        addAssignment(teaId, teacherId, subjId, schoolId, block, bes)
+    });
+
+    //show the modal
+    $('#modalChooseRoom').modal('show');
+}
 async function addAssignment(teaId, teacherId, subjId, schoolId, block, bes){
     let url = _URL['assignments'];
 
@@ -472,6 +535,7 @@ async function addAssignment(teaId, teacherId, subjId, schoolId, block, bes){
         csrfmiddlewaretoken: Cookies.get('csrftoken'),
         teacher_id: teacherId,
         course_id: $('#course_section').val(),
+        room_id: $('#roomSelect').val(),
         subject_id: subjId,
         school_year: $('#school_year').val(),
         school: schoolId,
@@ -486,12 +550,13 @@ async function addAssignment(teaId, teacherId, subjId, schoolId, block, bes){
         let res = await $.post(url, data=data);
         await loadData(true, false);
         await refreshTeachers();
-        await teacherClick($(`#teachers_list *[data-teacher-id=${teaId}]`), teacherId, subjId, schoolId, bes);
+        await teacherClick($(`#teachers_list *[data-teacher-id=${teaId}]`), teaId, teacherId, subjId, schoolId, bes);
     }
     catch(e){
         console.log("Error adding an assignment");
         console.error(e);
     }
+    $('#modalChooseRoom').modal('hide');
 }
 
 function deleteAssignment(assign){
@@ -518,110 +583,114 @@ function deleteAssignment(assign){
     return res;
 }
 
-function checkReplicationAssignment(assign, startDate, endDate, resultList){
-    let url = _URL['replicate_assignment']
-        .replace("12345", assign.id)
+async function checkReplicateWeek(){
+    let startDate = moment($('#date_start').val(), "DD/MM/YYYY").toDate();
+    let endDate = moment($('#date_end').val(), "DD/MM/YYYY").toDate();
+
+    let url = _URL['check_week_replication']
         .replace("0000-00-00", formatDate(startDate))
         .replace("9999-99-99", formatDate(endDate));
-    $.get(url, function(data) {
-        let listConflict = ``;
-        for(let conflict of data){
-            listConflict += `
-                <li>
-                    <b>${conflict.teacher.first_name} ${conflict.teacher.last_name}</b> - ${conflict.subject.name}
-                    ${conflict.hour_start}-${conflict.hour_end}
-                </li>`;
+    let data = {
+        csrfmiddlewaretoken: Cookies.get('csrftoken'),
+        assignments: []
+    }
+    for (let block of Object.keys(timetable.blocks)){
+        for(let event of timetable.getBlock(block).events){
+            data.assignments.push(event.id);
         }
+    }
 
-        let date = moment(startDate).add(assign.block.day, 'days').toDate();
-        date = formatDate(date);
-
-        let badge = '';
-        if(data.length > 0)
-            badge = `<span class="badge badge-danger badge-pill">${data.length}</span>`;
-
-        resultList.append(`
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span href="#submenu${assign.id}" data-toggle="collapse" aria-expanded="false">
-                    <b>${assign.teacher}</b> - ${assign.lecture} ${date}
-                    ${formatStringTime(assign.block.startTime)}-${formatStringTime(assign.block.endTime)}
-                </span>
-                ${badge}
-            </li>
-            <li class="list-group-item d-flex justify-content-between align-items-center conflicts-content">
-                <ul class="collapse" id="submenu${assign.id}">
-                    ${listConflict}
-                </ul>
-            </li>
-        `);
-    });        
-}
-function checkReplicateWeek(){
-    let startDate = moment($('#date_start').val(), "MM/DD/YYYY").toDate();
-    let endDate = moment($('#date_end').val(), "MM/DD/YYYY").toDate();
+    let res = await $.post(url, data=data);
 
     let resultBox = $("#replicateResult");
     resultBox.empty();
     resultBox.append(`
-        <b>Result:</b>
-        <ul class="list-group">
+        <b>${_TRANS['teacher_conflicts']}:</b>
+        <span class="badge badge-pill ${res.teacher_conflicts.length > 0 ? 'badge-danger' : 'badge-success'}">
+            ${res.teacher_conflicts.length}
+        </span>
+        <ul class="list-group" id="teacher-conflicts">
+        </ul>
+        <b>${_TRANS['course_conflicts']}:</b>
+        <span class="badge badge-pill ${res.course_conflicts.length > 0 ? 'badge-danger' : 'badge-success'}">
+            ${res.course_conflicts.length}
+        </span>
+        <ul class="list-group" id="course-conflicts">
+        </ul>
+        <b>${_TRANS['room_conflicts']}:</b>
+        <span class="badge badge-pill ${res.room_conflicts.length > 0 ? 'badge-danger' : 'badge-success'}">
+            ${res.room_conflicts.length}
+        </span>
+        <ul class="list-group" id="room-conflicts">
         </ul>
     `);
 
-    let resultList = resultBox.find('ul');
+    let teacherConflicts = resultBox.find('#teacher-conflicts');
+    let courseConflicts = resultBox.find('#course-conflicts');
+    let roomConflicts = resultBox.find('#room-conflicts');
 
-    for (let block of Object.keys(timetable.blocks)){
-        for(let event of timetable.getBlock(block).events){
-            checkReplicationAssignment(event, startDate, endDate, resultList);
-        }
+    for(let conflict of res.teacher_conflicts){
+        teacherConflicts.append(`
+            <li class="list-group-item">
+                <b>${conflict.teacher.first_name} ${conflict.teacher.last_name}</b> - ${conflict.subject.name}<br/>
+                ${moment(conflict.date).format('DD-MM-YYYY')} 
+                <b>${conflict.course.year} ${conflict.course.section}</b>
+                ${conflict.hour_start.substring(0,5)} - ${conflict.hour_end.substring(0,5)}
+            </li>`);
+    }
+
+    for(let conflict of res.course_conflicts){
+        courseConflicts.append(`
+            <li class="list-group-item">
+                <b>${conflict.teacher.first_name} ${conflict.teacher.last_name}</b> - ${conflict.subject.name}<br/>
+                ${moment(conflict.date).format('DD-MM-YYYY')} ${conflict.hour_start.substring(0,5)} - ${conflict.hour_end.substring(0,5)}
+            </li>`);
+    }
+
+    for(let conflict of res.room_conflicts){
+        roomConflicts.append(`
+            <li class="list-group-item">
+                <b>${conflict.room.name} [${conflict.room.capacity}] - ${conflict.teacher.first_name} ${conflict.teacher.last_name}</b> - ${conflict.subject.name}<br/>
+                ${moment(conflict.date).format('DD-MM-YYYY')}
+                <b>${conflict.course.year} ${conflict.course.section}</b>
+                ${conflict.hour_start.substring(0,5)} - ${conflict.hour_end.substring(0,5)}
+            </li>`);
     }
 }
 
-async function replicateAssignment(assign, startDate, endDate){
-    let url = _URL['multiple_assignment']
-        .replace("12345", assign.id)
+async function replicateWeek(){
+    let startDate = moment($('#date_start').val(), "DD/MM/YYYY").toDate();
+    let endDate = moment($('#date_end').val(), "DD/MM/YYYY").toDate();
+
+    let url = _URL['replicate_week']
+        .replace("12345", $('#school_year').val())
+        .replace("99999", $('#course_section').val())
         .replace("0000-00-00", formatDate(startDate))
         .replace("9999-99-99", formatDate(endDate));
     let data = {
-        csrfmiddlewaretoken: Cookies.get('csrftoken')
+        csrfmiddlewaretoken: Cookies.get('csrftoken'),
+        assignments: []
     }
-    try {
-        let res = await $.ajax({
-            url: url,
-            type: 'POST',
-            data: data
-        });
-    }
-    catch(e){
-        if(e.status === 400){
-            let data = e.responseJSON;
-            return data[0];
-        }
-    }
-}
-async function replicateWeek(){
-    let startDate = moment($('#date_start').val(), "MM/DD/YYYY").toDate();
-    let endDate = moment($('#date_end').val(), "MM/DD/YYYY").toDate();
-
-    let results = [];
 
     for (let block of Object.keys(timetable.blocks)){
         for(let event of timetable.getBlock(block).events){
-            let res = await replicateAssignment(event, startDate, endDate);
-            if(res !== undefined)
-                results.push(res);
+            data.assignments.push(event.id);
         }
     }
 
-    if(results.length === 0){
+    try {
+        let res = await $.post(url, data=data);
         $('#modalReplicateWeek').modal('hide');
         alert(_TRANS['week_replicated_msg']);
     }
-    else{
-        let dates = '';
-        for(let d of results){
-            dates += d.date + ', ';
+    catch(e){
+        if(e.status === 400){
+            let results = e.responseJSON;
+            let dates = '';
+            for(let d of results){
+                dates += d.date + ', ';
+            }
+            alert(_TRANS['conflict_dates_msg'] + " " + dates);
         }
-        alert(_TRANS['conflict_dates_msg'] + " " + dates);
     }
 }

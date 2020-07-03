@@ -3,7 +3,7 @@ import random
 import string
 
 from django.contrib.auth.forms import PasswordResetForm
-from timetable.models import Teacher, AdminSchool, HoursPerTeacherInClass, Assignment, HourSlot
+from timetable.models import Teacher, AdminSchool, HoursPerTeacherInClass, Assignment, HourSlot, School
 
 
 def get_school_from_user(user):
@@ -81,37 +81,43 @@ def compute_total_hours_assignments(assignments, hours_slots):
                 el['hour_end'] in map_hour_slots[el['date__week_day']][el['hour_start']]:
             el['legal_duration'] = map_hour_slots[el['date__week_day']][el['hour_start']][el['hour_end']]
         else:
-            el['legal_duration'] = datetime.datetime.combine(datetime.date.min, el['hour_end']) -\
+            el['legal_duration'] = datetime.datetime.combine(datetime.date.min, el['hour_end']) - \
                                    datetime.datetime.combine(datetime.date.min, el['hour_start'])
 
     total = datetime.timedelta(0)
     for el in assignments:
         total += el['legal_duration']
-    return int(total.seconds/3600)
+    return int(total.seconds / 3600)
 
 
-def get_teachers_hours_info():
+def get_teachers_hours_info(school):
     teachers_report = []
-    for hptic in HoursPerTeacherInClass.objects.order_by('teacher__last_name', 'teacher__first_name',
-                                                         'course__year', 'course__section'):
+    for hptic in HoursPerTeacherInClass.objects.filter(school_id=school)\
+            .order_by('teacher__last_name', 'teacher__first_name', 'course__year', 'course__section'):
         assignments = Assignment.objects.filter(teacher=hptic.teacher,
-                                            course=hptic.course,
-                                            subject=hptic.subject,
-                                            school=hptic.school,
-                                            school_year=hptic.school_year).values(
-                                                                'date__week_day', 'hour_start', 'hour_end')
+                                                course=hptic.course,
+                                                subject=hptic.subject,
+                                                school=hptic.school,
+                                                school_year=hptic.school_year).values(
+            'date__week_day', 'hour_start', 'hour_end')
         for el in assignments:
             el['date__week_day'] = convert_weekday_into_0_6_format(el['date__week_day'])
 
         hours_slots = HourSlot.objects.filter(school=hptic.school,
                                               school_year=hptic.school_year).values("day_of_week", "starts_at",
-                                                                                  "ends_at", "legal_duration")
+                                                                                    "ends_at", "legal_duration")
         # Normal assignments lessons
         normal_done_assign = assignments.filter(bes=False, substitution=False)
         total_normal_done = compute_total_hours_assignments(normal_done_assign, hours_slots)
 
         # Substitution assignments
-        subst_done_assign = assignments.filter(substitution=True)
+        subst_done_assign = Assignment.objects.filter(teacher=hptic.teacher,
+                                                      school=hptic.school,
+                                                      school_year=hptic.school_year,
+                                                      substitution=True, free_substitution=False).values(
+            'date__week_day', 'hour_start', 'hour_end')
+        for el in subst_done_assign:
+            el['date__week_day'] = convert_weekday_into_0_6_format(el['date__week_day'])
         total_subst_done = compute_total_hours_assignments(subst_done_assign, hours_slots)
 
         # BES assignments
@@ -154,6 +160,32 @@ def generate_random_password():
     length = 15
     password_characters = string.ascii_letters + string.digits + string.punctuation
     return ''.join(random.choice(password_characters) for i in range(length))
+
+
+def get_available_teachers(assign: Assignment, school: School):
+    """
+    Return the list of all the available teachers to make a substitution for a given assignment
+    """
+    teachers_list = Teacher.objects.filter(school=school) \
+        .exclude(id=assign.teacher.id) \
+        .filter(hoursperteacherinclass__school_year=assign.school_year).distinct()
+
+    # Remove all teachers who already have assignments in that hour
+    teachers_list = teachers_list.exclude(assignment__date=assign.date,
+                                          assignment__hour_start=assign.hour_start,
+                                          assignment__hour_end=assign.hour_end).distinct()
+
+    # Remove all teachers who have an absence block there.
+    hour_slot = HourSlot.objects.filter(school=assign.school,
+                                        school_year=assign.school_year,
+                                        starts_at=assign.hour_start,
+                                        ends_at=assign.hour_end).first()
+    if hour_slot:
+        # If there is the hour_slot, then exclude all teachers that have an absence block in that period.
+        # TODO: do some tests with absence blocks!!
+        teachers_list = teachers_list.exclude(absenceblock__hour_slot=hour_slot)
+
+    return teachers_list
 
 
 def send_invitation_email(email, request):

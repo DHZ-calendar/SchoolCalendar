@@ -16,13 +16,17 @@
 
 
     <script>
-        $(".datepicker").datepicker({ dateFormat: 'dd-mm-yy' });
-        $('.timepicker').timepicker({
+        $(function () {
+            $(".datepicker").datepicker({
+              format: 'yyyy-mm-dd',
+            });
+            $('.timepicker').timepicker({
                 minuteStep: 1,
                 appendWidgetTo: 'body',
                 showSeconds: false,
                 showMeridian: false,
                 defaultTime: false
             });
+        });
     </script>
 {% endblock %}

@@ -145,10 +145,10 @@
             </div>
             <div class="modal-body">
                 {% trans 'Date start' %}:
-                <input type="text" id="date_start" class="form-control datepicker" />
+                <input type="text" id="date_start" class="form-control datepicker" data-date-format='dd/mm/yyyy' />
 
                 {% trans 'Date end' %}:
-                <input type="text" id="date_end" class="form-control datepicker" />
+                <input type="text" id="date_end" class="form-control datepicker" data-date-format='dd/mm/yyyy' />
                 <hr/>
                 <div id="replicateResult">
 
@@ -158,6 +158,29 @@
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans 'Close' %}</button>
                 <button type="button" class="btn btn-info" onclick="checkReplicateWeek()">{% trans 'Check conflicts' %}</button>
                 <button type="button" class="btn btn-success" onclick="replicateWeek()">{% trans 'Replicate lectures' %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal choose room -->
+<div class="modal fade" id="modalChooseRoom" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">{% trans 'Assign a room' %}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {% trans 'Available rooms' %}:
+                <select class="custom-select" id="roomSelect">
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans 'Close' %}</button>
+                <button type="button" id="btn-room-add-assignment" class="btn btn-info">{% trans 'Add lecture' %}</button>
             </div>
         </div>
     </div>
@@ -179,6 +202,14 @@
         });
         $('.datepicker').datepicker({
             dateFormat: 'dd-mm-yy'
+        });
+
+        $("#modalReplicateWeek").on("hidden.bs.modal", function() {
+            $("#replicateResult").html("");
+        });
+
+        $('#date_start, #date_end').change(() => {
+            $("#replicateResult").empty();
         });
 
         let cal = $("#calendar");
@@ -215,7 +246,11 @@
         'assign_bes': "{% trans 'Assign B.E.S.' %}",
         'delete_lecture_msg': "{% trans 'Are you sure to delete this lecture?' %}",
         'week_replicated_msg': "{% trans 'Week replicated!' %}",
-        'conflict_dates_msg': "{% trans 'Conflict on date' %}"
+        'conflict_dates_msg': "{% trans 'Conflict on date' %}",
+        'teacher_conflicts': "{% trans 'Teacher conflicts' %}",
+        'course_conflicts': "{% trans 'Course conflicts' %}",
+        'room_conflicts': "{% trans 'Room conflicts' %}",
+        'no_room': "{% trans 'No room' %}"
     };
 
     _URL = {
@@ -226,9 +261,10 @@
         'assignments': "{% url 'assignments-list' %}",
         'holiday': "{% url 'holiday-list' %}",
         'stage': "{% url 'stage-list' %}",
+        'room': "{% url 'room-list' %}",
         'teacher_assignments': "{% url 'teacher_assignments-list' 12345 99999 %}",
         'teacher_absence_blocks': "{% url 'teacher_absence_blocks-list' 12345 99999 %}",
-        'replicate_assignment': "{% url 'replicate_assignment-list' 12345 '0000-00-00' '9999-99-99' %}",
-        'multiple_assignment': "{% url 'multiple_assignment-add' 12345 '0000-00-00' '9999-99-99' %}",
+        'check_week_replication': "{% url 'check_week_replication-view' '0000-00-00' '9999-99-99' %}",
+        'replicate_week': "{% url 'replicate_week-view' 12345 99999 '0000-00-00' '9999-99-99' %}",
     };
 {% endblock %}

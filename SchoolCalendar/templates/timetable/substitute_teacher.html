@@ -1,7 +1,10 @@
 {% extends 'timetable/base.html' %}
 {% load i18n %}
+{% load static %}
 
 {% block head %}
+<link rel="stylesheet" href="{% static 'main.css' %}"/>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
 {% endblock %}
@@ -10,17 +13,25 @@
 .check-subsitute{
     margin-top: calc(50% - 10px) !important;
 }
+.teachers-list{
+    max-height: 350px;
+    overflow-y: auto;
+}
+.teachers-list-others{
+    max-height: 200px;
+    overflow-y: auto;
+}
 {% endblock %}
 
 {% block body %}
-<div class="container-fluid">
+<div class="container">
     <div class="row">
         <h3 class="col text-center">{% trans 'Substitute a teacher' %}</h3>
     </div>
     <div class="row p-1">
         <div class="col-6">
             {% trans 'School year:' %}
-            <select id="school_year" onchange="getTeachers()">
+            <select id="school_year" class="form-control form-control-custom" onchange="getTeachers()">
                 {% for year in school_years %}
                     <option value="{{ year.id }}">{{ year }}</option>
                 {% endfor %}
@@ -28,25 +39,25 @@
         </div>
         <div class="col-6">
             {% trans 'Teachers:' %}
-            <select id="teachers" onchange="">
+            <select id="teachers" class="form-control form-control-custom" onchange="">
             </select>
         </div>
     </div>
     <div class="row p-1">
         <div class="col-6">
             {% trans 'Choose a date:' %}
-            <input type="text" id="date" class="datepicker" />            
+            <input type="text" class="form-control form-control-custom datepicker" id="date" data-date-format='dd/mm/yyyy' />
         </div>
         <div class="col-6">
-            <button type="button" class="btn btn-success" onclick="getTeacherAssignments($(this))">{% trans 'Load lectures' %}</button>
+            <button type="button" class="btn btn-success" onclick="getTeacherAssignments()">{% trans 'Load lectures' %}</button>
         </div>
     </div>
     <div class="row">
         <div class="col-12 container">
-            <div id="lectures">
+            <div id="lectures" class="accordion mt-4">
             </div>
+        </div>
     </div>
-</div>
 </div>
 
 {% endblock %}
@@ -69,7 +80,7 @@
             $("#teachers").empty();
             for(let tea of data){
                 $("#teachers").append(`
-                    <option value="${tea.id}">${tea.first_name} ${tea.last_name}</option>
+                    <option value="${tea.id}">${tea.last_name} ${tea.first_name}</option>
                 `);
             }
         });
@@ -80,43 +91,72 @@
             .replace('1234', $("#teachers").val())
             .replace('9999', $('#school_year').val());
         
-        let date = moment($("#date").val()).format('YYYY-MM-DD');
+        let date = moment($("#date").val(), 'DD-MM-YYYY').format('YYYY-MM-DD');
         let data = {
             'from_date': date,
             'to_date': date
         };
+        $("#lectures").empty();
         $.get(url, data=data, function(data) {
-            $("#lectures").empty();
             for(let assign of data){
                 $("#lectures").append(`
-                    <hr/>
-                    <div class="row m-0">
-                        <b>${assign.subject.name}</b>&nbsp;${assign.hour_start} - ${assign.hour_end}&nbsp;
-                        {% trans 'Available teachers:' %}
-                        <ul class="list-group col-12 my-2" id="sub_teachers-${assign.id}">
-                        </ul>
-                        <button type="button" class="btn btn-success" assignId="${assign.id}" teaId="${assign.teacher.id}" subId="${assign.subject.id}" date="${assign.date}" 
-                            hourStart="${assign.hour_start}" hourEnd="${assign.hour_end}" course="${assign.course.id}" schoolYear="${assign.school_year}" school="${assign.school}"
-                            onclick="substituteTeacher($(this))">{% trans 'Make substitution' %}</button>
+                    <div class="card" id="card-${assign.id}">
+                        <div class="card-header">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse-${assign.id}" aria-expanded="false" aria-controls="collapse-${assign.id}">
+                                    <b>${assign.subject.name}</b>&nbsp;${assign.hour_start.substring(0, 5)} - ${assign.hour_end.substring(0, 5)}&nbsp;
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="collapse-${assign.id}" class="collapse" aria-labelledby="card-${assign.id}" data-parent="#lectures">
+                            <div class="card-body text-center">
+                                <b>{% trans 'Available teachers:' %}</b>
+                                <ul class="list-group teachers-list col-12 my-2 text-left" id="sub_teachers-${assign.id}">
+                                </ul>
+                                <hr/>
+                                <b>{% trans 'Other teachers: (the substitution will not be counted)' %}</b>
+                                <ul class="list-group teachers-list teachers-list-others col-12 my-2 text-left" id="sub_teachers-others-${assign.id}">
+                                </ul>
+                                <button type="button" class="btn btn-success mt-2" assignId="${assign.id}" onclick="substituteTeacher($(this))">
+                                    {% trans 'Make substitution' %}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 `);
 
                 let substituteBlock = $("#lectures").find("ul#sub_teachers-" + assign.id);
-                getSubstituteTeachers(assign.id, substituteBlock);
+                let substituteOthersBlock = $("#lectures").find("ul#sub_teachers-others-" + assign.id);
+                getSubstituteTeachers(assign.id, substituteBlock, substituteOthersBlock);
             }
             if(data.length === 0){
-                $("#lectures").append(`<b>{% trans 'No lectures found!' %}</b>`);
+                $("#lectures").html(`<b>{% trans 'No lectures found!' %}</b>`);
             }
         });
     }
 
-    function getSubstituteTeachers(assignId, substSelect){
-        let url = "{% url 'teacher_substitution-list' 1234 %}"
+    function getSubstituteTeachers(assignId, substSelect, substOthersSelect){
+        let url = "{% url 'teacher_substitution-view' 1234 %}"
             .replace('1234', assignId);
         $.get(url, function(data) {
             substSelect.empty();
-            for(let tea of data){
+            for(let tea of data.available_teachers){
                 substSelect.append(`
+                    <li class="list-group-item row" style="display: flex;">
+                        <div class="col-1 text-center">
+                            <input class="check-subsitute" type="radio" name="radio-${assignId}" value="${tea.id}">
+                        </div>
+                        <div class="col-11">
+                            <b>${tea.first_name} ${tea.last_name}</b><br/>
+                            {% trans 'Hours of substitutions made:' %} ${tea.substitutions_made_so_far}<br/>
+                            {% trans 'Has a lesson before:' %} ${tea.has_hour_before}<br/>
+                            {% trans 'Has a lesson after:' %} ${tea.has_hour_after}<br/>
+                        </div>
+                    </li>
+                `);
+            }
+            for(let tea of data.other_teachers){
+                substOthersSelect.append(`
                     <li class="list-group-item row" style="display: flex;">
                         <div class="col-1 text-center">
                             <input class="check-subsitute" type="radio" name="radio-${assignId}" value="${tea.id}">
@@ -135,43 +175,19 @@
 
     async function substituteTeacher(btn){
         let assignId = btn.attr("assignId");
-        console.log(assignId)
         let teacherId = $("input[name=radio-" + assignId + "]:checked").val();
         
         if(teacherId !== undefined){
-            let url = "{% url 'assignments-list' %}" + assignId + "/";
+            let url = "{% url 'substitute_teacher_api-view' 1234 9999 %}"
+                    .replace("1234", assignId)
+                    .replace("9999", teacherId);
             let data = {
-                csrfmiddlewaretoken: Cookies.get('csrftoken'),
-                absent: true,
-                teacher_id: btn.attr("teaId"),
-                subject_id: btn.attr("subId"),
-                date: btn.attr("date"),
-                hour_start: btn.attr("hourStart"),
-                hour_end: btn.attr("hourEnd"),
-                course_id: btn.attr("course"),
-                school_year: btn.attr("schoolYear"),
-                school: btn.attr("school")
+                csrfmiddlewaretoken: Cookies.get('csrftoken')
             }
-            $.ajax({
-                url: url,
-                type: 'PUT',
-                headers: { "X-CSRFToken": Cookies.get('csrftoken') },
-                data: data,
-                statusCode: {
-                    200: function(xhr) {
-                        getTeacherAssignments();
-                    }
-                }
-            });
 
-            url = "{% url 'assignments-list' %}";
+            let res = await $.post(url, data=data);
 
-            data.teacher_id = teacherId;
-            data.substitution = true;
-            data.absent = false;
-
-            $.post(url, data=data, function(data) {
-            });
+            getTeacherAssignments();
         }
     }
 {% endblock %}
