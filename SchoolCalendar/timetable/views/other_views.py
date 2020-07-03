@@ -27,36 +27,19 @@ from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, C
     Stage, Subject, HoursPerTeacherInClass, Assignment
 from timetable import utils
 from timetable.serializers import ReplicationConflictsSerializer, AssignmentSerializer, SubstitutionSerializer
+from timetable.views.CRUD_views import TemplateViewWithSchoolYears
 
 
-class TimetableView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateView):
+class TimetableView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateViewWithSchoolYears):
     template_name = 'timetable/timetable.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
 
-        context['school_years'] = SchoolYear.objects.all()
-        return context
-
-
-class SubstituteTeacherView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateView):
+class SubstituteTeacherView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateViewWithSchoolYears):
     template_name = 'timetable/substitute_teacher.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
 
-        context['school_years'] = SchoolYear.objects.all()
-        return context
-
-
-class TeacherTimetableView(LoginRequiredMixin, TeacherPermissionMixin, TemplateView):
+class TeacherTimetableView(LoginRequiredMixin, TeacherPermissionMixin, TemplateViewWithSchoolYears):
     template_name = 'timetable/teacher_timetable.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['school_years'] = SchoolYear.objects.all()
-        return context
 
 
 class TeacherReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateView):
