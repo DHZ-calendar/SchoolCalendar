@@ -120,11 +120,13 @@ class HourSlot(models.Model):
 
     def __str__(self):
         """
-        :return: hourslots like "Monday, 8:00-9:00"
+        :return: hourslots like "Monday, 8:00-9:00 2019/2020"
         """
-        return "{}, {}-{}".format(DAYS_OF_WEEK[self.day_of_week][1],
-                                  self.starts_at.strftime("%H:%M"),
-                                  self.ends_at.strftime("%H:%M"),)
+        return "{}, {}-{} {}/{}".format(DAYS_OF_WEEK[self.day_of_week][1],
+                                        self.starts_at.strftime("%H:%M"),
+                                        self.ends_at.strftime("%H:%M"),
+                                        str(self.school_year.year_start),
+                                        str(self.school_year.year_start + 1))
 
 
 class AbsenceBlock(models.Model):
