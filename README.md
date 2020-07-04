@@ -3,7 +3,7 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/dhz-calendar/schoolcalendar/badge)](https://www.codefactor.io/repository/github/dhz-calendar/schoolcalendar)
 
 ## Traduzione in Italiano
-[Traduzione in Italiano](#Italian-translation)
+[Traduzione in Italiano](README_IT.md)
 
 ## Presentation
 We know how hard is the process of creating the calendar of a school: all classes cannot be left without a teacher, still no teacher can be assigned to multiple classes at the same time - unless time travel were possible, but this is definitely another story ;). And moreover, at the end of the year all teachers must have done their yearly amount of hours per class. And what if some teacher substitutions were necessary during the year due to illness? It's a nightmare!
@@ -66,9 +66,6 @@ pip install -r requirements.txt
 You will have to play with the settings.py file too, in order to setup your Database (Postgresql is our choice, but you can have whatever you wish, and an sqlite3 DB comes out of the box), and of course be careful not to disclose your credentials!
 
 Lastly, you have to setup an email that our website uses to invite teachers to join the service. 
-
-## Italian Translation
-Ancora da fare!
 
 ## How to contribute
 ### Update translations
