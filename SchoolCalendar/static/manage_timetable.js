@@ -269,7 +269,7 @@ async function getAssignments(startDate, endDate){
                 </svg> ` + subject;
             let customEvent = new Event(assign.id, teacher, subject);
             let clickEvent = (event) => {
-                alert("Lecture " + event.lecture + ", teacher " + event.teacher);
+                alert("Lecture " + assign.subject.name + ", teacher " + event.teacher);
             };
             timetable.addEvent(customEvent, blockId, clickEvent, deleteAssignment);
 
