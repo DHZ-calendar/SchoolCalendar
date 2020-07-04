@@ -38,17 +38,60 @@ Now open the menu at the upper left corner, click the `Admin` button, open the i
 - Subject: the subjects taught in the school (Maths, Literature and so on).
 - Holiday: you do not want your poor teachers and pupils to work at Christmas ;) The holiday period specified will be valid for all the courses of the school! Try to insert one, you will see it painted in orange in the home page calendar!
 - Stage: same as holiday (no class can be held if there is a stage that day), but this time it is specific for a single course.
-- Hour Slot: this is the slot in which a lesson can be taught. For instance, assume that on Tuesday the third hour goes from 11:05 to 11:55. Then the field `Hour number` is 3. Still, when you count how many hours a teacher has done during the year, you may want to count the class duratoin as 1 hour, even if it lasts only 50 minutes (after 6 classes of 50 minutes, the teacher has done actually only 5 hours!). This is what the `Legal Duration` field is for! (You can set it with hours and minutes, but we believe that the vast majority will be 1 hour and 0 minutes). This insertion is going to be a bit painful since you may have potentially 30 or more hour slots in a week! But bring a little bit of patience, you have to do insert them only once! ;)
+- Hour Slot: this is the slot in which a lesson can be taught. For instance, assume that on Tuesday the third hour goes from 11:05 to 11:55. Then the field `Hour number` is 3. Still, when you count how many hours a teacher has done during the year, you may want to count the class duratoin as 1 hour, even if it lasts only 50 minutes (after 6 classes of 50 minutes, the teacher has done actually only 5 hours!). This is what the `Legal Duration` field is for! (You can set it with hours and minutes, but we believe that the vast majority will be 1 hour and 0 minutes). This insertion is going to be a bit painful since you may have potentially 30 or more hour slots in a week! But do not worry, we saved you a bunch of time by letting you decide in which days of the week to repeat the hour slot. For instance, if you want the first hour of the morning from 8:00 to 9:00 to be repeated every morning from Monday to Friday, just select the correct days in the field `Replicate on Days`. In order to select multiple options use the key `ctrl`, or `shift`.
 - Absence Block: if any teacher has some chronical indisposability to teach in certain hour slots, you can register them using the `Absence Block`. When you later check for the disposability of a teacher to teach in a certain course, such hour slot will not be considered valid, even if the teacher has no other conflicts at such time.
 - Hours Per Teacher In Class: this records how many hours of teaching (field `Hours`) any teacher needs to do in every course. Note that when computing the total amount of hours done by the teacher in a course, the field `Legal Duration` of the instance `Hour Slot` is used). If a teacher teaches multiple subjects in the same course (like Physics and Maths), she needs multiple Hours Per Teacher In Class (one for Math, the other for Physics in the example). The `Hour BES` field is meant for special hours of teaching (like hours done with pupils carrying disability and so on). If your school does not have such special hours, just leave them set to zero.
 
 Fill these fields carefully! All the information that you provide to the website must be correct, or it will work (of course) in an unexpected manner!
 
-### Teachers' Assignments
-Now that we have done the initialization step, we can finally start to use the service! We guide you in the next subsection.
+### Example Instances
+Now that we have done the initialization step, we can finally start to use the service! We guide you through this process in the next subsection.
 
-FILL THIS!
+For the sake of the example, we just created a School Admin account (the same type of account that you are using right now) called John Doe, who is the manager of the school called "Galilei High School". You cannot create a school with your current account: you have to ask the administrators (the same guys who created for you your account) of the website to add your school to the system!
 
+Now we start to fill what is necessary in order to utilize properly the website: let us start by the basis, and insert some hour-slots. Open the left menu, click the `Admin` option and select `Hour-Slots`. Add a new one and fill it as you wish.
+
+![HourSlotCreate](readme_pics/HourSlotInsertion.png)
+
+You can check that the insertion was successful by going back to the home page (left menu -> Timetable), and see that the hourslots appear in a gray overlay on the timetable.
+
+![TimetableWithHourslots](readme_pics/timetable_with_hourslots.png)
+
+We now insert a few courses (1A, 2A, 3A, 4A, 5A): go to left menu -> Admin -> Courses -> Add new, and fill the forms with the informations for the various courses (careful, if the course is 1A, then the year is 1 - it must be a number - and the section is A). For example:
+
+![CourseCreation](readme_pics/Course_creation.png)
+
+We now insert some subjects (left menu -> Admin -> Subjects -> Add New): Maths, Physics, Italian Literature, English Literature.
+
+Let us now insert a few rooms: you do not need to insert all of them (although you are not prohibited neither from doing so), but just the ones you believe will be likely to have conflicts (for instance, the laboratories that can be used by multiple courses).
+
+In order to add some rooms go to left menu -> Admin -> Rooms -> Add new. We create a couple of rooms, the Physics laboratory (with capacity 2, which means that can be used concurrently by two courses) and the Multimedia Laboratory (with capacity 1).
+
+![RoomCreation](readme_pics/rooms_creation.png)
+
+It is time to add some teachers: go to left menu -> Admin -> Teachers -> Add new, and create a few teachers. We are going to create for this example the teachers Marie Curie, Dante Alighieri, Oscar Wild and Carl Friedrich Gauss. 
+
+Note that: the username is going to be the username that the teacher is going to use in order to login - choose it carefully, there cannot be duplicates and it cannot contain spaces! The email is instead required since the teacher is going to receive an email from SchoolCalendar, so that she can set her own password (she will use the account to check her personal timetable, she will not be able to alter anything since she is not an admin as you are!). The email is not sent automatically: you need to click the button `Send Invite` in the page left menu -> Admin -> Teachers.
+
+![TeacherCreate](readme_pics/teacher_create.png)
+
+We create now an absence block: our poor Dante cannot be present at school from 8:00 to 9:00 on Mondays, since he has to take care of his old friend Virgilio. Just go to left menu -> Admin -> Absence Blocks -> Add new, and fill the form with Dante's information.
+
+![AbsenceBlockCreation](readme_pics/absence_block_create.png)
+
+Now we insert the important information regarding the teachers and courses: how many hours does every teacher need to teach in every course. To keep things simple, we just say that every teachers in our example teaches her own subject (we do not need to explain who teaches what, right?) in courses 1A and 2A. For the sake of the simplicity of the example, we just assign 100 normal hours to every teacher in every course, apart from Dante in 1A, who teaches both 100 normal hours and 50 BES.
+
+![HourPerTeacherInClass](readme_pics/hour_per_teacher_in_class_create.png)
+
+Lastly, we insert some holydays, and some stages. First, go to left menu -> Admin -> Holidays -> Add new and create a new holiday: 
+
+![HolidayCreate](readme_pics/holiday_create.png)
+
+Then a stage for class 1A: left menu -> Admin -> Stages -> Add new.
+
+![StageCreate](readme_pics/stage_create.png)
+
+You can check how those two instances are rendered in the timetable: go to left menu -> Timetable, go to the desired week using the button go, right above the timetable (for the stage and the holiday), and look for them, they should be fairly easy to spot.
 
 ## Installation
 Two possibilities are there available at the moment: either you download the code (it is an open source repository after all) and start the service by yourself on your school servers, either you pay an annual licence and enjoy the possibility to use the service out of the box on our servers. It will be moreover kept up to date and maintained by our developers! :) The choice is up to you.
