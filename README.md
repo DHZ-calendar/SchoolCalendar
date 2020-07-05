@@ -44,12 +44,12 @@ Now open the menu at the upper left corner, click the `Admin` button, open the i
 
 Fill these fields carefully! All the information that you provide to the website must be correct, or it will work (of course) in an unexpected manner!
 
-### Example Instances
-Now that we have done the initialization step, we can finally start to use the service! We guide you through this process in the next subsection.
+### An example creation of entries 
+Now that we have done the initialization step, we can finally start to use the service! We guide you through this process in this subsection.
 
-For the sake of the example, we just created a School Admin account (the same type of account that you are using right now) called John Doe, who is the manager of the school called "Galilei High School". You cannot create a school with your current account: you have to ask the administrators (the same guys who created for you your account) of the website to add your school to the system!
+For the sake of the example, we just created a School Admin account (the same type of account that you are using right now) called John Doe, who is the manager of the school called "Galilei High School". You cannot create nor a school nor a school_year with your current account: you have to ask the administrators (the same guys who created for you your account) of the website to add your `school` and the `school_year` to the system!
 
-Now we start to fill what is necessary in order to utilize properly the website: let us start by the basis, and insert some hour-slots. Open the left menu, click the `Admin` option and select `Hour-Slots`. Add a new one and fill it as you wish.
+Now that we have everything up and running we start to fill what is necessary in order to utilize properly the website: let us start by the basis, and insert some hour-slots. Open the left menu, click the `Admin` option and select `Hour-Slots`. Add a new one and fill it as you wish. (Note that in this case the hour lasts physically speaking only 50 minutes, but the legal duration makes sure that it is going to be counted as a full hour long lesson). We insert both the hour slot for the first hour (7.55-8.45) and the second hour (8.45-9.35)
 
 ![HourSlotCreate](readme_pics/HourSlotInsertion.png)
 
@@ -57,21 +57,21 @@ You can check that the insertion was successful by going back to the home page (
 
 ![TimetableWithHourslots](readme_pics/timetable_with_hourslots.png)
 
-We now insert a few courses (1A, 2A, 3A, 4A, 5A): go to left menu -> Admin -> Courses -> Add new, and fill the forms with the informations for the various courses (careful, if the course is 1A, then the year is 1 - it must be a number - and the section is A). For example:
+We now insert a few courses (1A, 2A, 3A, 4A, 5A): go to left menu -> Admin -> Courses -> Add new, and fill the forms with the information for the various courses (careful, if the course is 1A, then the year is 1 - it must be a number - and the section is A). For example:
 
 ![CourseCreation](readme_pics/Course_creation.png)
 
 We now insert some subjects (left menu -> Admin -> Subjects -> Add New): Maths, Physics, Italian Literature, English Literature.
 
-Let us now insert a few rooms: you do not need to insert all of them (although you are not prohibited neither from doing so), but just the ones you believe will be likely to have conflicts (for instance, the laboratories that can be used by multiple courses).
+Let us now insert a few rooms: you do not need to insert all of them (although you are not prohibited either from doing so), but just the ones you believe will be likely to have conflicts (for instance, the laboratories that can be used by multiple courses).
 
-In order to add some rooms go to left menu -> Admin -> Rooms -> Add new. We create a couple of rooms, the Physics laboratory (with capacity 2, which means that can be used concurrently by two courses) and the Multimedia Laboratory (with capacity 1).
+In order to add some rooms go to left menu -> Admin -> Rooms -> Add new. We create a couple of rooms, the Physics laboratory (with capacity 2, which means that can be used concurrently by two courses and not that it can fit only two students) and the Multimedia Laboratory (with capacity 1).
 
 ![RoomCreation](readme_pics/rooms_creation.png)
 
-It is time to add some teachers: go to left menu -> Admin -> Teachers -> Add new, and create a few teachers. We are going to create for this example the teachers Marie Curie, Dante Alighieri, Oscar Wild and Carl Friedrich Gauss. 
+It is time to add some teachers: go to left menu -> Admin -> Teachers -> Add new, and create a few teachers. We are going to create for this example the teachers Marie Curie, Dante Alighieri, Oscar Wilde and Carl Friedrich Gauss. 
 
-Note that: the username is going to be the username that the teacher is going to use in order to login - choose it carefully, there cannot be duplicates and it cannot contain spaces! The email is instead required since the teacher is going to receive an email from SchoolCalendar, so that she can set her own password (she will use the account to check her personal timetable, she will not be able to alter anything since she is not an admin as you are!). The email is not sent automatically: you need to click the button `Send Invite` in the page left menu -> Admin -> Teachers.
+Note that: the `username` field is going to be the username that the teacher will use use in order to login - choose it carefully, there cannot be duplicates and it cannot contain spaces! The email is instead required since the teacher is going to receive an email from SchoolCalendar, so that she can set her own password (she will use the account to check her personal timetable, she will not be able to alter anything since she is not an admin as you are!). The email is not sent automatically: you need to click the button `Send Invite` in the page left menu -> Admin -> Teachers.
 
 ![TeacherCreate](readme_pics/teacher_create.png)
 
@@ -83,7 +83,7 @@ Now we insert the important information regarding the teachers and courses: how 
 
 ![HourPerTeacherInClass](readme_pics/hour_per_teacher_in_class_create.png)
 
-Lastly, we insert some holydays, and some stages. First, go to left menu -> Admin -> Holidays -> Add new and create a new holiday: 
+Lastly, we insert some holidays and some stages. First, go to left menu -> Admin -> Holidays -> Add new and create a new holiday: 
 
 ![HolidayCreate](readme_pics/holiday_create.png)
 
@@ -91,7 +91,35 @@ Then a stage for class 1A: left menu -> Admin -> Stages -> Add new.
 
 ![StageCreate](readme_pics/stage_create.png)
 
-You can check how those two instances are rendered in the timetable: go to left menu -> Timetable, go to the desired week using the button go, right above the timetable (for the stage and the holiday), and look for them, they should be fairly easy to spot.
+You can check how those two instances are rendered in the timetable: go to left menu -> Timetable, go to the desired week using the button `go`, right above the timetable (for the stage and the holiday), and look for them, they should be fairly easy to spot.
+
+### Teacher Assignment
+
+After we have finished to set all the entries of our mock school, we can finally start to see how the system works. Go to the timetable page (left menu -> Timetable) and start to play with the teachers assignments.
+This view shows you the weekly timetable for a specific course and school year (you can select which course and school year to visualize in the upper left menu). Note that the list of teachers in the right column will change according to the course you have selected. If you try to select course 3A, for instance, you will notice that it has no teacher assigned (if you remember, we only add hours for teachers in courses 1A and 2A).
+
+Try now to add an Italian lecture the second hour on Monday in course 1A. Click the button `Assign lecture` in Dante's square, and afterwards select the first hour slot on Monday morning (it should have been filled in green).
+
+![AssignButton](readme_pics/Assign_teacher.png)
+
+It will be asked whether you want to assign a room to this lecture, to which you can say `No Room`.
+
+![NoRoomAddLecture](readme_pics/No_room_add_lecture.png)
+
+
+What about the first hour slot? Why is it still gray and it doesn't turn into green? Simple enough, Dante is by Virgilio's, we have added an absence block for him at that time.
+
+So good so far: let us now add a Math class during the first hour slot on Monday morning. Just repeat the same procedure with Gauss: notice that when you press the button `Assign lecture` under Gauss' square, the Italian lecture we added earlier will appear split in half: this is to let you add more than one teacher during the same course.
+
+![HourSlotSplit](readme_pics/Hour_Slot_split.png)
+
+Before starting to add courses in the other course, try to click the downward arrow in the teachers' box in the right column: it will show you a summary of how many hours does the teacher still need to do in the course.
+
+Ok, move on right now in class 2A (using the menu at the top left corner). Try to add a lecture for Dante; as you can see, Monday is off limits: first hour Dante is as usual by Virgilio, second hour instead there would be a conflict with course 1A. It is shown in red.
+
+![ConflictRedHourSlot](readme_pics/conflict_red_hour_slot.png)
+
+Add him then during the first hour slot on Tuesday, and add him in the Multimedia Laboratory. If you go back to class 1A, and try to add another teacher (Oscar Wilde) in the same hour slot in the same room, you can notice that you cannot! (The multimedia laboratory won't appear as one of the possible options when choosing the room).
 
 ## Installation
 Two possibilities are there available at the moment: either you download the code (it is an open source repository after all) and start the service by yourself on your school servers, either you pay an annual licence and enjoy the possibility to use the service out of the box on our servers. It will be moreover kept up to date and maintained by our developers! :) The choice is up to you.
