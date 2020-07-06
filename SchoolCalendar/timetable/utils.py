@@ -3,6 +3,7 @@ import random
 import string
 
 from django.contrib.auth.forms import PasswordResetForm
+from django.db.models import Q
 from timetable.models import Teacher, AdminSchool, HoursPerTeacherInClass, Assignment, HourSlot, School
 
 
@@ -170,20 +171,25 @@ def get_available_teachers(assign: Assignment, school: School):
         .exclude(id=assign.teacher.id) \
         .filter(hoursperteacherinclass__school_year=assign.school_year).distinct()
 
-    # Remove all teachers who already have assignments in that hour
-    teachers_list = teachers_list.exclude(assignment__date=assign.date,
-                                          assignment__hour_start=assign.hour_start,
-                                          assignment__hour_end=assign.hour_end).distinct()
-
     # Remove all teachers who have an absence block there.
     hour_slot = HourSlot.objects.filter(school=assign.school,
                                         school_year=assign.school_year,
                                         starts_at=assign.hour_start,
-                                        ends_at=assign.hour_end).first()
+                                        ends_at=assign.hour_end,
+                                        day_of_week=assign.date.weekday()).first()
     if hour_slot:
         # If there is the hour_slot, then exclude all teachers that have an absence block in that period.
         # TODO: do some tests with absence blocks!!
         teachers_list = teachers_list.exclude(absenceblock__hour_slot=hour_slot)
+
+        # Exclude from the choice the teachers that are already busy with other assignments.
+        teachers_to_exclude = Assignment.objects.filter(school=assign.school,
+                                                        school_year=assign.school_year,
+                                                        hour_start=assign.hour_start,
+                                                        hour_end=assign.hour_end,
+                                                        date=assign.date).values_list('teacher__id')
+
+        teachers_list = teachers_list.exclude(id__in=teachers_to_exclude)
 
     return teachers_list
 
