@@ -119,7 +119,38 @@ Ok, move on right now in class 2A (using the menu at the top left corner). Try t
 
 ![ConflictRedHourSlot](readme_pics/conflict_red_hour_slot.png)
 
-Add him then during the first hour slot on Tuesday, and add him in the Multimedia Laboratory. If you go back to class 1A, and try to add another teacher (Oscar Wilde) in the same hour slot in the same room, you can notice that you cannot! (The multimedia laboratory won't appear as one of the possible options when choosing the room).
+Add him then during the first hour slot on Tuesday, and add him in the Multimedia Laboratory. If you go back to class 1A, and try to add another teacher (Oscar Wilde) in the same hour slot in the same room, you can notice that you cannot! (The multimedia laboratory won't appear as one of the possible options when choosing the room). Which makes sense, in fact the multimedia laboratory has capacity only one.
+
+If you now add instead a lecture for Marie Curie in the Physics laboratory in course 1A, the second hour of Tuesday, and then do the same for course 2A, putting Gauss in the physics laboratory as well, you notice that you can! The Physics lab can hold concurrently 2 classes together (we created it with capacity 2).
+
+To recap what we have done so far, here is a picture of the classes that we have assigned until now for courses 1A and 2A.
+
+![hourscourse1a](readme_pics/1a_hours.png)
+![hourscourse2a](readme_pics/2a_hours.png)
+
+### Substitution
+
+We explore now another feature of SchoolCalendar: assume it is Monday evening, and Gauss calls you to tell you that he is ill and will not be able to attend the lecture he has in course 2A. You have therefore to find a right candidate for a substitution. Normally you should consider all lectures that Gauss teaches on Tuesday, look for a candidate to substitute him, check for the candidate's conflicts, and repeat the process for all Gauss' lectures of the day: a nightmare. And with SchoolCalendar? Just a piece of cake. 
+
+Open the left menu -> Substitute a teacher, and fill the form with the correct information (Gauss, on the 7th of July). 
+
+![GaussSubstitution](readme_pics/gauss_substitution.png)
+
+As you can notice, a list of all lectures that you need to fill is proposed to you (in our case, only the second hour of Tuesday).
+
+If you click on it, a list of all teachers will open at your disposal
+
+![GaussSubstitution2](readme_pics/substitute_gauss_teacher_list.png)
+
+The information in this page should help you decide who will make the substitution: first, you may want to give the lecture to the teacher with less hours of substitutions made so far during the year. Moreover, you may want to prefer to give the hour to teachers already at school: note for instance that Oscar Wilde is home on Tuesday both the hour before the substitution and the one after, whereas Dante would already be at school (he teaches the hour before Gauss in course 2A). We believe this information will help you to decide to which teacher to assign the substitution.
+
+In the end, Marie Curie is teaching in another class at that hour, hence she will be listed in `Other Teachers` list: you should not choose her, but if you have very good reasons for doing so, feel free (for instance, Marie Curie's class is doing an educational trip, and she is not one of the accompanists).
+
+If we choose Dante, and assign him to the substitution, you will notice in the Timetable page that Gauss is going to be set as absent (purple color) whereas Dante will be set as the substitute (light blue). Good! :)
+
+![SubstitutionInTimetable](readme_pics/substitution_in_timetable.png)
+
+
 
 ## Installation
 Two possibilities are there available at the moment: either you download the code (it is an open source repository after all) and start the service by yourself on your school servers, either you pay an annual licence and enjoy the possibility to use the service out of the box on our servers. It will be moreover kept up to date and maintained by our developers! :) The choice is up to you.
