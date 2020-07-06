@@ -286,7 +286,10 @@ class TeacherSubstitutionView(UserPassesTestMixin, View):
 
         teachers_list = utils.get_available_teachers(a, school)
 
-        other_teachers = Teacher.objects.filter(school=school).exclude(id__in=teachers_list.values('id'))
+        # Show all the other teachers (the ones that may be busy or have an absence block).
+        other_teachers = Teacher.objects.filter(school=school)\
+            .exclude(id__in=teachers_list.values('id'))\
+            .exclude(id=a.teacher.id)    # Exclude the teacher herself!
 
         data = dict(available_teachers=teachers_list,
                     other_teachers=other_teachers)
