@@ -30,8 +30,7 @@ DEBUG = local_settings.DEBUG
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 
-
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = local_settings.ALLOWED_HOSTS
 
 
 # Application definition

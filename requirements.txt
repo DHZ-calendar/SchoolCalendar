@@ -5,4 +5,5 @@ djangorestframework==3.11.0
 Markdown==3.2
 django-filter==2.2.0
 reportlab==3.5.42
-
+psycopg2==2.8.5
+gunicorn==20.0.4
