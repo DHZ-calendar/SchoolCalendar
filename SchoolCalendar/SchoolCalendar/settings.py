@@ -13,14 +13,23 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+import SchoolCalendar.local_settings as local_settings
+
+# Database
+# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
+
+DATABASES = local_settings.DATABASES
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = local_settings.SECRET_KEY
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = local_settings.DEBUG
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '+xqb9fvu^c%0cnjaqma3d(=$=&+e7l6l0qa)b#h11=qa)13gio'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -70,17 +79,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'SchoolCalendar.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
 
 
 # Password validation
