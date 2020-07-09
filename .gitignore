@@ -1,6 +1,5 @@
 SchoolCalendar/SchoolCalendar/__pycache__/
 SchoolCalendar/db.sqlite3
-SchoolCalendar/config.json
 SchoolCalendar/SchoolCalendar/local_settings.py
 
 *__pycache__
