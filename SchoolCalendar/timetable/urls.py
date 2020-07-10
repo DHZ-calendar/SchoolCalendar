@@ -1,4 +1,5 @@
 from django.urls import path, re_path, include
+from django.views.generic import TemplateView
 from timetable.views.CRUD_views import SchoolCreate, TeacherCreate, AdminSchoolCreate, SchoolYearCreate, CourseCreate, \
     HourSlotCreate, AbsenceBlockCreate, HolidayCreate, StageCreate, SubjectCreate, \
     HoursPerTeacherInClassCreate, AssignmentCreate, \
@@ -43,6 +44,7 @@ router.register(r'absence_blocks', AbsenceBlockViewSet, basename='absence_block'
 
 urlpatterns = [
     path('', LoggedUserRedirectView.as_view(), name='user_redirect-view'),
+    path('user_guide', TemplateView.as_view(template_name='timetable/user_guide.html'), name='user_guide'),
     path('admin_school', TimetableView.as_view(), name='timetable-view'),
     path('substitute_teacher', SubstituteTeacherView.as_view(), name='substitute_teacher-view'),
     path('teacher_view', TeacherTimetableView.as_view(), name='teacher_timetable-view'),
