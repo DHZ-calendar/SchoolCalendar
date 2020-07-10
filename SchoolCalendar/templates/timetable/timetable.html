@@ -120,10 +120,10 @@
                 </select>
 
                 {% trans 'Hour start' %}:
-                <input type="text" id="hour_start" class="form-control timepicker" />
+                <input type="text" id="hour_start" class="form-control timepicker" data-append-widget-to="#modalExtraLecture" />
 
                 {% trans 'Hour end' %}:
-                <input type="text" id="hour_end" class="form-control timepicker" />
+                <input type="text" id="hour_end" class="form-control timepicker" data-append-widget-to="#modalExtraLecture" />
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans 'Close' %}</button>
@@ -195,7 +195,6 @@
     $(document).ready(async () => {
         $('.timepicker').timepicker({
             minuteStep: 1,
-            appendWidgetTo: 'body',
             showSeconds: false,
             showMeridian: false,
             defaultTime: false
