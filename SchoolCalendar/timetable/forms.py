@@ -145,6 +145,7 @@ class UserCreationFormWithoutPassword(UserCreationForm):
         if self.instance.pk is None:  # Creating a new user
             self.cleaned_data['password1'] = generate_random_password()
             self.cleaned_data['password2'] = self.cleaned_data['password1']
+        return super().clean()
 
 
 class TeacherForm(BaseFormWithSchoolCheck):
