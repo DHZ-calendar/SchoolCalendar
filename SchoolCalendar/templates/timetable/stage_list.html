@@ -21,6 +21,11 @@
             </select>
         </div>
         <div class="col">
+            {% trans 'Course:' %}
+            <select id="course" class="form-control form-control-custom" onchange="getStages()">
+            </select>
+        </div>
+        <div class="col">
             <a class="btn btn-success mb-2 float-right" href="{% url 'stage-add' %}" role="button">
                 <svg class="bi bi-plus" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" d="M8 3.5a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5H4a.5.5 0 0 1 0-1h3.5V4a.5.5 0 0 1 .5-.5z"/>
@@ -76,13 +81,15 @@
 
 {% block script %}
     $(document).ready(async () => {
+        await getCourses();
         await getStages();
     });
 
     async function getStages(){
         let url = _URL['stages'];
         let data = {
-            'school_year': $('#school_year').val()
+            'school_year': $('#school_year').val(),
+            'course': $('#course').val()
         };
         $('#table-body').empty();
         try{
@@ -118,9 +125,26 @@
         }
     }
 
+    async function getCourses(){
+        let url = _URL['courses'];
+        $('#course').empty();
+        $('#course').append(`<option value="">{% trans 'All courses' %}</option>`);
+        try{
+            data = await $.get(url);
+            for(let el of data){
+                let html = `<option value="${el.id}">${el.year} ${el.section}</option>`;
+                $('#course').append(html);
+            }
+        }
+        catch{
+            console.log("No data");
+        }
+    }
+
     _URL = {
         'stages': "{% url 'stage-list' %}",
         'stages_edit': "{% url 'stage-edit' 1234 %}",
-        'stages_delete': "{% url 'stage-delete' 1234 %}"
+        'stages_delete': "{% url 'stage-delete' 1234 %}",
+        'courses': "{% url 'section_only_course-list' %}"
     };
 {% endblock %}
