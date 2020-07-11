@@ -64,7 +64,7 @@ class HourSlotFilter(FilterSet):
 class HoursPerTeacherInClassFilter(FilterSet):
     class Meta:
         model = HoursPerTeacherInClass
-        fields = ['school_year', 'course']
+        fields = ['school_year', 'course', 'teacher']
 
 
 class CourseSectionOnlyFilter(FilterSet):

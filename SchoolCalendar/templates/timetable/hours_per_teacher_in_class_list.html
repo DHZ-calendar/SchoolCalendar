@@ -21,6 +21,14 @@
             </select>
         </div>
         <div class="col">
+            <select id="teacher" class="form-control form-control-custom" onchange="getHoursTeachers()">
+            </select>
+        </div>
+        <div class="col">
+            <select id="course" class="form-control form-control-custom" onchange="getHoursTeachers()">
+            </select>
+        </div>
+        <div class="col">
             <a class="btn btn-success mb-2 float-right" href="{% url 'hours_per_teacher_in_class-add' %}" role="button">
                 <svg class="bi bi-plus" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" d="M8 3.5a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5H4a.5.5 0 0 1 0-1h3.5V4a.5.5 0 0 1 .5-.5z"/>
@@ -54,13 +62,17 @@
 
 {% block script %}
     $(document).ready(async () => {
+        await getTeachers();
+        await getCourses();
         await getHoursTeachers();
     });
 
     async function getHoursTeachers(){
         let url = _URL['hour_per_teacher_in_class'];
         let data = {
-            'school_year': $('#school_year').val()
+            'school_year': $('#school_year').val(),
+            'teacher': $('#teacher').val(),
+            'course': $('#course').val()
         };
         $('#table-body').empty();
         try{
@@ -97,9 +109,43 @@
         }
     }
 
+    async function getTeachers(){
+        let url = _URL['teachers'];
+        $('#teacher').empty();
+        $('#teacher').append(`<option value="">{% trans 'All teachers' %}</option>`);
+        try{
+            data = await $.get(url);
+            for(let el of data){
+                let html = `<option value="${el.id}">${el.last_name} ${el.first_name}</option>`;
+                $('#teacher').append(html);
+            }
+        }
+        catch{
+            console.log("No data");
+        }
+    }
+
+    async function getCourses(){
+        let url = _URL['courses'];
+        $('#course').empty();
+        $('#course').append(`<option value="">{% trans 'All courses' %}</option>`);
+        try{
+            data = await $.get(url);
+            for(let el of data){
+                let html = `<option value="${el.id}">${el.year} ${el.section}</option>`;
+                $('#course').append(html);
+            }
+        }
+        catch{
+            console.log("No data");
+        }
+    }
+
     _URL = {
         'hour_per_teacher_in_class': "{% url 'hour_per_teacher_in_class-list' %}",
         'hour_per_teacher_in_class_edit': "{% url 'hours_per_teacher_in_class-edit' 1234 %}",
-        'hour_per_teacher_in_class_delete': "{% url 'hours_per_teacher_in_class-delete' 1234 %}"
+        'hour_per_teacher_in_class_delete': "{% url 'hours_per_teacher_in_class-delete' 1234 %}",
+        'teachers': "{% url 'teacher-list' %}",
+        'courses': "{% url 'section_only_course-list' %}"
     };
 {% endblock %}
