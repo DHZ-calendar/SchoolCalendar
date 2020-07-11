@@ -42,15 +42,8 @@ class TeacherTimetableView(LoginRequiredMixin, TeacherPermissionMixin, TemplateV
     template_name = 'timetable/teacher_timetable.html'
 
 
-class TeacherReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateView):
+class TeacherReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateViewWithSchoolYears):
     template_name = 'timetable/teacher_report.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        school = utils.get_school_from_user(self.request.user)
-        context['teachers_report'] = utils.get_teachers_hours_info(school)
-        return context
 
 
 class TeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):

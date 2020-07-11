@@ -69,6 +69,105 @@ class TeacherSerializer(ModelSerializer):
         fields = ['id', 'url', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'school', 'notes']
 
 
+class TeacherSummarySerializer(ModelSerializer):
+    hours_done = SerializerMethodField()  # normal hours done in the given date period
+    hours_bes_done = SerializerMethodField()  # bes hours done in the given date period
+    total_hours = SerializerMethodField()  # total amount of hours to be done in the year
+    total_hours_bes = SerializerMethodField()  # same but for bes hours
+    hours_substitution_done = SerializerMethodField()  # substitution hours done in the given date period
+
+    class Meta:
+        model = Teacher
+        fields = ['id', 'first_name', 'last_name', 'hours_done', 'hours_bes_done', 'total_hours', 'total_hours_bes',
+                  'hours_substitution_done']
+
+    def get_hours_done(self, obj, *args, **kwargs):
+        # Get start_date and end_date parameters from url
+        start_date = self.context.get('request').query_params.get('start_date')
+        end_date = self.context.get('request').query_params.get('end_date')
+
+        school_year = self.context.get('request').query_params.get('school_year')
+
+        assignments = Assignment.objects.filter(teacher=obj.id,
+                                                school=obj.school,
+                                                school_year=school_year,
+                                                substitution=False,
+                                                bes=False).values('date__week_day', 'hour_start', 'hour_end')
+        # Filter in a time interval
+        if start_date:
+            assignments = assignments.filter(date__gte=start_date)
+        if end_date:
+            assignments = assignments.filter(date__lte=end_date)
+
+        for el in assignments:
+            el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
+
+        hours_slots = HourSlot.objects.filter(school=obj.school,
+                                              school_year=school_year).values("day_of_week", "starts_at",
+                                                                              "ends_at", "legal_duration")
+        total = utils.compute_total_hours_assignments(assignments, hours_slots)
+        return total
+
+    def get_hours_bes_done(self, obj, *args, **kwargs):
+        # Get start_date and end_date parameters from url
+        start_date = self.context.get('request').query_params.get('start_date')
+        end_date = self.context.get('request').query_params.get('end_date')
+
+        school_year = self.context.get('request').query_params.get('school_year')
+
+        assignments = Assignment.objects.filter(teacher=obj.id,
+                                                school=obj.school,
+                                                school_year=school_year,
+                                                bes=True).values('date__week_day', 'hour_start', 'hour_end')
+        # Filter in a time interval
+        if start_date:
+            assignments = assignments.filter(date__gte=start_date)
+        if end_date:
+            assignments = assignments.filter(date__lte=end_date)
+
+        for el in assignments:
+            el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
+
+        hours_slots = HourSlot.objects.filter(school=obj.school,
+                                              school_year=school_year).values("day_of_week", "starts_at",
+                                                                              "ends_at", "legal_duration")
+        total = utils.compute_total_hours_assignments(assignments, hours_slots)
+        return total
+
+    def get_hours_substitution_done(self, obj, *args, **kwargs):
+        # Get start_date and end_date parameters from url
+        start_date = self.context.get('request').query_params.get('start_date')
+        end_date = self.context.get('request').query_params.get('end_date')
+
+        school_year = self.context.get('request').query_params.get('school_year')
+
+        assignments = Assignment.objects.filter(teacher=obj.id,
+                                                school=obj.school,
+                                                school_year=school_year,
+                                                substitution=True).values('date__week_day', 'hour_start', 'hour_end')
+        # Filter in a time interval
+        if start_date:
+            assignments = assignments.filter(date__gte=start_date)
+        if end_date:
+            assignments = assignments.filter(date__lte=end_date)
+
+        for el in assignments:
+            el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
+
+        hours_slots = HourSlot.objects.filter(school=obj.school,
+                                              school_year=school_year).values("day_of_week", "starts_at",
+                                                                              "ends_at", "legal_duration")
+        total = utils.compute_total_hours_assignments(assignments, hours_slots)
+        return total
+
+    # TODO: complete the methods when the year load is done
+    def get_total_hours(self, obj, *args, **kwargs):
+        return 0
+
+    def get_total_hours_bes(self, obj, *args, **kwargs):
+        return 0
+
+
 class RoomSerializer(ModelSerializer):
     class Meta:
         model = Room
@@ -443,12 +542,14 @@ class SubstitutionSerializer(Serializer):
 
     def get_available_teachers(self, obj):
         serializer_context = {'request': self.context.get('request')}
-        serializer = TeacherSubstitutionSerializer(self.initial_data['available_teachers'], many=True, context=serializer_context)
+        serializer = TeacherSubstitutionSerializer(self.initial_data['available_teachers'], many=True,
+                                                   context=serializer_context)
         return serializer.data
 
     def get_other_teachers(self, obj):
         serializer_context = {'request': self.context.get('request')}
-        serializer = TeacherSubstitutionSerializer(self.initial_data['other_teachers'], many=True, context=serializer_context)
+        serializer = TeacherSubstitutionSerializer(self.initial_data['other_teachers'], many=True,
+                                                   context=serializer_context)
         return serializer.data
 
     def create(self, validated_data):

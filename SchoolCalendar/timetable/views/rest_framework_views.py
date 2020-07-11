@@ -11,7 +11,7 @@ from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, C
 from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer, \
     HolidaySerializer, StageSerializer, HourSlotSerializer, HoursPerTeacherInClassSerializer, AssignmentSerializer, \
     AbsenceBlockSerializer, TeacherSubstitutionSerializer, SubjectSerializer, ReplicationConflictsSerializer, \
-    RoomSerializer
+    RoomSerializer, TeacherSummarySerializer
 from timetable.permissions import SchoolAdminCanWriteDelete, TeacherCanView
 from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
     StageFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
@@ -24,6 +24,14 @@ from timetable import utils
 class TeacherViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
+    filter_backends = [OrderingFilter, QuerysetFromSameSchool]
+    ordering = ['last_name', 'first_name']
+
+
+class TeacherSummaryViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherSummarySerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filter_backends = [OrderingFilter, QuerysetFromSameSchool]
     ordering = ['last_name', 'first_name']

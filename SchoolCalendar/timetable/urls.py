@@ -14,7 +14,7 @@ from timetable.views.rest_framework_views import TeacherViewSet, \
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
     AbsenceBlocksPerTeacherViewSet, TeacherTimetableViewSet, AbsenceBlockViewSet, \
-    SubjectViewSet, RoomViewSet
+    SubjectViewSet, RoomViewSet, TeacherSummaryViewSet
 from timetable.views.other_views import TimetableView, SubstituteTeacherView, TeacherTimetableView, \
     LoggedUserRedirectView, TeacherReportView, TeacherPDFReportView, SendInvitationTeacherEmailView, \
     SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView, \
@@ -41,6 +41,8 @@ router.register(r'teacher_absence_block/(?P<teacher_pk>[0-9]+)/(?P<school_year_p
                 AbsenceBlocksPerTeacherViewSet, basename='teacher_absence_blocks')
 router.register(r'teacher_timetable', TeacherTimetableViewSet, basename='teacher_timetable')
 router.register(r'absence_blocks', AbsenceBlockViewSet, basename='absence_block')
+router.register(r'teachers_summary/?(school_year=[0-9]+)?(start_date=\d\d\d\d-\d\d-\d\d)?(end_date=\d\d\d\d-\d\d-\d\d)?',
+                TeacherSummaryViewSet, basename='teacher_summary')
 
 urlpatterns = [
     path('', LoggedUserRedirectView.as_view(), name='user_redirect-view'),
