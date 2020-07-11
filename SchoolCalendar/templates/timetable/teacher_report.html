@@ -44,6 +44,16 @@
                 {% endfor %}
             </select>
         </div>
+        <div class="col">
+            {% trans 'Date start:' %}
+            <input class="datepicker form-control form-control-custom form-control-sm"
+                   data-date-format='dd/mm/yyyy' type="text" id="date_start" onchange="loadData()"></input>
+        </div>
+        <div class="col">
+            {% trans 'Date end:' %}
+            <input class="datepicker form-control form-control-custom form-control-sm"
+                   data-date-format='dd/mm/yyyy' type="text" id="date_end" onchange="loadData()"></input>
+        </div>
     </div>
     <div class="row p-1">
         <div class="col">
@@ -71,13 +81,19 @@
 {% block script %}
 
     $(document).ready(async () => {
+        $('.datepicker').datepicker();
+
         await loadData();
     });
 
     async function loadData() {
-        let url = _URL['teacher_summary']
+        let url = _URL['teacher_summary'];
+        let startDate = moment($('#date_start').val(), "DD/MM/YYYY").toDate();
+        let endDate = moment($('#date_end').val(), "DD/MM/YYYY").toDate();
         let data = {
-            school_year: $('#school_year').val()
+            school_year: $('#school_year').val(),
+            start_date: formatDate(startDate),
+            end_date: formatDate(endDate)
         };
         try {
             data = await $.get(url, data=data);
@@ -88,8 +104,12 @@
 
     async function detailFormatter(index, row, $detail) {
         let url = _URL['hour_per_teacher_in_class'];
+        let startDate = moment($('#date_start').val(), "DD/MM/YYYY").toDate();
+        let endDate = moment($('#date_end').val(), "DD/MM/YYYY").toDate();
         let data = {
-            teacher: row.id
+            teacher: row.id,
+            start_date: formatDate(startDate),
+            end_date: formatDate(endDate)
         };
         let hpticHtml = '';
         try {
@@ -135,4 +155,11 @@
         'hour_per_teacher_in_class': "{% url 'hour_per_teacher_in_class-list' %}"
     };
 
+    function formatDate(date){
+        if(date === undefined)
+            return date;
+
+        let frm = (x) => ("0" + x).slice(-2);
+        return date.getFullYear() + "-" + frm(date.getMonth() + 1) + "-" + frm(date.getDate());
+    }
 {% endblock %}
