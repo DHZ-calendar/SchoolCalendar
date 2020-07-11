@@ -23,6 +23,19 @@
             </select>
         </div>
         <div class="col">
+            {% trans 'Day of week:' %}
+            <select id="day_of_week" class="form-control form-control-custom" onchange="getHourSlots()">
+                <option value="">{% trans 'All days' %}</option>
+                <option value="0">{% trans 'Monday' %}</option>
+                <option value="1">{% trans 'Tuesday' %}</option>
+                <option value="2">{% trans 'Wednesday' %}</option>
+                <option value="3">{% trans 'Thursday' %}</option>
+                <option value="4">{% trans 'Friday' %}</option>
+                <option value="5">{% trans 'Saturday' %}</option>
+                <option value="6">{% trans 'Sunday' %}</option>
+            </select>
+        </div>
+        <div class="col">
             <a class="btn btn-success mb-2 float-right" href="{% url 'hourslot-add' %}" role="button">
                 <svg class="bi bi-plus" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" d="M8 3.5a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5H4a.5.5 0 0 1 0-1h3.5V4a.5.5 0 0 1 .5-.5z"/>
@@ -62,7 +75,8 @@
     async function getHourSlots(){
         let url = _URL['hour_slots'];
         let data = {
-            'school_year': $('#school_year').val()
+            'school_year': $('#school_year').val(),
+            'day_of_week': $('#day_of_week').val()
         };
         $('#table-body').empty();
         try{

@@ -58,7 +58,7 @@ class AbsenceBlockFilter(FilterSet):
 class HourSlotFilter(FilterSet):
     class Meta:
         model = HourSlot
-        fields = ['school_year']
+        fields = ['school_year', 'day_of_week']
 
 
 class HoursPerTeacherInClassFilter(FilterSet):
