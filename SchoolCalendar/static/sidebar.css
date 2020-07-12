@@ -120,8 +120,7 @@
     text-decoration: none;
 }
 
-#sidebar ul li.active>a,
-a[aria-expanded="true"] {
+#sidebar ul li.active>a {
     color: #fff;
     background: #4791ff;
 }
