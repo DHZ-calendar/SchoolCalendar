@@ -282,7 +282,7 @@ class HourSlotForm(BaseFormWithSchoolCheck):
                                   show_hours=True,
                                   show_minutes=True,
                                   show_seconds=False,
-                                  attrs={}),  # We need to remove form-control.
+                                  attrs={'class': 'form-control duration-input'}),  # We need to remove form-control.
         required=False)
 
     def __init__(self, user, *args, **kwargs):
