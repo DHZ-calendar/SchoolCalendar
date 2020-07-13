@@ -583,7 +583,7 @@ class AssignmentForm(BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck):
 
     class Meta:
         model = Assignment
-        fields = ['teacher', 'course', 'subject', 'school_year', 'school', 'date', 'hour_start', 'hour_end', 'bes',
+        fields = ['teacher', 'course', 'subject', 'school', 'date', 'hour_start', 'hour_end', 'bes',
                   'substitution', 'absent', 'room']
 
     def clean(self):
@@ -602,7 +602,7 @@ class AssignmentForm(BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck):
                 # We need to check for the existence of a related HourPerTeacherInClass
                 hours_teacher_in_class = HoursPerTeacherInClass.objects.filter(
                                                             teacher=self.cleaned_data['teacher'],
-                                                            course__school_year=self.cleaned_data['school_year'],
+                                                            course__school_year=self.cleaned_data['course'].school_year,
                                                             school=self.cleaned_data['school'],
                                                             course=self.cleaned_data['course'],
                                                             subject=self.cleaned_data['subject'])
@@ -620,7 +620,7 @@ class AssignmentForm(BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck):
             conflicts_teacher = Assignment.objects.filter(
                 school=self.cleaned_data['school'],
                 teacher=self.cleaned_data['teacher'],
-                school_year=self.cleaned_data['school_year'],
+                course__school_year=self.cleaned_data['course'].school_year,
                 hour_start=self.cleaned_data['hour_start'],
                 hour_end=self.cleaned_data['hour_end'],
                 date=self.cleaned_data['date'])\
@@ -636,7 +636,7 @@ class AssignmentForm(BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck):
                 conflict_room = Assignment.objects.filter(
                     school=self.cleaned_data['school'],
                     room=self.cleaned_data['room'],
-                    school_year=self.cleaned_data['school_year'],
+                    course__school_year=self.cleaned_data['course'].school_year,
                     hour_start=self.cleaned_data['hour_start'],
                     hour_end=self.cleaned_data['hour_end'],
                     date=self.cleaned_data['date']) \

@@ -113,7 +113,7 @@ class CheckWeekReplicationView(UserPassesTestMixin, View):
                 a = Assignment.objects.get(pk=assign)
                 # Return all assignments from the same course or teacher that would collide in the future.
                 # excluding the assignment in the url.
-                conflicts = Assignment.objects.filter(school_year=a.school_year,
+                conflicts = Assignment.objects.filter(course__school_year=a.course.school_year,
                                                       # _week_day returns dates Sun-Sat (1,7), while weekday (Mon, Sun) (0,6)
                                                       date__week_day=(a.date.weekday() + 2) % 7,
                                                       hour_start=a.hour_start) \
@@ -180,7 +180,7 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
                 # There can't be conflicts among the newly created assignments and the teaching hours of the same teacher!
                 # The same is not true for conflicts of the same class.
                 conflicts = Assignment.objects.filter(school=a.school,
-                                                      school_year=a.school_year,
+                                                      course__school_year=a.course.school_year,
                                                       hour_start=a.hour_start,
                                                       hour_end=a.hour_end,
                                                       date__week_day=((a.date.weekday() + 2) % 7),
@@ -201,7 +201,7 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
             school = utils.get_school_from_user(request.user)
             assign_to_del = Assignment.objects.filter(school=school,
                                                       course=course_pk,
-                                                      school_year=school_year_pk,
+                                                      course__school_year=school_year_pk,
                                                       date__gte=from_date,
                                                       date__lte=to_date). \
                 exclude(id__in=assignments)  # avoid removing replicating assignments
@@ -215,11 +215,11 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
                 while d <= to_date:
                     if d != a.date and d.weekday() == a.date.weekday() and not \
                             Holiday.objects.filter(school=a.school,
-                                                   school_year=a.school_year,
+                                                   school_year=a.course.school_year,
                                                    date_end__gte=d,
                                                    date_start__lte=d).exists() and not \
                             Stage.objects.filter(school=a.school,
-                                                 school_year=a.school_year,
+                                                 course__school_year=a.course.school_year,
                                                  date_start__lte=d,
                                                  date_end__gte=d,
                                                  course=a.course):
@@ -229,7 +229,6 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
                             course=a.course,
                             subject=a.subject,
                             room=a.room,
-                            school_year=a.school_year,
                             school=a.school,
                             hour_start=a.hour_start,
                             hour_end=a.hour_end,
@@ -325,7 +324,6 @@ class SubstituteTeacherApiView(UserPassesTestMixin, View):
             teacher=Teacher.objects.get(id=teacher),
             course=a.course,
             subject=a.subject,
-            school_year=a.school_year,
             school=a.school,
             room=a.room,
             date=a.date,
@@ -403,7 +401,7 @@ class TimetableTeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMix
                 'hour_end': 'ends_at'
             }
         ).order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
-        assignments = Assignment.objects.filter(school=school, school_year=school_year, teacher=teacher,
+        assignments = Assignment.objects.filter(school=school, course__school_year=school_year, teacher=teacher,
                                                 date__gte=monday_date, date__lte=end_date)
         hours_assign = assignments.order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
 
@@ -511,7 +509,7 @@ class TimetableCoursePDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixi
                 'hour_end': 'ends_at'
             }
         ).order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
-        assignments = Assignment.objects.filter(school=school, school_year=school_year, course=course,
+        assignments = Assignment.objects.filter(school=school, course__school_year=school_year, course=course,
                                                 date__gte=monday_date, date__lte=end_date)
         hours_assign = assignments.order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
 
@@ -617,7 +615,7 @@ class TimetableGeneralPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMix
                 'hour_end': 'ends_at'
             }
         ).order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
-        assignments = Assignment.objects.filter(school=school, school_year=school_year,
+        assignments = Assignment.objects.filter(school=school, course__school_year=school_year,
                                                 date__gte=monday_date, date__lte=end_date). \
             order_by('teacher__last_name', 'teacher__first_name')
         hours_assign = assignments.order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()

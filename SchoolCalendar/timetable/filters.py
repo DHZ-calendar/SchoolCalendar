@@ -82,6 +82,10 @@ class CourseYearOnlyFilter(FilterSet):
 class AssignmentFilter(FilterSet):
     to_date = DateFilter(field_name='date', lookup_expr='lte')
     from_date = DateFilter(field_name='date', lookup_expr='gte')
+    school_year = NumberFilter(field_name='school_year', method='school_year_filter')
+
+    def school_year_filter(self, queryset, name, value):
+        return queryset.filter(course__school_year__id=value)
 
     class Meta:
         model = Assignment
@@ -108,7 +112,7 @@ class RoomFilter(FilterSet):
         if school and school_year and hour_start and hour_end and date:
             # Search assignments with an intersection in time
             used_rooms = Assignment.objects.filter(school=school,
-                                                   school_year=school_year,
+                                                   course__school_year=school_year,
                                                    date=date,
                                                    room__isnull=False) \
                 .filter(Q(hour_start__lte=hour_start, hour_end__gt=hour_start) |

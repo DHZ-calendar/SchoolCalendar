@@ -221,8 +221,6 @@ class Assignment(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("teacher"))
     course = models.ForeignKey(Course, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("course"))
     subject = models.ForeignKey(Subject, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("subject"))
-    school_year = models.ForeignKey(SchoolYear, null=False, blank=False, on_delete=models.CASCADE,
-                                    verbose_name=_("school year"))
     school = models.ForeignKey(School, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("school"))
     room = models.ForeignKey(Room, null=True, blank=True, on_delete=models.CASCADE, verbose_name=_("room"))
 

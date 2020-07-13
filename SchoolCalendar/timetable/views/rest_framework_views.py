@@ -175,7 +175,7 @@ class TeacherAssignmentsViewSet(UserPassesTestMixin, ListModelMixin, GenericView
 
         return Assignment.objects.filter(teacher=teacher,
                                          absent=False,
-                                         school_year=school_year)
+                                         course__school_year=school_year)
 
 
 class AbsenceBlocksPerTeacherViewSet(UserPassesTestMixin, ListModelMixin, GenericViewSet):
