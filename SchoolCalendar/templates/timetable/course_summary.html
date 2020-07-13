@@ -1,0 +1,151 @@
+{% extends 'timetable/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'main.css' %}"/>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<link href="https://unpkg.com/bootstrap-table@1.17.1/dist/bootstrap-table.min.css" rel="stylesheet">
+<script src="https://unpkg.com/bootstrap-table@1.17.1/dist/bootstrap-table.min.js"></script>
+
+<script src="https://unpkg.com/bootstrap-table@1.17.1/dist/locale/bootstrap-table-it-IT.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.17.1/dist/locale/bootstrap-table-en-US.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <h3 class="col text-center">{% trans 'Courses summary' %}</h3>
+    </div>
+    <div class="row">
+        <div class="col">
+            {% trans 'School year:' %}
+            <select id="school_year" class="form-control form-control-custom" onchange="loadData()">
+                {% for year in school_years %}
+                    <option value="{{ year.id }}">{{ year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col">
+            {% trans 'Date start:' %}
+            <input class="datepicker form-control form-control-custom form-control-sm"
+                   data-date-format='dd/mm/yyyy' type="text" id="date_start" onchange="loadData()"></input>
+        </div>
+        <div class="col">
+            {% trans 'Date end:' %}
+            <input class="datepicker form-control form-control-custom form-control-sm"
+                   data-date-format='dd/mm/yyyy' type="text" id="date_end" onchange="loadData()"></input>
+        </div>
+    </div>
+    <div class="row p-1">
+        <div class="col">
+            <table id="table" data-toggle="table" data-search="true" data-detail-view="true" data-detail-formatter="detailFormatter">
+                <thead class="table-primary">
+                    <tr>
+                        <th data-field="year">{% trans 'Year' %}</th>
+                        <th data-field="section">{% trans 'Section' %}</th>
+                        <th data-field="hours_done">{% trans 'Teaching hours made' %}</th>
+                        <th data-field="hours_bes_done">{% trans 'B.E.S. hours made' %}</th>
+                        <th data-field="total_hours">{% trans 'Assigned teaching hours' %}</th>
+                        <th data-field="total_hours_bes">{% trans 'Assigned B.E.S. hours' %}</th>
+                        <th data-field="hours_substitution_done">{% trans 'Substitution hours made' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+              </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+    $(document).ready(async () => {
+        $('.datepicker').datepicker();
+
+        await loadData();
+    });
+
+    async function loadData() {
+        let url = _URL['course_summary'];
+        let startDate = moment($('#date_start').val(), "DD/MM/YYYY").toDate();
+        let endDate = moment($('#date_end').val(), "DD/MM/YYYY").toDate();
+        let data = {
+            school_year: $('#school_year').val(),
+            start_date: formatDate(startDate),
+            end_date: formatDate(endDate)
+        };
+        try {
+            data = await $.get(url, data=data);
+            $('#table').bootstrapTable('load', data);
+        }
+        catch {}
+    }
+
+    async function detailFormatter(index, row, $detail) {
+        let url = _URL['hour_per_teacher_in_class'];
+        let startDate = moment($('#date_start').val(), "DD/MM/YYYY").toDate();
+        let endDate = moment($('#date_end').val(), "DD/MM/YYYY").toDate();
+        let data = {
+            course: row.id,
+            start_date: formatDate(startDate),
+            end_date: formatDate(endDate)
+        };
+        let hpticHtml = '';
+        try {
+            data = await $.get(url, data=data);
+            for (let elem of data) {
+                hpticHtml += `
+                    <tr>
+                      <th scope="row">${elem.teacher.last_name} ${elem.teacher.first_name}</th>
+                      <td>${elem.subject.name}</td>
+                      <td>${elem.hours}</td>
+                      <td>${elem.hours_bes}</td>
+                      <td>${elem.missing_hours}</td>
+                      <td>${elem.missing_hours_bes}</td>
+                    </tr>
+                `;
+            }
+        }
+        catch {}
+
+        let html = `
+            <table class="table">
+              <thead class="table-success">
+                <tr>
+                  <th scope="col">{% trans 'Teacher' %}</th>
+                  <th scope="col">{% trans 'Subject' %}</th>
+                  <th scope="col">{% trans 'Assigned teaching hours' %}</th>
+                  <th scope="col">{% trans 'Assigned B.E.S. teaching hours' %}</th>
+                  <th scope="col">{% trans 'Missing teaching hours' %}</th>
+                  <th scope="col">{% trans 'Missing B.E.S. hours' %}</th>
+                </tr>
+              </thead>
+              <tbody class="table-secondary">
+                ${hpticHtml}
+              </tbody>
+            </table>
+            `;
+        $detail.html(html);
+    }
+
+
+    _URL = {
+        'course_summary': "{% url 'course_summary-list' %}",
+        'hour_per_teacher_in_class': "{% url 'hour_per_teacher_in_class-list' %}"
+    };
+
+    function formatDate(date){
+        if(date === undefined)
+            return date;
+
+        let frm = (x) => ("0" + x).slice(-2);
+        return date.getFullYear() + "-" + frm(date.getMonth() + 1) + "-" + frm(date.getDate());
+    }
+{% endblock %}

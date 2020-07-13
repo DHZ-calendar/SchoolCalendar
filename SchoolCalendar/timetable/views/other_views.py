@@ -42,8 +42,12 @@ class TeacherTimetableView(LoginRequiredMixin, TeacherPermissionMixin, TemplateV
     template_name = 'timetable/teacher_timetable.html'
 
 
-class TeacherReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateViewWithSchoolYears):
+class TeacherSummaryView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateViewWithSchoolYears):
     template_name = 'timetable/teacher_summary.html'
+
+
+class CourseSummaryView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateViewWithSchoolYears):
+    template_name = 'timetable/course_summary.html'
 
 
 class TeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):
