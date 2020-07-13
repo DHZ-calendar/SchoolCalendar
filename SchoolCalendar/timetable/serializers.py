@@ -204,7 +204,7 @@ class StageSerializer(AbstractTimePeriodSerializer):
 
     class Meta:
         model = Stage
-        fields = ['id', 'start', 'end', 'date_start', 'date_end', 'name', 'course', 'school', 'school_year']
+        fields = ['id', 'start', 'end', 'date_start', 'date_end', 'name', 'course', 'school']
 
 
 class HourSlotSerializer(ModelSerializer):

@@ -23,7 +23,6 @@ class StageTestCase(BaseTestCase):
             "date_end": datetime(day=23, month=6, year=2020),
             "course": self.course1,
             "school": self.s1,
-            "school_year": self.school_year_2020,
             "name": "Difficult Stage"}
 
     def test_stage_correct_creation(self):
@@ -57,7 +56,6 @@ class StageTestCase(BaseTestCase):
             "date_end": datetime(day=23, month=6, year=2020),
             "course": self.course2,    # Wrong course
             "school": self.s1,
-            "school_year": self.school_year_2020,
             "name": "Difficult Stage"}
         # But admin of school 1
         f = StageForm(user=self.a1, data=form_data)

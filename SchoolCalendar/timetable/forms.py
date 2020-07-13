@@ -504,7 +504,7 @@ class StageForm(BaseFormWithCourseTeacherAndSchoolCheck):
 
     class Meta:
         model = Stage
-        fields = ['date_start', 'date_end', 'course', 'name', 'school', 'school_year']
+        fields = ['date_start', 'date_end', 'course', 'name', 'school']
 
     def clean(self):
         """

@@ -171,8 +171,6 @@ class Stage(models.Model):
     date_end = models.DateField(null=False, blank=False, verbose_name=_("end date"))
     course = models.ForeignKey(Course, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("course"))
     school = models.ForeignKey(School, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("school"))
-    school_year = models.ForeignKey(SchoolYear, null=False, blank=False, on_delete=models.CASCADE,
-                                    verbose_name=_("school year"))
     name = models.CharField(null=True, blank=True, max_length=256, verbose_name=_("name"))
 
 

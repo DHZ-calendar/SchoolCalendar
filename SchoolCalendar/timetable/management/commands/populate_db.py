@@ -168,32 +168,27 @@ class Command(BaseCommand):
                             date_end=datetime.datetime(year=2020, month=5, day=16),
                             course=courses[0],
                             school=school,
-                            name="Contability by local industry",
-                            school_year=school_years[0]).save())
+                            name="Contability by local industry").save())
         stages.append(Stage(date_start=datetime.datetime(year=2019, month=12, day=2),
                             date_end=datetime.datetime(year=2019, month=12, day=6),
                             course=courses[1],
                             school=school,
-                            name="Physics laboratory in research lab.",
-                            school_year=school_years[0]).save())
+                            name="Physics laboratory in research lab.").save())
         stages.append(Stage(date_start=datetime.datetime(year=2020, month=1, day=20),
                             date_end=datetime.datetime(year=2020, month=1, day=25),
                             course=courses[2],
                             school=school,
-                            name="Robotics lab.",
-                            school_year=school_years[0]).save())
+                            name="Robotics lab.").save())
         stages.append(Stage(date_start=datetime.datetime(year=2020, month=3, day=9),
                             date_end=datetime.datetime(year=2020, month=3, day=21),
                             course=courses[3],
                             school=school,
-                            name="Philosophy lecture at university.",
-                            school_year=school_years[0]).save())
+                            name="Philosophy lecture at university.").save())
         stages.append(Stage(date_start=datetime.datetime(year=2019, month=10, day=7),
                             date_end=datetime.datetime(year=2019, month=10, day=19),
                             course=courses[4],
                             school=school,
-                            name="Programming laboratory.",
-                            school_year=school_years[0]).save())
+                            name="Programming laboratory.").save())
 
         # Create subjects
         subjects = []
