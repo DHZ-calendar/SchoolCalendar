@@ -70,7 +70,7 @@
     async function getHoursTeachers(){
         let url = _URL['hour_per_teacher_in_class'];
         let data = {
-            'course__school_year': $('#school_year').val(),
+            'school_year': $('#school_year').val(),
             'teacher': $('#teacher').val(),
             'course': $('#course').val()
         };

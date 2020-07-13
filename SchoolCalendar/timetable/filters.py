@@ -43,16 +43,25 @@ class HolidayPeriodFilter(FilterSet):
 class StageFilter(FilterSet):
     to_date = DateFilter(field_name='date_start', lookup_expr='lte')
     from_date = DateFilter(field_name='date_end', lookup_expr='gte')
+    school_year = NumberFilter(field_name='school_year', method='school_year_filter')
+
+    def school_year_filter(self, queryset, name, value):
+        return queryset.filter(course__school_year__id=value)
 
     class Meta:
         model = Stage
-        fields = ['from_date', 'to_date', 'course', 'course__school_year']
+        fields = ['from_date', 'to_date', 'course', 'school_year']
 
 
 class AbsenceBlockFilter(FilterSet):
+    school_year = NumberFilter(field_name='school_year', method='school_year_filter')
+
+    def school_year_filter(self, queryset, name, value):
+        return queryset.filter(hour_slot__school_year__id=value)
+
     class Meta:
         model = AbsenceBlock
-        fields = ['hour_slot__school_year', 'teacher']
+        fields = ['school_year', 'teacher']
 
 
 class HourSlotFilter(FilterSet):
@@ -62,9 +71,14 @@ class HourSlotFilter(FilterSet):
 
 
 class HoursPerTeacherInClassFilter(FilterSet):
+    school_year = NumberFilter(field_name='school_year', method='school_year_filter')
+
+    def school_year_filter(self, queryset, name, value):
+        return queryset.filter(course__school_year__id=value)
+
     class Meta:
         model = HoursPerTeacherInClass
-        fields = ['course__school_year', 'course', 'teacher']
+        fields = ['school_year', 'course', 'teacher']
 
 
 class CourseSectionOnlyFilter(FilterSet):

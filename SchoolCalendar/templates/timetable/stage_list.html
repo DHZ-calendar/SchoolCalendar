@@ -88,7 +88,7 @@
     async function getStages(){
         let url = _URL['stages'];
         let data = {
-            'course__school_year': $('#school_year').val(),
+            'school_year': $('#school_year').val(),
             'course': $('#course').val()
         };
         $('#table-body').empty();
