@@ -169,7 +169,7 @@ def get_available_teachers(assign: Assignment, school: School):
     """
     teachers_list = Teacher.objects.filter(school=school) \
         .exclude(id=assign.teacher.id) \
-        .filter(hoursperteacherinclass__school_year=assign.school_year).distinct()
+        .filter(hoursperteacherinclass__course__school_year=assign.school_year).distinct()
 
     # Remove all teachers who have an absence block there.
     hour_slot = HourSlot.objects.filter(school=assign.school,

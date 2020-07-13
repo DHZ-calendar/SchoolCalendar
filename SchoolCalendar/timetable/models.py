@@ -202,8 +202,6 @@ class HoursPerTeacherInClass(models.Model):
                                 verbose_name=_("teacher"))
     course = models.ForeignKey(Course, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("course"))
     subject = models.ForeignKey(Subject, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("subject"))
-    school_year = models.ForeignKey(SchoolYear, null=False, blank=False, on_delete=models.CASCADE,
-                                    verbose_name=_("school year"))
     school = models.ForeignKey(School, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("school"))
 
     # A teacher has both "normal" hours and "bes" hours

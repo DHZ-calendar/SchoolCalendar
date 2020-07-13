@@ -79,7 +79,6 @@ class AssignmentTestCase(BaseTestCase):
            subject=self.subj1,
            teacher=self.teacher1,
            school=self.s1,
-           school_year=self.school_year_2020,
            hours=100,
            hours_bes=100)
         self.hptic3 = HoursPerTeacherInClass(
@@ -87,7 +86,6 @@ class AssignmentTestCase(BaseTestCase):
            subject=self.subj1,
            teacher=self.teacher3,
            school=self.s1,
-           school_year=self.school_year_2020,
            hours=100,
            hours_bes=100)
 
@@ -96,7 +94,6 @@ class AssignmentTestCase(BaseTestCase):
             subject=self.subj2,
             teacher=self.teacher2,
             school=self.s2,
-            school_year=self.school_year_2020,
             hours=100,
             hours_bes=100)
         self.hptic1.save()

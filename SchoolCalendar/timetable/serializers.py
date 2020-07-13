@@ -229,7 +229,7 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
 
     class Meta:
         model = HoursPerTeacherInClass
-        fields = ['id', 'teacher', 'course', 'subject', 'school_year', 'school', 'hours', 'hours_bes', 'missing_hours',
+        fields = ['id', 'teacher', 'course', 'subject', 'school', 'hours', 'hours_bes', 'missing_hours',
                   'missing_hours_bes']
 
     def get_missing_hours(self, obj, *args, **kwargs):
@@ -248,7 +248,7 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
                                                 course=obj.course,
                                                 subject=obj.subject,
                                                 school=obj.school,
-                                                school_year=obj.school_year,
+                                                school_year=obj.course.school_year,
                                                 bes=False).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
         if start_date:
@@ -260,8 +260,11 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
             el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
 
         hours_slots = HourSlot.objects.filter(school=obj.school,
-                                              school_year=obj.school_year).values("day_of_week", "starts_at",
-                                                                                  "ends_at", "legal_duration")
+                                              school_year=obj.course.school_year
+                                              ).values("day_of_week",
+                                                       "starts_at",
+                                                       "ends_at",
+                                                       "legal_duration")
         total = utils.compute_total_hours_assignments(assignments, hours_slots)
         return obj.hours - total
 
@@ -281,7 +284,7 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
                                                 course=obj.course,
                                                 subject=obj.subject,
                                                 school=obj.school,
-                                                school_year=obj.school_year,
+                                                school_year=obj.course.school_year,
                                                 bes=True).values('date__week_day', 'hour_start', 'hour_end')
 
         # Filter in a time interval
@@ -294,8 +297,11 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
             el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
 
         hours_slots = HourSlot.objects.filter(school=obj.school,
-                                              school_year=obj.school_year).values("day_of_week", "starts_at",
-                                                                                  "ends_at", "legal_duration")
+                                              school_year=obj.course.school_year
+                                              ).values("day_of_week",
+                                                       "starts_at",
+                                                       "ends_at",
+                                                       "legal_duration")
         total = utils.compute_total_hours_assignments(assignments, hours_slots)
 
         return obj.hours_bes - total
