@@ -52,6 +52,6 @@ class HolidayTestCase(BaseTestCase):
             "school": self.s1,
             "school_year": self.school_year_2020,
             "name": "Holiday at the seaside"}
-        f = StageForm(user=self.a1, data=form_data)
+        f = HolidayForm(user=self.a1, data=form_data)
         f.full_clean()
         self.assertFalse(f.is_valid())   # The form should have error on the dates
