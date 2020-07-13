@@ -94,9 +94,9 @@ class TeacherSummarySerializer(ModelSerializer):
                                                 substitution=False,
                                                 bes=False).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
-        if start_date:
+        if start_date and utils.is_date_string_valid(start_date):
             assignments = assignments.filter(date__gte=start_date)
-        if end_date:
+        if end_date and utils.is_date_string_valid(end_date):
             assignments = assignments.filter(date__lte=end_date)
 
         for el in assignments:
@@ -120,9 +120,9 @@ class TeacherSummarySerializer(ModelSerializer):
                                                 course__school_year=school_year,
                                                 bes=True).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
-        if start_date:
+        if start_date and utils.is_date_string_valid(start_date):
             assignments = assignments.filter(date__gte=start_date)
-        if end_date:
+        if end_date and utils.is_date_string_valid(end_date):
             assignments = assignments.filter(date__lte=end_date)
 
         for el in assignments:
@@ -146,9 +146,9 @@ class TeacherSummarySerializer(ModelSerializer):
                                                 course__school_year=school_year,
                                                 substitution=True).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
-        if start_date:
+        if start_date and utils.is_date_string_valid(start_date):
             assignments = assignments.filter(date__gte=start_date)
-        if end_date:
+        if end_date and utils.is_date_string_valid(end_date):
             assignments = assignments.filter(date__lte=end_date)
 
         for el in assignments:
@@ -193,9 +193,9 @@ class CourseSummarySerializer(ModelSerializer):
                                                 substitution=False,
                                                 bes=False).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
-        if start_date:
+        if start_date and utils.is_date_string_valid(start_date):
             assignments = assignments.filter(date__gte=start_date)
-        if end_date:
+        if end_date and utils.is_date_string_valid(end_date):
             assignments = assignments.filter(date__lte=end_date)
 
         for el in assignments:
@@ -219,9 +219,9 @@ class CourseSummarySerializer(ModelSerializer):
                                                 course__school_year=school_year,
                                                 bes=True).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
-        if start_date:
+        if start_date and utils.is_date_string_valid(start_date):
             assignments = assignments.filter(date__gte=start_date)
-        if end_date:
+        if end_date and utils.is_date_string_valid(end_date):
             assignments = assignments.filter(date__lte=end_date)
 
         for el in assignments:
@@ -245,9 +245,9 @@ class CourseSummarySerializer(ModelSerializer):
                                                 course__school_year=school_year,
                                                 substitution=True).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
-        if start_date:
+        if start_date and utils.is_date_string_valid(start_date):
             assignments = assignments.filter(date__gte=start_date)
-        if end_date:
+        if end_date and utils.is_date_string_valid(end_date):
             assignments = assignments.filter(date__lte=end_date)
 
         for el in assignments:
@@ -350,9 +350,9 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
                                                 course__school_year=obj.course.school_year,
                                                 bes=False).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
-        if start_date:
+        if start_date and utils.is_date_string_valid(start_date):
             assignments = assignments.filter(date__gte=start_date)
-        if end_date:
+        if end_date and utils.is_date_string_valid(end_date):
             assignments = assignments.filter(date__lte=end_date)
 
         for el in assignments:
@@ -387,9 +387,9 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
                                                 bes=True).values('date__week_day', 'hour_start', 'hour_end')
 
         # Filter in a time interval
-        if start_date:
+        if start_date and utils.is_date_string_valid(start_date):
             assignments = assignments.filter(date__gte=start_date)
-        if end_date:
+        if end_date and utils.is_date_string_valid(end_date):
             assignments = assignments.filter(date__lte=end_date)
 
         for el in assignments:

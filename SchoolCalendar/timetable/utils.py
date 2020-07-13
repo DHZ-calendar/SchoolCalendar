@@ -44,6 +44,16 @@ def get_closest_smaller_Monday():
     return datetime.datetime.now().date() - datetime.timedelta(days=datetime.datetime.now().date().weekday())
 
 
+def is_date_string_valid(date_str):
+    """
+    Returns True only if the specified string is in the format YYYY-MM-DD
+    """
+    try:
+        d = datetime.datetime.strptime(date_str, "%Y-%m-%d")
+        return True
+    except ValueError:
+        return False
+
 def is_adminschool(user):
     """
     :param user:
