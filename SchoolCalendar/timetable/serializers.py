@@ -423,7 +423,7 @@ class AbsenceBlockSerializer(ModelSerializer):
 
     class Meta:
         model = AbsenceBlock
-        fields = ['teacher', 'hour_slot', 'hour_slot_text', 'school_year', 'id']
+        fields = ['teacher', 'hour_slot', 'hour_slot_text', 'id']
 
 
 class TeacherSubstitutionSerializer(ModelSerializer):

@@ -6,6 +6,8 @@ import random
 import datetime
 import numpy as np
 
+from SchoolCalendar.timetable.models import AbsenceBlock
+
 PASSWORD_DEMO = 'password_demo'
 
 HOUR_SLOT_LIST = [
@@ -130,8 +132,7 @@ class Command(BaseCommand):
             permutation_of_absence_blocks = np.random.permutation(len(hour_slots))
             for i in range(0, random.choice(number_of_absence_blocks)):
                 absences[t.username].append(AbsenceBlock(teacher=t,
-                                                         hour_slot=hour_slots[permutation_of_absence_blocks[i]],
-                                                         school_year=school_years[0]))
+                                                         hour_slot=hour_slots[permutation_of_absence_blocks[i]]))
             for el in absences[t.username]:
                 el.save()
 

@@ -137,8 +137,6 @@ class AbsenceBlock(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("teacher"))
     hour_slot = models.ForeignKey(HourSlot, on_delete=models.CASCADE, null=False, blank=False,
                                   verbose_name=_("hour slot"))
-    school_year = models.ForeignKey(SchoolYear, on_delete=models.CASCADE, null=False, blank=False,
-                                    verbose_name=_('school year'))
 
     def __str__(self):
         """

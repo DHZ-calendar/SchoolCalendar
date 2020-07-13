@@ -442,7 +442,7 @@ class AbsenceBlockForm(BaseFormWithHourSlotTeacherAndSchoolCheck):
 
     class Meta:
         model = AbsenceBlock
-        fields = ['teacher', 'hour_slot', 'school_year']
+        fields = ['teacher', 'hour_slot']
 
 
 class HolidayForm(BaseFormWithSchoolCheck):

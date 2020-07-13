@@ -63,7 +63,7 @@
     async function getAbsences(){
         let url = _URL['absence_block'];
         let data = {
-            'school_year': $('#school_year').val(),
+            'hour_slot__school_year': $('#school_year').val(),
             'teacher': $('#teacher').val()
         };
         $('#table-body').empty();

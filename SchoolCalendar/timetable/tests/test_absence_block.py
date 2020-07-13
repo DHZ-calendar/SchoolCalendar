@@ -56,8 +56,7 @@ class AbsenceBlockTestCase(BaseTestCase):
         :return:
         """
         data = {'teacher': self.teacher1,
-                'hour_slot': self.hs1,
-                'school_year': self.school_year_2020}
+                'hour_slot': self.hs1}
         f = AbsenceBlockForm(user=self.a1, data=data)
         f.full_clean()
         self.assertTrue(f.is_valid(), msg=f.errors)
@@ -68,8 +67,7 @@ class AbsenceBlockTestCase(BaseTestCase):
         :return:
         """
         data = {'teacher': self.teacher2,    # Teacher from a different school
-                'hour_slot': self.hs1,
-                'school_year': self.school_year_2020}
+                'hour_slot': self.hs1}
         f = AbsenceBlockForm(user=self.a1, data=data)
         f.full_clean()
         self.assertTrue(f.has_error('teacher'))
@@ -80,8 +78,7 @@ class AbsenceBlockTestCase(BaseTestCase):
         :return:
         """
         data = {'teacher': self.teacher1,    # Teacher from a different school
-                'hour_slot': self.hs2,
-                'school_year': self.school_year_2020}
+                'hour_slot': self.hs2}
         f = AbsenceBlockForm(user=self.a1, data=data)
         f.full_clean()
         self.assertTrue(f.has_error('hour_slot'))
@@ -92,8 +89,7 @@ class AbsenceBlockTestCase(BaseTestCase):
         :return:
         """
         data = {'teacher': self.teacher1,    # Teacher from a different school
-                'hour_slot': self.hs1,
-                'school_year': self.school_year_2020}
+                'hour_slot': self.hs1}
         f = AbsenceBlockForm(user=self.a2, data=data)
         f.full_clean()
         self.assertTrue(f.has_error('teacher'))

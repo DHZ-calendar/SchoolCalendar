@@ -52,7 +52,7 @@ class StageFilter(FilterSet):
 class AbsenceBlockFilter(FilterSet):
     class Meta:
         model = AbsenceBlock
-        fields = ['school_year', 'teacher']
+        fields = ['hour_slot__school_year', 'teacher']
 
 
 class HourSlotFilter(FilterSet):

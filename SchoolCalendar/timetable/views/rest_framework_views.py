@@ -213,7 +213,7 @@ class AbsenceBlocksPerTeacherViewSet(UserPassesTestMixin, ListModelMixin, Generi
             return Assignment.objects.none()
 
         return AbsenceBlock.objects.filter(teacher=teacher,
-                                           school_year=school_year)
+                                           hour_slot__school_year=school_year)
 
 
 class TeacherTimetableViewSet(ListModelMixin, GenericViewSet):
