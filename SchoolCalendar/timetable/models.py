@@ -173,6 +173,15 @@ class Stage(models.Model):
     school = models.ForeignKey(School, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("school"))
     name = models.CharField(null=True, blank=True, max_length=256, verbose_name=_("name"))
 
+    def __str__(self):
+        return _("{} from {} to {} in {} {}").format(
+            self.name,
+            self.date_start,
+            self.date_end,
+            self.course.year,
+            self.course.section
+        )
+
 
 class Subject(models.Model):
     """
