@@ -9,7 +9,7 @@ from timetable.views.CRUD_views import SchoolCreate, TeacherCreate, AdminSchoolC
     HolidayUpdate, StageUpdate, SubjectUpdate, HoursPerTeacherInClassUpdate, \
     SchoolDelete, TeacherDelete, AdminSchoolDelete, SchoolYearDelete, CourseDelete, HourSlotDelete, AbsenceBlockDelete, \
     HolidayDelete, StageDelete, SubjectDelete, HoursPerTeacherInClassDelete, RoomCreate, RoomUpdate, RoomDelete, \
-    RoomList
+    RoomList, TeachersYearlyLoadCreate, TeachersYearlyLoadUpdate, TeachersYearlyLoadDelete, TeachersYearlyLoadList
 from timetable.views.rest_framework_views import TeacherViewSet, \
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
@@ -113,6 +113,14 @@ urlpatterns = [
     path('subject/<pk>/edit/', SubjectUpdate.as_view(), name='subject-edit'),
     path('subject/<pk>/delete/', SubjectDelete.as_view(), name='subject-delete'),
     path('subject/', SubjectList.as_view(), name='subject-listview'),
+    path('teachers_yearly_load/add/', TeachersYearlyLoadCreate.as_view(),
+         name='teachers_yearly_load-add'),
+    path('teachers_yearly_load/<pk>/edit/', TeachersYearlyLoadUpdate.as_view(),
+         name='teachers_yearly_load-edit'),
+    path('teachers_yearly_load/<pk>/delete/', TeachersYearlyLoadDelete.as_view(),
+         name='teachers_yearly_load-delete'),
+    path('teachers_yearly_load/', TeachersYearlyLoadList.as_view(),
+         name='teachers_yearly_load-listview'),
     path('hours_per_teacher_in_class/add/', HoursPerTeacherInClassCreate.as_view(),
          name='hours_per_teacher_in_class-add'),
     path('hours_per_teacher_in_class/<pk>/edit/', HoursPerTeacherInClassUpdate.as_view(),
