@@ -194,6 +194,25 @@ class Subject(models.Model):
         return self.name
 
 
+class TeachersYearlyLoad(models.Model):
+    """
+    This model keeps track of how many hours any teacher needs to do in a school, in a certain school year.
+    """
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, null=False, blank=False,
+                                verbose_name=_("teacher"))
+    # A teacher has both "normal" hours and "bes" hours
+    yearly_load = models.IntegerField(null=False, blank=False, verbose_name=_("yearly load"))
+    yearly_load_bes = models.IntegerField(null=False, blank=False, verbose_name=_("yearly load bes"))
+    school_year = models.ForeignKey(SchoolYear, null=False, blank=False, on_delete=models.CASCADE,
+                                    verbose_name=_("school year"))
+
+    def __str__(self):
+        return _("{} in {}: {} and {} of bes").format(str(self.teacher),
+                                                      str(self.school),
+                                                      self.yearly_load,
+                                                      self.yearly_load_bes)
+
+
 class HoursPerTeacherInClass(models.Model):
     """
     This model keeps track of how many hours any teacher has in every class.
