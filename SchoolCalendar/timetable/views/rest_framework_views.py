@@ -7,15 +7,16 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.core.exceptions import ObjectDoesNotExist
 
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
-    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad
+    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad, CoursesYearlyLoad
 from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer, \
     HolidaySerializer, StageSerializer, HourSlotSerializer, HoursPerTeacherInClassSerializer, AssignmentSerializer, \
     AbsenceBlockSerializer, TeacherSubstitutionSerializer, SubjectSerializer, ReplicationConflictsSerializer, \
-    RoomSerializer, TeacherSummarySerializer, CourseSummarySerializer, TeachersYearlyLoadSerializer
+    RoomSerializer, TeacherSummarySerializer, CourseSummarySerializer, TeachersYearlyLoadSerializer, \
+    CoursesYearlyLoadSerializer
 from timetable.permissions import SchoolAdminCanWriteDelete, TeacherCanView
 from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
     StageFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
-    AssignmentFilter, AbsenceBlockFilter, RoomFilter, TeachersYearlyLoadFilter
+    AssignmentFilter, AbsenceBlockFilter, RoomFilter, TeachersYearlyLoadFilter, CoursesYearlyLoadFilter
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 
 from timetable import utils
@@ -44,6 +45,15 @@ class TeachersYearlyLoadViewSet(RetrieveModelMixin, ListModelMixin, GenericViewS
     filterset_class = TeachersYearlyLoadFilter
     filter_backends = [DjangoFilterBackend, OrderingFilter, TeacherFromSameSchoolFilterBackend]
     ordering = ['teacher__last_name', 'teacher__first_name']
+
+
+class CoursesYearlyLoadViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
+    queryset = CoursesYearlyLoad.objects.all()
+    serializer_class = CoursesYearlyLoadSerializer
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
+    filterset_class = CoursesYearlyLoadFilter
+    filter_backends = [DjangoFilterBackend, OrderingFilter]  #TODO: add filter course from same school
+    ordering = ['course__year', 'course__section']
 
 
 class CourseSummaryViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):

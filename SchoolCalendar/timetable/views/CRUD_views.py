@@ -5,10 +5,11 @@ from django.urls import reverse_lazy
 
 from timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYearForm, CourseForm, HourSlotForm, \
     AbsenceBlockForm, HolidayForm, StageForm, SubjectForm, HoursPerTeacherInClassForm, \
-    AssignmentForm, TeacherCreationForm, AdminSchoolCreationForm, RoomForm, HourSlotCreateForm, TeachersYearlyLoadForm
+    AssignmentForm, TeacherCreationForm, AdminSchoolCreationForm, RoomForm, HourSlotCreateForm, TeachersYearlyLoadForm, \
+    CoursesYearlyLoadForm
 from timetable.mixins import AdminSchoolPermissionMixin, SuperUserPermissionMixin, TeacherPermissionMixin
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
-    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad
+    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad, CoursesYearlyLoad
 
 
 class CreateViewWithUser(CreateView):
@@ -210,12 +211,38 @@ class TeachersYearlyLoadUpdate(AdminSchoolPermissionMixin, UpdateViewWithUser):
 class TeachersYearlyLoadDelete(AdminSchoolPermissionMixin, DeleteView):
     model = TeachersYearlyLoad
     form_class = TeachersYearlyLoadForm
-    template_name = 'timetable/teachersyearlyload_form.html'
+    template_name = 'timetable/delete_form.html'
     success_url = reverse_lazy('teachers_yearly_load-listview')
 
 
 class TeachersYearlyLoadList(AdminSchoolPermissionMixin, TemplateViewWithSchoolYears):
     template_name = 'timetable/teachersyearlyload_list.html'
+
+
+# CoursesYearlyLoad CRUD
+class CoursesYearlyLoadCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
+    model = CoursesYearlyLoad
+    form_class = CoursesYearlyLoadForm
+    template_name = 'timetable/coursesyearlyload_form.html'
+    success_url = reverse_lazy('courses_yearly_load-listview')
+
+
+class CoursesYearlyLoadUpdate(AdminSchoolPermissionMixin, UpdateViewWithUser):
+    model = CoursesYearlyLoad
+    form_class = CoursesYearlyLoadForm
+    template_name = 'timetable/coursesyearlyload_form.html'
+    success_url = reverse_lazy('courses_yearly_load-listview')
+
+
+class CoursesYearlyLoadDelete(AdminSchoolPermissionMixin, DeleteView):
+    model = CoursesYearlyLoad
+    form_class = CoursesYearlyLoadForm
+    template_name = 'timetable/delete_form.html'
+    success_url = reverse_lazy('courses_yearly_load-listview')
+
+
+class CoursesYearlyLoadList(AdminSchoolPermissionMixin, TemplateViewWithSchoolYears):
+    template_name = 'timetable/coursesyearlyload_list.html'
 
 
 # CRUD HourSlot

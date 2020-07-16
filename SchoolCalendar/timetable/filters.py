@@ -8,7 +8,7 @@ from datetime import datetime
 from timetable import utils
 from timetable.utils import get_school_from_user, convert_weekday_into_0_6_format
 from timetable.models import Holiday, Stage, AbsenceBlock, Teacher, AdminSchool, HourSlot, HoursPerTeacherInClass, \
-    Course, Assignment, Subject, Room, TeachersYearlyLoad
+    Course, Assignment, Subject, Room, TeachersYearlyLoad, CoursesYearlyLoad
 
 
 class TeacherFromSameSchoolFilterBackend(BaseFilterBackend):
@@ -67,6 +67,17 @@ class AbsenceBlockFilter(FilterSet):
 class TeachersYearlyLoadFilter(FilterSet):
     class Meta:
         model = TeachersYearlyLoad
+        fields = ['school_year']
+
+
+class CoursesYearlyLoadFilter(FilterSet):
+    school_year = NumberFilter(field_name='school_year', method='school_year_filter')
+
+    def school_year_filter(self, queryset, name, value):
+        return queryset.filter(course__school_year__id=value)
+
+    class Meta:
+        model = CoursesYearlyLoad
         fields = ['school_year']
 
 

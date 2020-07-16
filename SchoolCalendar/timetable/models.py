@@ -53,7 +53,7 @@ class Teacher(MyUser):
     The teacher class inherits from MyUser, is only able to see her timetable
     """
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("school"))
-    notes = models.TextField(blank=True, null=True, verbose_name=_("notes"))   # Optional field
+    notes = models.TextField(blank=True, null=True, verbose_name=_("notes"))  # Optional field
 
     def __str__(self):
         return "{} {}".format(self.first_name, self.last_name)
@@ -63,8 +63,10 @@ class AdminSchool(MyUser):
     """
     This is the headmaster, the only user capable to create the timetable
     """
+
     class Meta:
         verbose_name = _('Admin School')
+
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("school"))
 
 
@@ -91,10 +93,11 @@ class Course(models.Model):
     Course is an alias for the class (like IA and so on)
     """
     year = models.IntegerField(blank=False, null=False, verbose_name=_("year"))  # in class IA, year is 1
-    section = models.CharField(max_length=256, blank=False, null=False, verbose_name=_("section"))   # In class IA, the section is A
+    section = models.CharField(max_length=256, blank=False, null=False,
+                               verbose_name=_("section"))  # In class IA, the section is A
     school_year = models.ForeignKey(SchoolYear, on_delete=models.PROTECT, blank=False, null=False,
                                     verbose_name=_("school year"))
-    school = models.ForeignKey(School,  on_delete=models.CASCADE, blank=False, null=False, verbose_name=_("school"))
+    school = models.ForeignKey(School, on_delete=models.CASCADE, blank=False, null=False, verbose_name=_("school"))
 
     def __str__(self):
         """
@@ -108,7 +111,8 @@ class HourSlot(models.Model):
     HourSlot is used to store the time interval of first, second, third and so on hours.
     Every school, in fact, keeps them separately.
     """
-    hour_number = models.IntegerField(blank=False, null=False, verbose_name=_("hour number"))   # Used to store first, second third hour and so on.
+    hour_number = models.IntegerField(blank=False, null=False, verbose_name=_(
+        "hour number"))  # Used to store first, second third hour and so on.
     starts_at = models.TimeField(null=False, blank=False, verbose_name=_("begins at"))
     ends_at = models.TimeField(null=False, blank=False, verbose_name=_("ends at"))
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("school"))
@@ -208,7 +212,23 @@ class TeachersYearlyLoad(models.Model):
 
     def __str__(self):
         return _("{} in {}: {} and {} of bes").format(str(self.teacher),
-                                                      str(self.school),
+                                                      str(self.school_year),
+                                                      self.yearly_load,
+                                                      self.yearly_load_bes)
+
+
+class CoursesYearlyLoad(models.Model):
+    """
+    This model keeps track of how many hours any course needs to do.
+    """
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=False, blank=False,
+                               verbose_name=_("course"))
+    # A course has both "normal" hours and "bes" hours
+    yearly_load = models.IntegerField(null=False, blank=False, verbose_name=_("yearly load"))
+    yearly_load_bes = models.IntegerField(null=False, blank=False, verbose_name=_("yearly load bes"))
+
+    def __str__(self):
+        return _("{} in {}: {} and {} of bes").format(str(self.course),
                                                       self.yearly_load,
                                                       self.yearly_load_bes)
 
@@ -250,7 +270,8 @@ class Assignment(models.Model):
     hour_end = models.TimeField(null=False, blank=False, verbose_name=_("end hour"))
     bes = models.BooleanField(null=False, blank=False, default=False, verbose_name=_("BES"))
     substitution = models.BooleanField(null=False, blank=False, default=False, verbose_name=_("substitution"))
-    absent = models.BooleanField(null=False, blank=False, default=False, verbose_name=_("absence"))   # for substituted teachers
+    absent = models.BooleanField(null=False, blank=False, default=False,
+                                 verbose_name=_("absence"))  # for substituted teachers
 
     # it means that the substitution should not be considered when counting the total hours of substitutions
     free_substitution = models.BooleanField(null=False, blank=False, default=False, verbose_name=_("free substitution"))

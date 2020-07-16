@@ -7,7 +7,7 @@ from rest_framework.serializers import HyperlinkedModelSerializer, ModelSerializ
 import datetime
 
 from timetable.models import Teacher, Holiday, Stage, AbsenceBlock, Assignment, HoursPerTeacherInClass, HourSlot, \
-    Course, Subject, Room, TeachersYearlyLoad
+    Course, Subject, Room, TeachersYearlyLoad, CoursesYearlyLoad
 from timetable import utils
 
 
@@ -160,7 +160,6 @@ class TeacherSummarySerializer(ModelSerializer):
         total = utils.compute_total_hours_assignments(assignments, hours_slots)
         return total
 
-    # TODO: complete the methods when the year load is done
     def get_total_hours(self, obj, *args, **kwargs):
         school_year = self.context.get('request').query_params.get('school_year')
 
@@ -271,11 +270,16 @@ class CourseSummarySerializer(ModelSerializer):
         total = utils.compute_total_hours_assignments(assignments, hours_slots)
         return total
 
-    # TODO: complete the methods when the year load is done
     def get_total_hours(self, obj, *args, **kwargs):
+        yearly_load = CoursesYearlyLoad.objects.filter(course=obj.id)
+        if yearly_load:
+            return yearly_load.first().yearly_load
         return 0
 
     def get_total_hours_bes(self, obj, *args, **kwargs):
+        yearly_load = CoursesYearlyLoad.objects.filter(course=obj.id)
+        if yearly_load:
+            return yearly_load.first().yearly_load_bes
         return 0
 
 
@@ -283,6 +287,12 @@ class RoomSerializer(ModelSerializer):
     class Meta:
         model = Room
         fields = ['id', 'name', 'school', 'capacity']
+
+
+class CourseSerializer(ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['id', 'year', 'school', 'school_year', 'section']
 
 
 class TeachersYearlyLoadSerializer(ModelSerializer):
@@ -293,10 +303,12 @@ class TeachersYearlyLoadSerializer(ModelSerializer):
         fields = ['id', 'teacher', 'yearly_load', 'yearly_load_bes', 'school_year']
 
 
-class CourseSerializer(ModelSerializer):
+class CoursesYearlyLoadSerializer(ModelSerializer):
+    course = CourseSerializer()
+
     class Meta:
-        model = Course
-        fields = ['id', 'year', 'school', 'school_year', 'section']
+        model = CoursesYearlyLoad
+        fields = ['id', 'course', 'yearly_load', 'yearly_load_bes']
 
 
 class SubjectSerializer(ModelSerializer):

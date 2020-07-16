@@ -7,7 +7,7 @@ from django.utils.translation import gettext as _
 
 from timetable import models
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
-    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad
+    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad, CoursesYearlyLoad
 from timetable.utils import get_school_from_user, assign_html_style_to_visible_forms_fields, generate_random_password
 
 
@@ -541,6 +541,19 @@ class TeachersYearlyLoadForm(BaseFormWithTeacherAndSchoolCheck):
     class Meta:
         model = TeachersYearlyLoad
         fields = ['teacher', 'school_year', 'yearly_load', 'yearly_load_bes']
+
+
+class CoursesYearlyLoadForm(BaseFormWithCourseTeacherAndSchoolCheck):
+
+    def __init__(self, user, *args, **kwargs):
+        super(CoursesYearlyLoadForm, self).__init__(user, *args, **kwargs)
+        self.fields['course'] = forms.ModelChoiceField(
+            queryset=Course.objects.filter(school__id=get_school_from_user(self.user).id))
+        assign_html_style_to_visible_forms_fields(self)
+
+    class Meta:
+        model = CoursesYearlyLoad
+        fields = ['course', 'yearly_load', 'yearly_load_bes']
 
 
 class HoursPerTeacherInClassForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck):

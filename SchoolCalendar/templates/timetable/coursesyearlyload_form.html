@@ -1,0 +1,25 @@
+{% extends 'timetable/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'main.css' %}"/>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <h1 class="col text-center">{% trans 'Courses\' Yearly Load' %}</h1>
+    </div>
+    <div class="row">
+        <form method="post" class="form-group col text-center">
+            {% csrf_token %}
+            {{ form }}
+            <br/>
+            <br/>
+            <br/>
+            <input type="submit" class="btn btn-success" value="Submit">
+        </form>
+    </div>
+</div>
+{% endblock %}

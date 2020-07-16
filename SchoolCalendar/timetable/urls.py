@@ -9,12 +9,14 @@ from timetable.views.CRUD_views import SchoolCreate, TeacherCreate, AdminSchoolC
     HolidayUpdate, StageUpdate, SubjectUpdate, HoursPerTeacherInClassUpdate, \
     SchoolDelete, TeacherDelete, AdminSchoolDelete, SchoolYearDelete, CourseDelete, HourSlotDelete, AbsenceBlockDelete, \
     HolidayDelete, StageDelete, SubjectDelete, HoursPerTeacherInClassDelete, RoomCreate, RoomUpdate, RoomDelete, \
-    RoomList, TeachersYearlyLoadCreate, TeachersYearlyLoadUpdate, TeachersYearlyLoadDelete, TeachersYearlyLoadList
+    RoomList, TeachersYearlyLoadCreate, TeachersYearlyLoadUpdate, TeachersYearlyLoadDelete, TeachersYearlyLoadList, \
+    CoursesYearlyLoadCreate, CoursesYearlyLoadUpdate, CoursesYearlyLoadDelete, CoursesYearlyLoadList
 from timetable.views.rest_framework_views import TeacherViewSet, \
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
     AbsenceBlocksPerTeacherViewSet, TeacherTimetableViewSet, AbsenceBlockViewSet, \
-    SubjectViewSet, RoomViewSet, TeacherSummaryViewSet, CourseSummaryViewSet, TeachersYearlyLoadViewSet
+    SubjectViewSet, RoomViewSet, TeacherSummaryViewSet, CourseSummaryViewSet, TeachersYearlyLoadViewSet, \
+    CoursesYearlyLoadViewSet
 from timetable.views.other_views import TimetableView, SubstituteTeacherView, TeacherTimetableView, \
     LoggedUserRedirectView, TeacherSummaryView, TeacherPDFReportView, SendInvitationTeacherEmailView, \
     SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView, \
@@ -46,6 +48,7 @@ router.register(r'teachers_summary/?(school_year=[0-9]+)?(start_date=\d\d\d\d-\d
 router.register(r'courses_summary/?(school_year=[0-9]+)?(start_date=\d\d\d\d-\d\d-\d\d)?(end_date=\d\d\d\d-\d\d-\d\d)?',
                 CourseSummaryViewSet, basename='course_summary')
 router.register(r'teachers_yearly_loads', TeachersYearlyLoadViewSet, basename='teachers_yearly_load')
+router.register(r'courses_yearly_loads', CoursesYearlyLoadViewSet, basename='courses_yearly_load')
 
 urlpatterns = [
     path('', LoggedUserRedirectView.as_view(), name='user_redirect-view'),
@@ -118,6 +121,10 @@ urlpatterns = [
     path('teachers_yearly_load/<pk>/edit/', TeachersYearlyLoadUpdate.as_view(), name='teachers_yearly_load-edit'),
     path('teachers_yearly_load/<pk>/delete/', TeachersYearlyLoadDelete.as_view(), name='teachers_yearly_load-delete'),
     path('teachers_yearly_load/', TeachersYearlyLoadList.as_view(), name='teachers_yearly_load-listview'),
+    path('courses_yearly_load/add/', CoursesYearlyLoadCreate.as_view(), name='courses_yearly_load-add'),
+    path('courses_yearly_load/<pk>/edit/', CoursesYearlyLoadUpdate.as_view(), name='courses_yearly_load-edit'),
+    path('courses_yearly_load/<pk>/delete/', CoursesYearlyLoadDelete.as_view(), name='courses_yearly_load-delete'),
+    path('courses_yearly_load/', CoursesYearlyLoadList.as_view(), name='courses_yearly_load-listview'),
     path('hours_per_teacher_in_class/add/', HoursPerTeacherInClassCreate.as_view(),
          name='hours_per_teacher_in_class-add'),
     path('hours_per_teacher_in_class/<pk>/edit/', HoursPerTeacherInClassUpdate.as_view(),
