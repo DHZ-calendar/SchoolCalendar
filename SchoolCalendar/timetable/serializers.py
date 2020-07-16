@@ -7,7 +7,7 @@ from rest_framework.serializers import HyperlinkedModelSerializer, ModelSerializ
 import datetime
 
 from timetable.models import Teacher, Holiday, Stage, AbsenceBlock, Assignment, HoursPerTeacherInClass, HourSlot, \
-    Course, Subject, Room
+    Course, Subject, Room, TeachersYearlyLoad
 from timetable import utils
 
 
@@ -162,9 +162,21 @@ class TeacherSummarySerializer(ModelSerializer):
 
     # TODO: complete the methods when the year load is done
     def get_total_hours(self, obj, *args, **kwargs):
+        school_year = self.context.get('request').query_params.get('school_year')
+
+        yearly_load = TeachersYearlyLoad.objects.filter(teacher=obj.id,
+                                                        school_year=school_year)
+        if yearly_load:
+            return yearly_load.first().yearly_load
         return 0
 
     def get_total_hours_bes(self, obj, *args, **kwargs):
+        school_year = self.context.get('request').query_params.get('school_year')
+
+        yearly_load = TeachersYearlyLoad.objects.filter(teacher=obj.id,
+                                                        school_year=school_year)
+        if yearly_load:
+            return yearly_load.first().yearly_load_bes
         return 0
 
 
@@ -271,6 +283,14 @@ class RoomSerializer(ModelSerializer):
     class Meta:
         model = Room
         fields = ['id', 'name', 'school', 'capacity']
+
+
+class TeachersYearlyLoadSerializer(ModelSerializer):
+    teacher = TeacherSerializer()
+
+    class Meta:
+        model = TeachersYearlyLoad
+        fields = ['id', 'teacher', 'yearly_load', 'yearly_load_bes', 'school_year']
 
 
 class CourseSerializer(ModelSerializer):

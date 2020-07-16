@@ -7,15 +7,15 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.core.exceptions import ObjectDoesNotExist
 
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
-    Stage, Subject, HoursPerTeacherInClass, Assignment, Room
+    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad
 from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer, \
     HolidaySerializer, StageSerializer, HourSlotSerializer, HoursPerTeacherInClassSerializer, AssignmentSerializer, \
     AbsenceBlockSerializer, TeacherSubstitutionSerializer, SubjectSerializer, ReplicationConflictsSerializer, \
-    RoomSerializer, TeacherSummarySerializer, CourseSummarySerializer
+    RoomSerializer, TeacherSummarySerializer, CourseSummarySerializer, TeachersYearlyLoadSerializer
 from timetable.permissions import SchoolAdminCanWriteDelete, TeacherCanView
 from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
     StageFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
-    AssignmentFilter, AbsenceBlockFilter, RoomFilter
+    AssignmentFilter, AbsenceBlockFilter, RoomFilter, TeachersYearlyLoadFilter
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 
 from timetable import utils
@@ -35,6 +35,15 @@ class TeacherSummaryViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMi
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filter_backends = [OrderingFilter, QuerysetFromSameSchool]
     ordering = ['last_name', 'first_name']
+
+
+class TeachersYearlyLoadViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
+    queryset = TeachersYearlyLoad.objects.all()
+    serializer_class = TeachersYearlyLoadSerializer
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
+    filterset_class = TeachersYearlyLoadFilter
+    filter_backends = [DjangoFilterBackend, OrderingFilter, TeacherFromSameSchoolFilterBackend]
+    ordering = ['teacher__last_name', 'teacher__first_name']
 
 
 class CourseSummaryViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):

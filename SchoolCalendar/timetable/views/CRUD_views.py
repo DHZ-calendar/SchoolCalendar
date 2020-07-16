@@ -26,7 +26,7 @@ class UpdateViewWithUser(UpdateView):
 
 
 class TemplateViewWithSchoolYears(TemplateView):
-    def get_context_data(selfListView, **kwargs):
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         context['school_years'] = SchoolYear.objects.all().order_by('-year_start')
@@ -197,7 +197,7 @@ class TeachersYearlyLoadCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
     model = TeachersYearlyLoad
     form_class = TeachersYearlyLoadForm
     template_name = 'timetable/teachersyearlyload_form.html'
-    success_url = reverse_lazy('teachers_yearly_load-add')
+    success_url = reverse_lazy('teachers_yearly_load-listview')
 
 
 class TeachersYearlyLoadUpdate(AdminSchoolPermissionMixin, UpdateViewWithUser):
@@ -214,9 +214,8 @@ class TeachersYearlyLoadDelete(AdminSchoolPermissionMixin, DeleteView):
     success_url = reverse_lazy('teachers_yearly_load-listview')
 
 
-class TeachersYearlyLoadList(AdminSchoolPermissionMixin, ListView):
-    template_name = 'timetable/teachersyearlyload.html'
-    model = TeachersYearlyLoad
+class TeachersYearlyLoadList(AdminSchoolPermissionMixin, TemplateViewWithSchoolYears):
+    template_name = 'timetable/teachersyearlyload_list.html'
 
 
 # CRUD HourSlot

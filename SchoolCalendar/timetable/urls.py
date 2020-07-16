@@ -14,7 +14,7 @@ from timetable.views.rest_framework_views import TeacherViewSet, \
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
     AbsenceBlocksPerTeacherViewSet, TeacherTimetableViewSet, AbsenceBlockViewSet, \
-    SubjectViewSet, RoomViewSet, TeacherSummaryViewSet, CourseSummaryViewSet
+    SubjectViewSet, RoomViewSet, TeacherSummaryViewSet, CourseSummaryViewSet, TeachersYearlyLoadViewSet
 from timetable.views.other_views import TimetableView, SubstituteTeacherView, TeacherTimetableView, \
     LoggedUserRedirectView, TeacherSummaryView, TeacherPDFReportView, SendInvitationTeacherEmailView, \
     SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView, \
@@ -45,6 +45,7 @@ router.register(r'teachers_summary/?(school_year=[0-9]+)?(start_date=\d\d\d\d-\d
                 TeacherSummaryViewSet, basename='teacher_summary')
 router.register(r'courses_summary/?(school_year=[0-9]+)?(start_date=\d\d\d\d-\d\d-\d\d)?(end_date=\d\d\d\d-\d\d-\d\d)?',
                 CourseSummaryViewSet, basename='course_summary')
+router.register(r'teachers_yearly_loads', TeachersYearlyLoadViewSet, basename='teachers_yearly_load')
 
 urlpatterns = [
     path('', LoggedUserRedirectView.as_view(), name='user_redirect-view'),
@@ -113,14 +114,10 @@ urlpatterns = [
     path('subject/<pk>/edit/', SubjectUpdate.as_view(), name='subject-edit'),
     path('subject/<pk>/delete/', SubjectDelete.as_view(), name='subject-delete'),
     path('subject/', SubjectList.as_view(), name='subject-listview'),
-    path('teachers_yearly_load/add/', TeachersYearlyLoadCreate.as_view(),
-         name='teachers_yearly_load-add'),
-    path('teachers_yearly_load/<pk>/edit/', TeachersYearlyLoadUpdate.as_view(),
-         name='teachers_yearly_load-edit'),
-    path('teachers_yearly_load/<pk>/delete/', TeachersYearlyLoadDelete.as_view(),
-         name='teachers_yearly_load-delete'),
-    path('teachers_yearly_load/', TeachersYearlyLoadList.as_view(),
-         name='teachers_yearly_load-listview'),
+    path('teachers_yearly_load/add/', TeachersYearlyLoadCreate.as_view(), name='teachers_yearly_load-add'),
+    path('teachers_yearly_load/<pk>/edit/', TeachersYearlyLoadUpdate.as_view(), name='teachers_yearly_load-edit'),
+    path('teachers_yearly_load/<pk>/delete/', TeachersYearlyLoadDelete.as_view(), name='teachers_yearly_load-delete'),
+    path('teachers_yearly_load/', TeachersYearlyLoadList.as_view(), name='teachers_yearly_load-listview'),
     path('hours_per_teacher_in_class/add/', HoursPerTeacherInClassCreate.as_view(),
          name='hours_per_teacher_in_class-add'),
     path('hours_per_teacher_in_class/<pk>/edit/', HoursPerTeacherInClassUpdate.as_view(),
