@@ -21,6 +21,16 @@ class TeacherFromSameSchoolFilterBackend(BaseFilterBackend):
         return queryset.filter(teacher__school=school.id)
 
 
+class CourseFromSameSchoolFilterBackend(BaseFilterBackend):
+    """
+    Get all courses in the school of the user logged
+    """
+
+    def filter_queryset(self, request, queryset, view):
+        school = get_school_from_user(request.user)
+        return queryset.filter(course__school=school.id)
+
+
 class QuerysetFromSameSchool(BaseFilterBackend):
     """
     Generic filter that filters any queryset by school

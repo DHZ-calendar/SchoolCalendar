@@ -16,7 +16,8 @@ from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, C
 from timetable.permissions import SchoolAdminCanWriteDelete, TeacherCanView
 from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
     StageFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
-    AssignmentFilter, AbsenceBlockFilter, RoomFilter, TeachersYearlyLoadFilter, CoursesYearlyLoadFilter
+    AssignmentFilter, AbsenceBlockFilter, RoomFilter, TeachersYearlyLoadFilter, CoursesYearlyLoadFilter, \
+    CourseFromSameSchoolFilterBackend
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 
 from timetable import utils
@@ -52,7 +53,7 @@ class CoursesYearlyLoadViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSe
     serializer_class = CoursesYearlyLoadSerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filterset_class = CoursesYearlyLoadFilter
-    filter_backends = [DjangoFilterBackend, OrderingFilter]  #TODO: add filter course from same school
+    filter_backends = [DjangoFilterBackend, OrderingFilter, CourseFromSameSchoolFilterBackend]
     ordering = ['course__year', 'course__section']
 
 
