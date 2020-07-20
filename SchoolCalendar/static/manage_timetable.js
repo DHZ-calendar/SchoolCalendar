@@ -34,17 +34,35 @@ async function loadTeacherData(){
     await getTeacherAssignments(startDate, endDate);
 }
 
-async function goNextWeek(teacher=false){
+async function loadRoomData(){
+    timetable.deleteAllEvents();
+    timetable.deleteAllBlocks();
+    await getBlocks();
+
+    let startDate = currentDate;
+    let endDate = moment(startDate).add(6, 'days').toDate();
+
+    timetable.setDays(new Date(startDate));
+
+    await getHolidays(startDate, endDate);
+    await getRoomAssignments(startDate, endDate);
+}
+
+async function goNextWeek(teacher=false, room=false){
     currentDate = moment(currentDate).add(7, 'days').toDate();
     if(teacher)
         await loadTeacherData();
+    else if(teacher)
+        await loadRoomData();
     else
         loadData();
 }
-async function goPrevWeek(teacher=false){
+async function goPrevWeek(teacher=false, room=false){
     currentDate = moment(currentDate).subtract(7, 'days').toDate();
     if(teacher)
         await loadTeacherData();
+    else if(teacher)
+        await loadRoomData();
     else
         loadData();
 }
@@ -360,6 +378,67 @@ async function getTeacherAssignments(startDate, endDate){
     }
     catch{
         console.log("No teacher assignments");
+    }
+}
+
+async function getRoomAssignments(startDate, endDate){
+    let url = _URL['room_timetable']
+        .replace('1234', $('#room').val());
+    let data = {
+        'school_year': $('#school_year').val(),
+        'from_date': formatDate(startDate),
+        'to_date': formatDate(endDate)
+    };
+    timetable.deleteAllEvents();
+    try{
+        data = await $.get(url, data=data);
+        for(let assign of data){
+            let blockId = assign.hour_slot;
+            if(blockId === null){
+                blockId = createExtraBlock(assign.date, assign.hour_start, assign.hour_end).id;
+            }
+
+            let teacher = assign.teacher.first_name + " " + assign.teacher.last_name;
+            let subject = assign.subject.name + ` (${assign.course.year} ${assign.course.section})`;
+            if (assign.room)
+                subject = `
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-tag-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M2 1a1 1 0 0 0-1 1v4.586a1 1 0 0 0 .293.707l7 7a1 1 0 0 0 1.414 0l4.586-4.586a1 1 0 0 0 0-1.414l-7-7A1 1 0 0 0 6.586 1H2zm4 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                </svg> ` + subject;
+            let customEvent = new Event(assign.id, teacher, subject);
+            let clickEvent = (event) => {
+                alert("Lecture " + event.lecture + ", teacher " + event.teacher);
+            };
+            timetable.addEvent(customEvent, blockId, clickEvent);
+
+            if(assign.bes){
+                customEvent.htmlElement.addClass('cal-event-bes');
+            }
+            else if(assign.absent){
+                customEvent.htmlElement.addClass('cal-event-absent');
+            }
+            else if(assign.substitution){
+                customEvent.htmlElement.addClass('cal-event-substitution');
+            }
+
+            let lbl_room = '';
+            if (assign.room)
+                lbl_room = 'Room: ' + assign.room.name;
+            customEvent.htmlElement.tooltip({
+                title: `
+                    <b>${teacher}</b><br/>
+                    ${assign.subject.name}<br/>
+                    ${assign.course.year} ${assign.course.section}<br/>
+                    ${lbl_room}<br/>
+                    ${assign.hour_start.slice(0, -3)} - ${assign.hour_end.slice(0, -3)}
+                `,
+                html: true,
+                boundary: 'window'
+            })
+        }
+    }
+    catch{
+        console.log("No room assignments");
     }
 }
 

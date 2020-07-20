@@ -1,0 +1,161 @@
+{% extends 'timetable/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block head %}
+<!-- TODO: change using git submodule -->
+<link rel="stylesheet" href="https://raw.githack.com/DHZ-calendar/timetable.js/develop/timetable.css"/>
+<script src="https://raw.githack.com/DHZ-calendar/timetable.js/develop/timetable.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
+
+<script src="{% static 'manage_timetable.js' %}"></script>
+<link rel="stylesheet" href="{% static 'main.css' %}"/>
+{% endblock %}
+
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <h3 class="col text-center">{% trans 'Room timetable' %}</h3>
+    </div>
+    <div class="row">
+        <div class="col-5">
+            <div class="col">
+                {% trans 'School year:' %}
+                <select id="school_year" class="form-control form-control-custom" onchange="getRooms()">
+                    {% for year in school_years %}
+                        <option value="{{ year.id }}">{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col">
+                {% trans 'Room:' %}
+                <select id="room" class="form-control form-control-custom" onchange="loadRoomData()">
+                </select>
+            </div>
+        </div>
+        <div class="col-5 row">
+            <div class="col-12"><b>{% trans 'Legend' %}:</b></div>
+            <div class="col-6">
+                <span class="legend-label cal-event">{% trans 'Lecture' %}</span>
+            </div>
+            <div class="col-6">
+                <span class="legend-label cal-event-bes">{% trans 'B.E.S.' %}</span>
+            </div>
+            <div class="col-6">
+                <span class="legend-label cal-event-absent">{% trans 'Absence of the teacher' %}</span>
+            </div>
+            <div class="col-6">
+                <span class="legend-label cal-event-substitution">{% trans 'Substitution lecture' %}</span>
+            </div>
+            <div class="col-6">
+                <span class="legend-label cal-block-conflict">{% trans 'Collision with other lectures' %}</span>
+            </div>
+            <div class="col-6">
+                <span class="legend-label cal-block-absence">{% trans 'Hours blocked for a teacher' %}</span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="row py-3">                
+                <div class="col text-left">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="goPrevWeek(false, true)">&lArr; {% trans 'Previous week'%}</button>
+                </div>
+                <div class="col text-center">
+                    <input class="datepicker form-control form-control-custom form-control-sm" data-date-format='dd/mm/yyyy' type="text" id="navigation_date"></input>
+                    <button type="button" class="btn btn-sm btn-info" id="btn-go-date">
+                        {% trans 'Go'%}
+                    </button>            
+                </div>
+                <div class="col text-right">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="goNextWeek(false, true)">{% trans 'Next week'%} &rArr;</button>
+                </div>
+            </div>
+            <table class="container-fluid" id="calendar">
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block script %}
+    let timetable;
+    let currentDate;
+    $(document).ready(async () => {
+        $('.datepicker').datepicker({
+            dateFormat: 'dd-mm-yy'
+        });
+
+        let cal = $("#calendar");
+        timetable = new Timetable(cal, 7, 23);
+
+        let blockStates = {
+            'available': 'cal-block-available',
+            'absence': 'cal-block-absence',
+            'conflict': 'cal-block-conflict'
+        };
+        timetable.setMapOfBlockStates(blockStates);
+
+        //find the first day of the week        
+        currentDate = moment().day(1).toDate();
+
+        await getRooms();
+        await loadRoomData();
+
+        $('#btn-go-date').click(async () => {
+            let date = $('#navigation_date').datepicker('getDate');
+            currentDate = moment(date).day(1).toDate();
+            await loadRoomData();
+            $('#navigation_date').val('');
+        });
+    });
+
+    async function getRooms() {
+        let url = _URL['rooms'];
+        let data = {
+            'school_year': $('#school_year').val()
+        };
+        $('#room').empty();
+        try{
+            data = await $.get(url, data=data);
+            for(let room of data){
+                $('#room').append(`
+                    <option value="${room.id}">${room.name}</option>
+                `);
+            }
+        }
+        catch{
+            console.log("No data");
+        }
+    }
+
+    _TRANS = {
+        'extra_block_title': "{% trans 'Extra lecture' %}",
+        'lecture_title': "° {% trans 'lecture' %}",
+        'hours_teaching': "{% trans 'Hours of theaching' %}",
+        'hours_bes': "{% trans 'B.E.S.' %}",
+        'missing_hours': "{% trans 'Missing hours' %}",
+        'assign_lecture': "{% trans 'Assign lecture' %}",
+        'assign_bes': "{% trans 'Assign B.E.S.' %}",
+        'delete_lecture_msg': "{% trans 'Are you sure to delete this lecture?' %}",
+        'week_replicated_msg': "{% trans 'Week replicated!' %}",
+        'conflict_dates_msg': "{% trans 'Conflict on date' %}"
+    };
+
+    _URL = {
+        'hour_slot': "{% url 'hour_slot-list' %}",
+        'year_only_course': "{% url 'year_only_course-list' %}",
+        'section_only_course': "{% url 'section_only_course-list' %}",
+        'hour_per_teacher_in_class': "{% url 'hour_per_teacher_in_class-list' %}",
+        'assignments': "{% url 'assignments-list' %}",
+        'holiday': "{% url 'holiday-list' %}",
+        'stage': "{% url 'stage-list' %}",
+        'room_timetable': "{% url 'room_timetable-list' 1234 %}",
+        'rooms': "{% url 'room-list' %}"
+    };
+{% endblock %}

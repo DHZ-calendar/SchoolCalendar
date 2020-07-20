@@ -16,12 +16,12 @@ from timetable.views.rest_framework_views import TeacherViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
     AbsenceBlocksPerTeacherViewSet, TeacherTimetableViewSet, AbsenceBlockViewSet, \
     SubjectViewSet, RoomViewSet, TeacherSummaryViewSet, CourseSummaryViewSet, TeachersYearlyLoadViewSet, \
-    CoursesYearlyLoadViewSet
+    CoursesYearlyLoadViewSet, RoomTimetableViewSet
 from timetable.views.other_views import TimetableView, SubstituteTeacherView, TeacherTimetableView, \
     LoggedUserRedirectView, TeacherSummaryView, TeacherPDFReportView, SendInvitationTeacherEmailView, \
     SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView, \
     TeacherSubstitutionView, SubstituteTeacherApiView, TimetableReportView, TimetableTeacherPDFReportView, \
-    TimetableCoursePDFReportView, TimetableGeneralPDFReportView, CourseSummaryView
+    TimetableCoursePDFReportView, TimetableGeneralPDFReportView, CourseSummaryView, RoomTimetableView
 
 from rest_framework.routers import DefaultRouter
 
@@ -42,6 +42,7 @@ router.register(r'teacher_assignments/(?P<teacher_pk>[0-9]+)/(?P<school_year_pk>
 router.register(r'teacher_absence_block/(?P<teacher_pk>[0-9]+)/(?P<school_year_pk>[0-9]+)',
                 AbsenceBlocksPerTeacherViewSet, basename='teacher_absence_blocks')
 router.register(r'teacher_timetable', TeacherTimetableViewSet, basename='teacher_timetable')
+router.register(r'room_timetable/(?P<room_pk>[0-9]+)', RoomTimetableViewSet, basename='room_timetable')
 router.register(r'absence_blocks', AbsenceBlockViewSet, basename='absence_block')
 router.register(r'teachers_summary/?(school_year=[0-9]+)?(start_date=\d\d\d\d-\d\d-\d\d)?(end_date=\d\d\d\d-\d\d-\d\d)?',
                 TeacherSummaryViewSet, basename='teacher_summary')
@@ -56,6 +57,7 @@ urlpatterns = [
     path('admin_school', TimetableView.as_view(), name='timetable-view'),
     path('substitute_teacher', SubstituteTeacherView.as_view(), name='substitute_teacher-view'),
     path('teacher_view', TeacherTimetableView.as_view(), name='teacher_timetable-view'),
+    path('room_view', RoomTimetableView.as_view(), name='room_timetable-view'),
     path('teacher_summary_view', TeacherSummaryView.as_view(), name='teacher_summary-view'),
     path('course_summary_view', CourseSummaryView.as_view(), name='course_summary-view'),
     path('teacher_pdf_report_view', TeacherPDFReportView.as_view(), name='teacher_pdf_report-view'),

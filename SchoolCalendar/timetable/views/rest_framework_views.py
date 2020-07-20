@@ -255,3 +255,18 @@ class TeacherTimetableViewSet(ListModelMixin, GenericViewSet):
         # Return all assignments for a teacher in a given time period
         assignments = Assignment.objects.filter(teacher_id=self.request.user.id)
         return assignments
+
+
+class RoomTimetableViewSet(ListModelMixin, GenericViewSet):
+    queryset = Assignment.objects.all()
+    serializer_class = AssignmentSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = (DjangoFilterBackend, QuerysetFromSameSchool)
+    filterset_class = AssignmentFilter
+    lookup_url_kwarg = ['room_pk']
+
+    def get_queryset(self):
+        # Return all assignments for a room in a given time period
+        room_pk = self.kwargs.get('room_pk')
+        assignments = Assignment.objects.filter(room_id=room_pk)
+        return assignments
