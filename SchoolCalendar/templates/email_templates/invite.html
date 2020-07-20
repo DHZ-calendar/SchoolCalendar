@@ -1,23 +1,34 @@
 {% autoescape off %}
 {% load i18n %}
 
-{% blocktrans %}
+Ciao!
+Sei stati inserito nell'applicazione SchoolCalendar, una piattaforma per  gestire l'orario degli insegnanti e delle classi.
+
+Per accedere alla piattaforma usa il tuo username:
+{{ user.get_username }}
+
+e clicca il link qui sotto per impostare la tua password:
+{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
+
+Se il link qua sopra non funziona, copia e incolla l'URL in una nuova finestra del tuo browser.
+
+Cordialmente,
+Il team di School Calendar
+
+-------
+English version:
+
 Hi teacher!
 You have been inserted into SchoolCalendar, a platform for managing the timetable of teachers and classes.
 
 To access the platform use your username:
-{% endblocktrans %}
 {{ user.get_username }}
 
-{% blocktrans %}
 and click the link below to set your password:
-{% endblocktrans %}
 {{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
 
-{% blocktrans %}
 If clicking the link above doesn't work, please copy and paste the URL in a new browser window instead.
 
 Sincerely,
 The School Calendar Team
-{% endblocktrans %}
 {% endautoescape %}
