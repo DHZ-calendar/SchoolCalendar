@@ -75,19 +75,21 @@ class AssignmentTestCase(BaseTestCase):
 
         # Create some hours per teacher in class
         self.hptic1 = HoursPerTeacherInClass(
-           course=self.c1,
-           subject=self.subj1,
-           teacher=self.teacher1,
-           school=self.s1,
-           hours=100,
-           hours_bes=100)
+            course=self.c1,
+            subject=self.subj1,
+            teacher=self.teacher1,
+            school=self.s1,
+            hours=100,
+            hours_bes=100,
+            hours_co_teaching=100)
         self.hptic3 = HoursPerTeacherInClass(
-           course=self.c3,
-           subject=self.subj1,
-           teacher=self.teacher3,
-           school=self.s1,
-           hours=100,
-           hours_bes=100)
+            course=self.c3,
+            subject=self.subj1,
+            teacher=self.teacher3,
+            school=self.s1,
+            hours=100,
+            hours_bes=100,
+            hours_co_teaching=100)
 
         self.hptic2 = HoursPerTeacherInClass(
             course=self.c2,
@@ -95,7 +97,8 @@ class AssignmentTestCase(BaseTestCase):
             teacher=self.teacher2,
             school=self.s2,
             hours=100,
-            hours_bes=100)
+            hours_bes=100,
+            hours_co_teaching=100)
         self.hptic1.save()
         self.hptic2.save()
         self.hptic3.save()

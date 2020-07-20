@@ -54,7 +54,8 @@ class HoursTeacherInClassTestCase(BaseTestCase):
                 'teacher': self.teacher1,
                 'school': self.s1,
                 'hours': 100,
-                'hours_bes': 150}
+                'hours_bes': 150,
+                'hours_co_teaching': 150}
         f = HoursPerTeacherInClassForm(user=self.a1, data=data)
         f.full_clean()
         self.assertTrue(f.is_valid())
@@ -69,7 +70,8 @@ class HoursTeacherInClassTestCase(BaseTestCase):
                 'teacher': self.teacher1,
                 'school': self.s1,
                 'hours': 100,
-                'hours_bes': 150}
+                'hours_bes': 150,
+                'hours_co_teaching': 150}
         f = HoursPerTeacherInClassForm(user=self.a2, data=data)
         f.full_clean()
         self.assertTrue(f.has_error('school'))
@@ -87,7 +89,8 @@ class HoursTeacherInClassTestCase(BaseTestCase):
                 'teacher': self.teacher1,
                 'school': self.s2,
                 'hours': 100,
-                'hours_bes': 150}
+                'hours_bes': 150,
+                'hours_co_teaching': 150}
         f = HoursPerTeacherInClassForm(user=self.a1, data=data)
         f.full_clean()
         self.assertTrue(f.has_error('school'))
@@ -102,7 +105,8 @@ class HoursTeacherInClassTestCase(BaseTestCase):
                 'teacher': self.teacher2,
                 'school': self.s1,
                 'hours': 100,
-                'hours_bes': 150}
+                'hours_bes': 150,
+                'hours_co_teaching': 150}
         f = HoursPerTeacherInClassForm(user=self.a1, data=data)
         f.full_clean()
         self.assertTrue(f.has_error('teacher'))
@@ -117,7 +121,8 @@ class HoursTeacherInClassTestCase(BaseTestCase):
                 'teacher': self.teacher1,
                 'school': self.s1,
                 'hours': 100,
-                'hours_bes': 150}
+                'hours_bes': 150,
+                'hours_co_teaching': 150}
         f = HoursPerTeacherInClassForm(user=self.a1, data=data)
         f.full_clean()
         self.assertTrue(f.has_error('course'))
@@ -132,7 +137,8 @@ class HoursTeacherInClassTestCase(BaseTestCase):
                 'teacher': self.teacher1,
                 'school': self.s1,
                 'hours': 100,
-                'hours_bes': 150}
+                'hours_bes': 150,
+                'hours_co_teaching': 150}
         f = HoursPerTeacherInClassForm(user=self.a1, data=data)
         f.full_clean()
         self.assertTrue(f.has_error('subject'))

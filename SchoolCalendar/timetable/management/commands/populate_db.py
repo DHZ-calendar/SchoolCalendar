@@ -231,97 +231,112 @@ class Command(BaseCommand):
                                                                  subject=Subject.objects.get(name='Mathematics'),
                                                                  school=school,
                                                                  hours=140,
-                                                                 hours_bes=0,).save())
+                                                                 hours_bes=0,
+                                                                 hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(HoursPerTeacherInClass(teacher=Teacher.objects.get(username='marco_rossi'),
                                                                  course=Course.objects.get(year=2, section='A ORD'),
                                                                  subject=Subject.objects.get(name='Mathematics'),
                                                                  school=school,
                                                                  hours=140,
-                                                                 hours_bes=0,).save())
+                                                                 hours_bes=0,
+                                                                 hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(HoursPerTeacherInClass(teacher=Teacher.objects.get(username='marco_rossi'),
                                                                  course=Course.objects.get(year=1, section='A ORD'),
                                                                  subject=Subject.objects.get(name='Physics'),
                                                                  school=school,
                                                                  hours=100,
-                                                                 hours_bes=0, ).save())
+                                                                 hours_bes=0,
+                                                                 hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(HoursPerTeacherInClass(teacher=Teacher.objects.get(username='marco_rossi'),
                                                                  course=Course.objects.get(year=2, section='A ORD'),
                                                                  subject=Subject.objects.get(name='Physics'),
                                                                  school=school,
                                                                  hours=100,
-                                                                 hours_bes=0, ).save())
+                                                                 hours_bes=0,
+                                                                 hours_co_teaching=0).save())
 
         hours_per_teacher_in_class.append(HoursPerTeacherInClass(teacher=Teacher.objects.get(username='mattia_bianchi'),
                                                                  course=Course.objects.get(year=3, section='A ORD'),
                                                                  subject=Subject.objects.get(name='Mathematics'),
                                                                  school=school,
                                                                  hours=140,
-                                                                 hours_bes=0, ).save())
+                                                                 hours_bes=0,
+                                                                 hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(HoursPerTeacherInClass(teacher=Teacher.objects.get(username='mattia_bianchi'),
                                                                  course=Course.objects.get(year=4, section='A ORD'),
                                                                  subject=Subject.objects.get(name='Mathematics'),
                                                                  school=school,
                                                                  hours=140,
-                                                                 hours_bes=0, ).save())
+                                                                 hours_bes=0,
+                                                                 hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(HoursPerTeacherInClass(teacher=Teacher.objects.get(username='mattia_bianchi'),
                                                                  course=Course.objects.get(year=3, section='A ORD'),
                                                                  subject=Subject.objects.get(name='Physics'),
                                                                  school=school,
                                                                  hours=100,
-                                                                 hours_bes=0, ).save())
+                                                                 hours_bes=0,
+                                                                 hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(HoursPerTeacherInClass(teacher=Teacher.objects.get(username='mattia_bianchi'),
                                                                  course=Course.objects.get(year=4, section='A ORD'),
                                                                  subject=Subject.objects.get(name='Physics'),
                                                                  school=school,
                                                                  hours=100,
-                                                                 hours_bes=0, ).save())
+                                                                 hours_bes=0,
+                                                                 hours_co_teaching=0).save())
 
         hours_per_teacher_in_class.append(HoursPerTeacherInClass(teacher=Teacher.objects.get(username='andrea_verdi'),
                                                                  course=Course.objects.get(year=1, section='A ORD'),
                                                                  subject=Subject.objects.get(name='Italian'),
                                                                  school=school,
                                                                  hours=170,
-                                                                 hours_bes=0, ).save())
+                                                                 hours_bes=0,
+                                                                 hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(HoursPerTeacherInClass(teacher=Teacher.objects.get(username='andrea_verdi'),
                                                                  course=Course.objects.get(year=4, section='A ORD'),
                                                                  subject=Subject.objects.get(name='Italian'),
                                                                  school=school,
                                                                  hours=170,
-                                                                 hours_bes=0,).save())
+                                                                 hours_bes=0,
+                                                                 hours_co_teaching=0).save())
 
         hours_per_teacher_in_class.append(HoursPerTeacherInClass(teacher=Teacher.objects.get(username='franca_benedetti'),
                                                                  course=Course.objects.get(year=5, section='A ORD'),
                                                                  subject=Subject.objects.get(name='Italian'),
                                                                  school=school,
                                                                  hours=170,
-                                                                 hours_bes=0, ).save())
+                                                                 hours_bes=0,
+                                                                 hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(HoursPerTeacherInClass(teacher=Teacher.objects.get(username='franca_benedetti'),
                                                                  course=Course.objects.get(year=2, section='A ORD'),
                                                                  subject=Subject.objects.get(name='Italian'),
                                                                  school=school,
                                                                  hours=170,
-                                                                 hours_bes=0, ).save())
+                                                                 hours_bes=0,
+                                                                 hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='franca_benedetti'),
                                    course=Course.objects.get(year=5, section='A ORD'),
                                    subject=Subject.objects.get(name='Latin'),
                                    school=school,
                                    hours=100,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='franca_benedetti'),
                                    course=Course.objects.get(year=2, section='A ORD'),
                                    subject=Subject.objects.get(name='Latin'),
                                    school=school,
                                    hours=100,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='franca_benedetti'),
                                    course=Course.objects.get(year=4, section='A ORD'),
                                    subject=Subject.objects.get(name='Latin'),
                                    school=school,
                                    hours=100,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
 
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='lucia_legni'),
@@ -329,21 +344,24 @@ class Command(BaseCommand):
                                    subject=Subject.objects.get(name='Latin'),
                                    school=school,
                                    hours=100,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='lucia_legni'),
                                    course=Course.objects.get(year=3, section='A ORD'),
                                    subject=Subject.objects.get(name='Latin'),
                                    school=school,
                                    hours=100,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='lucia_legni'),
                                    course=Course.objects.get(year=3, section='A ORD'),
                                    subject=Subject.objects.get(name='Italian'),
                                    school=school,
                                    hours=170,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
 
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='gianmarco_nardi'),
@@ -351,7 +369,8 @@ class Command(BaseCommand):
                                    subject=Subject.objects.get(name='Mathematics'),
                                    school=school,
                                    hours=140,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
 
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='francesco_franchi'),
@@ -359,7 +378,8 @@ class Command(BaseCommand):
                                    subject=Subject.objects.get(name='Physics'),
                                    school=school,
                                    hours=100,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
 
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='antonio_puro'),
@@ -367,35 +387,40 @@ class Command(BaseCommand):
                                    subject=Subject.objects.get(name='Religion'),
                                    school=school,
                                    hours=40,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='antonio_puro'),
                                    course=Course.objects.get(year=2, section='A ORD'),
                                    subject=Subject.objects.get(name='Religion'),
                                    school=school,
                                    hours=40,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='antonio_puro'),
                                    course=Course.objects.get(year=3, section='A ORD'),
                                    subject=Subject.objects.get(name='Religion'),
                                    school=school,
                                    hours=40,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='antonio_puro'),
                                    course=Course.objects.get(year=4, section='A ORD'),
                                    subject=Subject.objects.get(name='Religion'),
                                    school=school,
                                    hours=40,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='antonio_puro'),
                                    course=Course.objects.get(year=5, section='A ORD'),
                                    subject=Subject.objects.get(name='Religion'),
                                    school=school,
                                    hours=40,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
 
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='laura_brevi'),
@@ -403,21 +428,24 @@ class Command(BaseCommand):
                                    subject=Subject.objects.get(name='Philosophy'),
                                    school=school,
                                    hours=100,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='laura_brevi'),
                                    course=Course.objects.get(year=3, section='A ORD'),
                                    subject=Subject.objects.get(name='Philosophy'),
                                    school=school,
                                    hours=100,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='laura_brevi'),
                                    course=Course.objects.get(year=3, section='A ORD'),
                                    subject=Subject.objects.get(name='History'),
                                    school=school,
                                    hours=80,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
 
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='daniela_conci'),
@@ -425,14 +453,16 @@ class Command(BaseCommand):
                                    subject=Subject.objects.get(name='History'),
                                    school=school,
                                    hours=80,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='daniela_conci'),
                                    course=Course.objects.get(year=5, section='A ORD'),
                                    subject=Subject.objects.get(name='History'),
                                    school=school,
                                    hours=80,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
 
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='valentino_aspi'),
@@ -440,14 +470,16 @@ class Command(BaseCommand):
                                    subject=Subject.objects.get(name='Philosophy'),
                                    school=school,
                                    hours=100,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='valentino_aspi'),
                                    course=Course.objects.get(year=4, section='A ORD'),
                                    subject=Subject.objects.get(name='Philosophy'),
                                    school=school,
                                    hours=100,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
 
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='loredana_brancacci'),
@@ -456,14 +488,16 @@ class Command(BaseCommand):
                                    school_year=school_years[0],
                                    school=school,
                                    hours=80,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='loredana_brancacci'),
                                    course=Course.objects.get(year=4, section='A ORD'),
                                    subject=Subject.objects.get(name='History'),
                                    school=school,
                                    hours=80,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
 
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='sandro_moro'),
@@ -471,14 +505,16 @@ class Command(BaseCommand):
                                    subject=Subject.objects.get(name='Science'),
                                    school=school,
                                    hours=140,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='sandro_moro'),
                                    course=Course.objects.get(year=4, section='A ORD'),
                                    subject=Subject.objects.get(name='Science'),
                                    school=school,
                                    hours=140,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
 
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='giovanna_ciola'),
@@ -486,19 +522,22 @@ class Command(BaseCommand):
                                    subject=Subject.objects.get(name='Science'),
                                    school=school,
                                    hours=140,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='giovanna_ciola'),
                                    course=Course.objects.get(year=2, section='A ORD'),
                                    subject=Subject.objects.get(name='Science'),
                                    school=school,
                                    hours=140,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
         hours_per_teacher_in_class.append(
             HoursPerTeacherInClass(teacher=Teacher.objects.get(username='giovanna_ciola'),
                                    course=Course.objects.get(year=5, section='A ORD'),
                                    subject=Subject.objects.get(name='Science'),
                                    school=school,
                                    hours=140,
-                                   hours_bes=0, ).save())
+                                   hours_bes=0,
+                                   hours_co_teaching=0).save())
 

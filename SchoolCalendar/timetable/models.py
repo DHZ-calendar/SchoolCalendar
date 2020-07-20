@@ -246,6 +246,7 @@ class HoursPerTeacherInClass(models.Model):
     # A teacher has both "normal" hours and "bes" hours
     hours = models.IntegerField(null=False, blank=False, verbose_name=_("hours"))
     hours_bes = models.IntegerField(null=False, blank=False, verbose_name=_("hours BES"))
+    hours_co_teaching = models.IntegerField(null=False, blank=False, verbose_name=_("Hours co-teaching"))
 
     def __str__(self):
         return str(self.teacher) + " - " + str(self.course) + " " + self.subject.name
@@ -269,6 +270,7 @@ class Assignment(models.Model):
     hour_start = models.TimeField(null=False, blank=False, verbose_name=_("start hour"))
     hour_end = models.TimeField(null=False, blank=False, verbose_name=_("end hour"))
     bes = models.BooleanField(null=False, blank=False, default=False, verbose_name=_("BES"))
+    co_teaching = models.BooleanField(null=False, blank=False, default=False, verbose_name=_("Co-teaching"))
     substitution = models.BooleanField(null=False, blank=False, default=False, verbose_name=_("substitution"))
     absent = models.BooleanField(null=False, blank=False, default=False,
                                  verbose_name=_("absence"))  # for substituted teachers

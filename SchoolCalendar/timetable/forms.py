@@ -572,7 +572,7 @@ class HoursPerTeacherInClassForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck)
 
     class Meta:
         model = HoursPerTeacherInClass
-        fields = ['course', 'subject', 'teacher', 'school', 'hours', 'hours_bes']
+        fields = ['course', 'subject', 'teacher', 'school', 'hours', 'hours_bes', 'hours_co_teaching']
 
 
 class AssignmentForm(BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck):

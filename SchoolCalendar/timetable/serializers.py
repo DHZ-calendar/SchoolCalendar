@@ -354,14 +354,15 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
     """
     missing_hours = SerializerMethodField()
     missing_hours_bes = SerializerMethodField()
+    missing_hours_co_teaching = SerializerMethodField()
     teacher = TeacherSerializer()
     subject = SubjectSerializer()
     course = CourseSerializer()
 
     class Meta:
         model = HoursPerTeacherInClass
-        fields = ['id', 'teacher', 'course', 'subject', 'school', 'hours', 'hours_bes', 'missing_hours',
-                  'missing_hours_bes']
+        fields = ['id', 'teacher', 'course', 'subject', 'school', 'hours', 'hours_bes', 'hours_co_teaching',
+                  'missing_hours', 'missing_hours_bes', 'missing_hours_co_teaching']
 
     def get_missing_hours(self, obj, *args, **kwargs):
         """
@@ -436,6 +437,44 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
         total = utils.compute_total_hours_assignments(assignments, hours_slots)
 
         return obj.hours_bes - total
+
+    def get_missing_hours_co_teaching(self, obj, *args, **kwargs):
+        """
+            Missing hours is computed over the hours the teacher needs to do for a given class,
+            and the hours already planned in that class.
+            :param obj:
+            :param args:
+            :param kwargs:
+            :return:
+            """
+        start_date = self.context.get('request').query_params.get('start_date')
+        end_date = self.context.get('request').query_params.get('end_date')
+
+        assignments = Assignment.objects.filter(teacher=obj.teacher,
+                                                course=obj.course,
+                                                subject=obj.subject,
+                                                school=obj.school,
+                                                course__school_year=obj.course.school_year,
+                                                co_teaching=True).values('date__week_day', 'hour_start', 'hour_end')
+
+        # Filter in a time interval
+        if start_date and utils.is_date_string_valid(start_date):
+            assignments = assignments.filter(date__gte=start_date)
+        if end_date and utils.is_date_string_valid(end_date):
+            assignments = assignments.filter(date__lte=end_date)
+
+        for el in assignments:
+            el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
+
+        hours_slots = HourSlot.objects.filter(school=obj.school,
+                                              school_year=obj.course.school_year
+                                              ).values("day_of_week",
+                                                       "starts_at",
+                                                       "ends_at",
+                                                       "legal_duration")
+        total = utils.compute_total_hours_assignments(assignments, hours_slots)
+
+        return obj.hours_co_teaching - total
 
 
 class AssignmentSerializer(ModelSerializer):
