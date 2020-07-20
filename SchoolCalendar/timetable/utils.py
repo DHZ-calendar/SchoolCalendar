@@ -3,6 +3,7 @@ import random
 import string
 
 from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.models import User
 from django.db.models import Q
 from timetable.models import Teacher, AdminSchool, HoursPerTeacherInClass, Assignment, HourSlot, School
 
@@ -204,11 +205,21 @@ def get_available_teachers(assign: Assignment, school: School):
     return teachers_list
 
 
-def send_invitation_email(email, request):
-    form = PasswordResetForm({'email': email})
+def send_invitation_email(user_pk, request):
+    class InvitationForm(PasswordResetForm):
+        def __init__(self, user, *args, **kwargs):
+            self.user = user
+            super(InvitationForm, self).__init__(*args, **kwargs)
+
+        def get_users(self, email):
+            return (self.user, )
+
+    user = User.objects.get(id=user_pk)
+    form = InvitationForm(user, {'email': user.email})
     assert form.is_valid()
     form.save(
         request=request,
         use_https=request.is_secure(),
-        email_template_name='email_templates/invite.html'
+        email_template_name='email_templates/invite.html',
+        subject_template_name='email_templates/invite_subject.txt'
     )

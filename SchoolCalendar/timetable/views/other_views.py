@@ -714,13 +714,13 @@ class LoggedUserRedirectView(LoginRequiredMixin, RedirectView):
 
 class SendInvitationTeacherEmailView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):
     def post(self, request, *args, **kwargs):
-        email = kwargs.get('email')
-        utils.send_invitation_email(email, request)
+        user_pk = kwargs.get('user_pk')
+        utils.send_invitation_email(user_pk, request)
         return HttpResponse(status=200)
 
 
 class SendInvitationAdminSchoolEmailView(LoginRequiredMixin, SuperUserPermissionMixin, View):
     def post(self, request, *args, **kwargs):
-        email = kwargs.get('email')
-        utils.send_invitation_email(email, request)
+        user_pk = kwargs.get('user_pk')
+        utils.send_invitation_email(user_pk, request)
         return HttpResponse(status=200)

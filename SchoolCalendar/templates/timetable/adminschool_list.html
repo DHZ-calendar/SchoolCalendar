@@ -40,7 +40,7 @@
                             <td scope="row">{{ admin.last_name }}</td>
                             <td scope="row">{{ admin.school.name }}</td>
                             <td>
-                                <button class="btn btn-outline-primary" onclick="sendInvite('{{ admin.email }}')">
+                                <button class="btn btn-outline-primary" onclick="sendInvite('{{ admin.id }}')">
                                     {% trans 'Send invite' %}
                                 </button>
                             </td>
