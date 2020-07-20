@@ -71,8 +71,8 @@ def compute_total_hours_assignments(assignments, hours_slots):
     hour_slots in a left outer join fashion.
     Where there exists an hour slot for a given assignment, then we should use the 'legal_duration' field.
     Where there is no time_slot for it, we should use instead the actual duration of the assignment.
-    :param assignments: the list of assignments for a given teacher, course, school_year, school, subject (bes can
-                        be both True or False)
+    :param assignments: the list of assignments for a given teacher, course, school_year, school, subject (bes and
+                        co-teaching can be both True or False, but not True at the same time).
     :param hours_slots: the list of hour_slots for a given school and school_year
     :return: the total number of hours planned (both past and in the future) for a given teacher, course, school,
              school_year, subject.
@@ -118,8 +118,9 @@ def get_teachers_hours_info(school):
         hours_slots = HourSlot.objects.filter(school=hptic.school,
                                               school_year=hptic.school_year).values("day_of_week", "starts_at",
                                                                                     "ends_at", "legal_duration")
+        # TODO: Make tests for co-teaching!
         # Normal assignments lessons
-        normal_done_assign = assignments.filter(bes=False, substitution=False)
+        normal_done_assign = assignments.filter(bes=False, substitution=False, co_teaching=False)
         total_normal_done = compute_total_hours_assignments(normal_done_assign, hours_slots)
 
         # Substitution assignments
@@ -136,9 +137,9 @@ def get_teachers_hours_info(school):
         bes_done_assign = assignments.filter(bes=True)
         total_bes_done = compute_total_hours_assignments(bes_done_assign, hours_slots)
 
-        # not BES assignments
-        not_bes_done_assign = assignments.filter(bes=False)
-        total_not_bes_done = compute_total_hours_assignments(not_bes_done_assign, hours_slots)
+        # Co-teaching assignments
+        co_teaching_done_assign = assignments.filter(co_teaching=True)
+        total_co_teaching_done = compute_total_hours_assignments(co_teaching_done_assign, hours_slots)
 
         teachers_report.append({
             'first_name': hptic.teacher.first_name,
@@ -148,8 +149,10 @@ def get_teachers_hours_info(school):
             'normal_done': total_normal_done,
             'substitution_done': total_subst_done,
             'bes_done': total_bes_done,
-            'missing_hours': hptic.hours - total_not_bes_done,
-            'missing_bes': hptic.hours_bes - total_bes_done
+            'co_teaching_done': total_co_teaching_done,
+            'missing_hours': hptic.hours - total_normal_done,
+            'missing_bes': hptic.hours_bes - total_bes_done,
+            'missing_co_teaching': hptic.hours_co_teaching - total_co_teaching_done
         })
     return teachers_report
 

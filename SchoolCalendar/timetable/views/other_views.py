@@ -241,6 +241,7 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
                             hour_start=a.hour_start,
                             hour_end=a.hour_end,
                             bes=a.bes,
+                            co_teaching=a.co_teaching,
                             substitution=a.substitution,
                             absent=a.absent,
                             date=d

@@ -610,14 +610,15 @@ class AssignmentForm(BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck):
     class Meta:
         model = Assignment
         fields = ['teacher', 'course', 'subject', 'school', 'date', 'hour_start', 'hour_end', 'bes',
-                  'substitution', 'absent', 'room']
+                  'substitution', 'co_teaching', 'absent', 'room']
 
     def clean(self):
         """
         We need to check whether date_start <= date_end
         Moreover, we need to check whether there is a HoursPerTeacherInClass for a given course, teacher,
-        school_year, school, subject, bes. Only if the hour is not a substitution class.
-        Lastly we do not want to have conflicts for the teacher, course or room.
+        school_year, school, subject, bes or co_teaching. Only if the hour is not a substitution class.
+        In addition we do not want to have conflicts for the teacher, course or room.
+        Lastly, we cannot have an assignment which is both BES and co-teaching.
         :return:
         """
         if not self.errors:
@@ -633,14 +634,21 @@ class AssignmentForm(BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck):
                                                             course=self.cleaned_data['course'],
                                                             subject=self.cleaned_data['subject'])
                 if not hours_teacher_in_class:
-
+                    # If there is not an hours per teacher in class
                     self.add_error(None, forms.ValidationError(_('There is not a related '
                                                                  'teacher in class instance.')))
                 elif self.cleaned_data['bes'] and hours_teacher_in_class.first().hours_bes == 0:
+                    # If the hour is bes, but there are no bes hours for the teacher in class.
                     self.add_error(None, forms.ValidationError(_('The teacher doesn\'t have bes hours '
                                                                  'in this course.')))
-                elif not self.cleaned_data['bes'] and hours_teacher_in_class.first().hours == 0:
-                    self.add_error(None, forms.ValidationError(_('The teacher has only bes hours '
+                elif self.cleaned_data['co_teaching'] and hours_teacher_in_class.first().co_teaching == 0:
+                    # If the hour is co-teaching, but there are no co-teaching for the teacher in class.
+                    self.add_error(None, forms.ValidationError(_('The teacher doesn\'t have co-teaching hours '
+                                                                 'in this course.')))
+                elif (not self.cleaned_data['bes'] and
+                      not self.cleaned_data['co_teaching']) and hours_teacher_in_class.first().hours == 0:
+                    # If the hour is "normal", but the teacher has no normal hours in the class.
+                    self.add_error(None, forms.ValidationError(_('The teacher has only bes or co-teaching hours '
                                                                  'in this course.')))
 
             conflicts_teacher = Assignment.objects.filter(
@@ -671,6 +679,13 @@ class AssignmentForm(BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck):
                 )
                 if conflict_room.count() >= self.cleaned_data['room'].capacity:
                     self.add_error(None, forms.ValidationError(
-                        "The room {} has already reached its maximum capacity".format(self.cleaned_data['room'].name)))
+                        _("The room {} has already reached its maximum capacity").format(
+                            self.cleaned_data['room'].name)))
 
+        # Check that only one in bes and co_teaching is set to true.
+        if self.cleaned_data['bes'] and self.cleaned_data['co_teaching']:
+            # They cannot be both true.
+            self.add_error(None, forms.ValidationError(
+                _("An assignment can only be BES or co-teaching, but not both.")
+            ))
         return self.cleaned_data

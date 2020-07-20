@@ -64,8 +64,10 @@
                         <th data-field="first_name">{% trans 'First name' %}</th>
                         <th data-field="hours_done">{% trans 'Teaching hours made' %}</th>
                         <th data-field="hours_bes_done">{% trans 'B.E.S. hours made' %}</th>
+                        <th data-field="hours_co_teaching_done">{% trans 'Co-teaching hours made' %}</th>
                         <th data-field="total_hours">{% trans 'Yearly load' %}</th>
                         <th data-field="total_hours_bes">{% trans 'Yearly load B.E.S.' %}</th>
+                        <th data-field="total_hours_co_teaching">{% trans 'Yearly load co-teaching' %}</th>
                         <th data-field="hours_substitution_done">{% trans 'Substitution hours made' %}</th>
                     </tr>
                 </thead>
@@ -121,8 +123,10 @@
                       <td>${elem.course.year} ${elem.course.section}</td>
                       <td>${elem.hours}</td>
                       <td>${elem.hours_bes}</td>
+                      <td>${elem.hours_co_teaching}</td>
                       <td>${elem.missing_hours}</td>
                       <td>${elem.missing_hours_bes}</td>
+                      <td>${elem.missing_hours_co_teaching}</td>
                     </tr>
                 `;
             }
@@ -137,8 +141,10 @@
                   <th scope="col">{% trans 'Course' %}</th>
                   <th scope="col">{% trans 'Assigned teaching hours' %}</th>
                   <th scope="col">{% trans 'Assigned B.E.S. teaching hours' %}</th>
+                  <th scope="col">{% trans 'Assigned co-teaching hours' %}</th>
                   <th scope="col">{% trans 'Missing teaching hours' %}</th>
                   <th scope="col">{% trans 'Missing B.E.S. hours' %}</th>
+                  <th scope="col">{% trans 'Missing co-teaching hours' %}</th>
                 </tr>
               </thead>
               <tbody class="table-secondary">

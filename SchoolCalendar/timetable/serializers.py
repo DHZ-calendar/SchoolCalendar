@@ -72,14 +72,16 @@ class TeacherSerializer(ModelSerializer):
 class TeacherSummarySerializer(ModelSerializer):
     hours_done = SerializerMethodField()  # normal hours done in the given date period
     hours_bes_done = SerializerMethodField()  # bes hours done in the given date period
+    hours_co_teaching_done = SerializerMethodField()  # co-teaching hours done in the given date period
+    hours_substitution_done = SerializerMethodField()  # substitution hours done in the given date period
     total_hours = SerializerMethodField()  # total amount of hours to be done in the year
     total_hours_bes = SerializerMethodField()  # same but for bes hours
-    hours_substitution_done = SerializerMethodField()  # substitution hours done in the given date period
+    total_hours_co_teaching = SerializerMethodField()  # same but for co-teaching hours
 
     class Meta:
         model = Teacher
-        fields = ['id', 'first_name', 'last_name', 'hours_done', 'hours_bes_done', 'total_hours', 'total_hours_bes',
-                  'hours_substitution_done']
+        fields = ['id', 'first_name', 'last_name', 'hours_done', 'hours_bes_done', 'hours_co_teaching_done',
+                  'total_hours', 'total_hours_bes', 'total_hours_co_teaching', 'hours_substitution_done']
 
     def get_hours_done(self, obj, *args, **kwargs):
         # Get start_date and end_date parameters from url
@@ -119,6 +121,32 @@ class TeacherSummarySerializer(ModelSerializer):
                                                 school=obj.school,
                                                 course__school_year=school_year,
                                                 bes=True).values('date__week_day', 'hour_start', 'hour_end')
+        # Filter in a time interval
+        if start_date and utils.is_date_string_valid(start_date):
+            assignments = assignments.filter(date__gte=start_date)
+        if end_date and utils.is_date_string_valid(end_date):
+            assignments = assignments.filter(date__lte=end_date)
+
+        for el in assignments:
+            el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
+
+        hours_slots = HourSlot.objects.filter(school=obj.school,
+                                              school_year=school_year).values("day_of_week", "starts_at",
+                                                                              "ends_at", "legal_duration")
+        total = utils.compute_total_hours_assignments(assignments, hours_slots)
+        return total
+
+    def get_hours_co_teaching_done(self, obj, *args, **kwargs):
+        # Get start_date and end_date parameters from url
+        start_date = self.context.get('request').query_params.get('start_date')
+        end_date = self.context.get('request').query_params.get('end_date')
+
+        school_year = self.context.get('request').query_params.get('school_year')
+
+        assignments = Assignment.objects.filter(teacher=obj.id,
+                                                school=obj.school,
+                                                course__school_year=school_year,
+                                                co_teaching=True).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
         if start_date and utils.is_date_string_valid(start_date):
             assignments = assignments.filter(date__gte=start_date)
@@ -175,6 +203,16 @@ class TeacherSummarySerializer(ModelSerializer):
         yearly_load = TeachersYearlyLoad.objects.filter(teacher=obj.id,
                                                         school_year=school_year)
         if yearly_load:
+            return yearly_load.first().yearly_load_bes
+        return 0
+
+    def get_total_hours_co_teaching(self, obj, *args, **kwargs):
+        school_year = self.context.get('request').query_params.get('school_year')
+
+        yearly_load = TeachersYearlyLoad.objects.filter(teacher=obj.id,
+                                                        school_year=school_year)
+        if yearly_load:
+            # TODO: Change with co_teaching
             return yearly_load.first().yearly_load_bes
         return 0
 
@@ -517,12 +555,15 @@ class AssignmentSerializer(ModelSerializer):
 
     def validate(self, attrs):
         """
-        Check whether the hour_start is <= hour_end
+        Check whether the hour_start is <= hour_end.
+        Check whether at most one among bes and co-teaching is set to true.
         :param attrs: the values to validate
         :return: attrs or raises ValidationError
         """
         if attrs['hour_start'] > attrs['hour_end']:
             raise ValidationError(_('The start hour field can\'t be greater than the end hour'))
+        if attrs['bes'] and attrs['co_teaching']:
+            raise ValidationError(_("The assignment can only be BES or co-teaching, but not both."))
         return attrs
 
     def validate_subject_id(self, value):
