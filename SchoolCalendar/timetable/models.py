@@ -207,6 +207,8 @@ class TeachersYearlyLoad(models.Model):
     # A teacher has both "normal" hours and "bes" hours
     yearly_load = models.IntegerField(null=False, blank=False, verbose_name=_("yearly load"))
     yearly_load_bes = models.IntegerField(null=False, blank=False, verbose_name=_("yearly load bes"))
+    yearly_load_co_teaching = models.IntegerField(null=False, blank=False, default=0,
+                                                  verbose_name=_("yearly load co-teaching"))
     school_year = models.ForeignKey(SchoolYear, null=False, blank=False, on_delete=models.CASCADE,
                                     verbose_name=_("school year"))
 
@@ -226,6 +228,7 @@ class CoursesYearlyLoad(models.Model):
     # A course has both "normal" hours and "bes" hours
     yearly_load = models.IntegerField(null=False, blank=False, verbose_name=_("yearly load"))
     yearly_load_bes = models.IntegerField(null=False, blank=False, verbose_name=_("yearly load bes"))
+    # TODO: Do we want the co teaching hours in a course yearly load? :/
 
     def __str__(self):
         return _("{} in {}: {} and {} of bes").format(str(self.course),
@@ -243,7 +246,7 @@ class HoursPerTeacherInClass(models.Model):
     subject = models.ForeignKey(Subject, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("subject"))
     school = models.ForeignKey(School, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("school"))
 
-    # A teacher has both "normal" hours and "bes" hours
+    # A teacher has "normal" hours, "bes" hours and co-teaching hours.
     hours = models.IntegerField(null=False, blank=False, verbose_name=_("hours"))
     hours_bes = models.IntegerField(null=False, blank=False, verbose_name=_("hours BES"))
     hours_co_teaching = models.IntegerField(null=False, blank=False, verbose_name=_("Hours co-teaching"))

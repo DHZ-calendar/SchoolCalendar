@@ -212,8 +212,7 @@ class TeacherSummarySerializer(ModelSerializer):
         yearly_load = TeachersYearlyLoad.objects.filter(teacher=obj.id,
                                                         school_year=school_year)
         if yearly_load:
-            # TODO: Change with co_teaching
-            return yearly_load.first().yearly_load_bes
+            return yearly_load.first().yearly_load_co_teaching
         return 0
 
 
@@ -338,7 +337,7 @@ class TeachersYearlyLoadSerializer(ModelSerializer):
 
     class Meta:
         model = TeachersYearlyLoad
-        fields = ['id', 'teacher', 'yearly_load', 'yearly_load_bes', 'school_year']
+        fields = ['id', 'teacher', 'yearly_load', 'yearly_load_bes', 'yearly_load_co_teaching', 'school_year']
 
 
 class CoursesYearlyLoadSerializer(ModelSerializer):

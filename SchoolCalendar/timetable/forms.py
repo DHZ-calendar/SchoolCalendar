@@ -540,7 +540,7 @@ class TeachersYearlyLoadForm(BaseFormWithTeacherAndSchoolCheck):
 
     class Meta:
         model = TeachersYearlyLoad
-        fields = ['teacher', 'school_year', 'yearly_load', 'yearly_load_bes']
+        fields = ['teacher', 'school_year', 'yearly_load', 'yearly_load_bes', 'yearly_load_co_teaching']
 
 
 class CoursesYearlyLoadForm(BaseFormWithCourseTeacherAndSchoolCheck):
