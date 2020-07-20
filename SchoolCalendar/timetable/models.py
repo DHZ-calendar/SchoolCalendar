@@ -207,8 +207,7 @@ class TeachersYearlyLoad(models.Model):
     # A teacher has both "normal" hours and "bes" hours
     yearly_load = models.IntegerField(null=False, blank=False, verbose_name=_("yearly load"))
     yearly_load_bes = models.IntegerField(null=False, blank=False, verbose_name=_("yearly load bes"))
-    yearly_load_co_teaching = models.IntegerField(null=False, blank=False, default=0,
-                                                  verbose_name=_("yearly load co-teaching"))
+    yearly_load_co_teaching = models.IntegerField(null=False, blank=False, verbose_name=_("yearly load co-teaching"))
     school_year = models.ForeignKey(SchoolYear, null=False, blank=False, on_delete=models.CASCADE,
                                     verbose_name=_("school year"))
 
