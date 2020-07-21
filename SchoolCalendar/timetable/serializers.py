@@ -669,7 +669,7 @@ class TeacherSubstitutionSerializer(ModelSerializer):
                                                     ends_at=self.assignment_to_substitute.hour_end,
                                                     day_of_week=self.assignment_to_substitute.date.weekday(),
                                                     school=obj.school,
-                                                    course__school_year=self.assignment_to_substitute.course.school_year).first()
+                                                    school_year=self.assignment_to_substitute.course.school_year).first()
         if not related_hour_slot:
             # If there is not a related hour slot, then we are talking about a non standard assignment.
             # We return False by default

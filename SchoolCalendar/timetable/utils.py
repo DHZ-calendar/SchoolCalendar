@@ -55,6 +55,7 @@ def is_date_string_valid(date_str):
     except ValueError:
         return False
 
+
 def is_adminschool(user):
     """
     :param user:
@@ -183,11 +184,10 @@ def get_available_teachers(assign: Assignment, school: School):
     """
     teachers_list = Teacher.objects.filter(school=school) \
         .exclude(id=assign.teacher.id) \
-        .filter(hoursperteacherinclass__course__school_year=assign.school_year).distinct()
-
+        .filter(hoursperteacherinclass__course__school_year=assign.course.school_year).distinct()
     # Remove all teachers who have an absence block there.
     hour_slot = HourSlot.objects.filter(school=assign.school,
-                                        school_year=assign.school_year,
+                                        school_year=assign.course.school_year,
                                         starts_at=assign.hour_start,
                                         ends_at=assign.hour_end,
                                         day_of_week=assign.date.weekday()).first()
@@ -198,7 +198,7 @@ def get_available_teachers(assign: Assignment, school: School):
 
         # Exclude from the choice the teachers that are already busy with other assignments.
         teachers_to_exclude = Assignment.objects.filter(school=assign.school,
-                                                        school_year=assign.school_year,
+                                                        course__school_year=assign.course.school_year,
                                                         hour_start=assign.hour_start,
                                                         hour_end=assign.hour_end,
                                                         date=assign.date).values_list('teacher__id')
