@@ -216,6 +216,10 @@ async function getTeachers(){
                             <span class="col-9">${_TRANS['hours_bes']}</span>
                             <span class="col-3 tea-hours_bes">${tea.hours_bes}</span>
                         </div>
+                        <div class="row font-italic">
+                            <span class="col-9">${_TRANS['hours_co-teaching']}</span>
+                            <span class="col-3 tea-hours_bes">${tea.hours_co_teaching}</span>
+                        </div>
                         <hr/>
                         <div class="row font-italic">
                             <span class="col-9">${_TRANS['missing_hours']}:</span>
@@ -225,11 +229,15 @@ async function getTeachers(){
                             <span class="col-9">${_TRANS['hours_bes']}</span>
                             <span class="col-3 tea-missing_bes">${tea.missing_hours_bes}</span>
                         </div>
+                        <div class="row font-italic">
+                            <span class="col-9">${_TRANS['hours_co-teaching']}</span>
+                            <span class="col-3 tea-missing_bes">${tea.missing_hours_co_teaching}</span>
+                        </div>
                     </div>
                     <div class="row">
                         <button type="button" class="col-6 btn btn-sm cal-event" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false, false)">${_TRANS['assign_lecture']}</button>
                         <button type="button" class="col-6 btn btn-sm cal-event-bes" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, true, false)">${_TRANS['assign_bes']}</button>
-                        <button type="button" class="col-12 btn btn-sm cal-event-co-teaching" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false, true)">${_TRANS['assign_co-teaching']}</button>
+                        <button type="button" class="col-12 btn btn-sm cal-event-co-teaching mt-1" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false, true)">${_TRANS['assign_co-teaching']}</button>
                     </div>
                 </li>`;
             $('#teachers_list').append(html);
