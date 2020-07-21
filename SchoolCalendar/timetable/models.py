@@ -146,7 +146,7 @@ class AbsenceBlock(models.Model):
         """
         :return:
         """
-        return "{}, {}, {}".format(str(self.teacher), str(self.hour_slot), str(self.school_year))
+        return "{}, {}, {}".format(str(self.teacher), str(self.hour_slot), str(self.hour_slot.school_year))
 
 
 class Holiday(models.Model):

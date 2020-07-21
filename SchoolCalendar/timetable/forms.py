@@ -433,7 +433,8 @@ class AbsenceBlockForm(BaseFormWithHourSlotTeacherAndSchoolCheck):
         super(AbsenceBlockForm, self).__init__(user, *args, **kwargs)
         # Populate the teacher picker with the correct teachers
         self.fields['teacher'] = forms.ModelChoiceField(
-            queryset=Teacher.objects.filter(school__id=get_school_from_user(self.user).id))
+            queryset=Teacher.objects.filter(school__id=get_school_from_user(self.user).id).order_by('last_name',
+                                                                                                    'first_name'))
         # Get the correct hours slots,
         self.fields['hour_slot'] = forms.ModelChoiceField(
             queryset=HourSlot.objects.filter(school__id=get_school_from_user(self.user).id).order_by('day_of_week',
@@ -443,6 +444,54 @@ class AbsenceBlockForm(BaseFormWithHourSlotTeacherAndSchoolCheck):
     class Meta:
         model = AbsenceBlock
         fields = ['teacher', 'hour_slot']
+
+
+class AbsenceBlockCreateForm(AbsenceBlockForm, Form):
+    """
+    It allows to create more absence blocks specifying more than one hour slots.
+    """
+
+    def __init__(self, user, *args, **kwargs):
+        """
+        Add hour_slot selection based on the current school, and ordered by week_day and starts_at
+        :param user: the user logged, the school is retrieved by her.
+        """
+        super(AbsenceBlockCreateForm, self).__init__(user, *args, **kwargs)
+
+        # Delete the single hour_slot field
+        del self.fields['hour_slot']
+
+        # Get the correct hours slots in the MultipleChoiceField
+        self.fields['hour_slots'] = forms.ModelMultipleChoiceField(
+            queryset=HourSlot.objects.filter(school__id=get_school_from_user(self.user).id).order_by(
+                'day_of_week', 'starts_at'),
+            help_text=_("Do you want to assign multiple absence blocks?"
+                        " Use shift key and the mouse click to select multiple hour slots.")
+        )
+        assign_html_style_to_visible_forms_fields(self)
+
+    class Meta:
+        model = AbsenceBlock
+        fields = ['teacher']
+
+    def save(self, commit=True):
+        """
+        Create one absence block for every hour_slot selected.
+        :param commit:
+        :return:
+        """
+
+        print(self.cleaned_data)
+        for hour_slot in self.cleaned_data['hour_slots']:
+            # Create an absence block for every hour_slot.
+            ab = AbsenceBlock(
+                teacher=self.cleaned_data['teacher'],
+                hour_slot=hour_slot
+            )
+            ab.save()
+        self.cleaned_data.pop('hour_slots')
+
+        return ab
 
 
 class HolidayForm(BaseFormWithSchoolCheck):
