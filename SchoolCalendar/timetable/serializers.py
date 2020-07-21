@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.http import JsonResponse
 from django.utils.translation import gettext as _
 
 from rest_framework.serializers import HyperlinkedModelSerializer, ModelSerializer, Serializer, IntegerField, CharField, \
@@ -527,6 +528,7 @@ class AssignmentSerializer(ModelSerializer):
     course = CourseSerializer(read_only=True)
     room_id = PrimaryKeyRelatedField(write_only=True, required=False, queryset=Room.objects.all(), source='room')
     room = RoomSerializer(read_only=True)
+    eventual_substitute = SerializerMethodField(read_only=True)
 
     def __init__(self, *args, **kwargs):
         super(AssignmentSerializer, self).__init__(*args, **kwargs)
@@ -550,6 +552,28 @@ class AssignmentSerializer(ModelSerializer):
         )
         if el:
             return el[0].id
+        return None
+
+    def get_eventual_substitute(self, obj, *args, **kwargs):
+        """
+        If the teacher assignment is absent this returns the substitute teacher
+        """
+        if obj.absent:
+            assignment = Assignment.objects.filter(
+                course=obj.course,
+                subject=obj.subject,
+                room=obj.room,
+                school=obj.school,
+                date=obj.date,
+                hour_start=obj.hour_start,
+                hour_end=obj.hour_end,
+                bes=obj.bes,
+                co_teaching=obj.co_teaching,
+                substitution=True,
+                absent=False
+            ).first()
+            if assignment:
+                return TeacherSerializer(assignment.teacher, context=self.context).data
         return None
 
     def validate(self, attrs):

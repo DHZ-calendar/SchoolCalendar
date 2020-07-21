@@ -99,15 +99,35 @@
         $("#lectures").empty();
         $.get(url, data=data, function(data) {
             for(let assign of data){
-                $("#lectures").append(`
-                    <div class="card" id="card-${assign.id}">
-                        <div class="card-header">
-                            <h2 class="mb-0">
-                                <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse-${assign.id}" aria-expanded="false" aria-controls="collapse-${assign.id}">
-                                    <b>${assign.subject.name}</b>&nbsp;${assign.hour_start.substring(0, 5)} - ${assign.hour_end.substring(0, 5)}&nbsp; ${assign.course.year} ${assign.course.section}
-                                </button>
-                            </h2>
-                        </div>
+                let colorClass = 'bg-secondary';
+                let substText = ``;
+                let availableTeachers = ``;
+                if (assign.absent == true) {
+                    colorClass = 'bg-success text-white';
+                    if (assign.eventual_substitute)
+                        substText = `- {% trans 'Substituted by' %} ${assign.eventual_substitute.last_name} ${assign.eventual_substitute.first_name}`;
+                    availableTeachers = `
+                        <div id="collapse-${assign.id}" class="collapse" aria-labelledby="card-${assign.id}" data-parent="#lectures">
+                            <div class="card-body text-center">
+                                <a href="#" class="btn btn-primary" role="button" aria-pressed="true" onclick="sendSubstitutionEmail(${assign.id})">
+                                    {% trans 'Send an email to the teacher' %}
+                                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-envelope-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555zM0 4.697v7.104l5.803-3.558L0 4.697zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757zm3.436-.586L16 11.801V4.697l-5.803 3.546z"/>
+                                    </svg>
+                                </a>
+                                <a href="#" class="btn btn-danger" role="button" aria-pressed="true">
+                                    {% trans 'Download PDF' %}
+                                    <svg class="bi bi-download" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                      <path fill-rule="evenodd" d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"/>
+                                      <path fill-rule="evenodd" d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"/>
+                                      <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 1z"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>`;
+                }
+                else {
+                    availableTeachers = `
                         <div id="collapse-${assign.id}" class="collapse" aria-labelledby="card-${assign.id}" data-parent="#lectures">
                             <div class="card-body text-center">
                                 <b>{% trans 'Available teachers:' %}</b>
@@ -121,9 +141,23 @@
                                     {% trans 'Make substitution' %}
                                 </button>
                             </div>
+                        </div>`;
+                }
+
+                let htmlElement = `
+                    <div class="card" id="card-${assign.id}">
+                        <div class="card-header ${colorClass}">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link btn-block text-left text-white" type="button" data-toggle="collapse" data-target="#collapse-${assign.id}" aria-expanded="false" aria-controls="collapse-${assign.id}">
+                                    <b>${assign.subject.name}</b>&nbsp;${assign.hour_start.substring(0, 5)} - ${assign.hour_end.substring(0, 5)}&nbsp; ${assign.course.year} ${assign.course.section}
+                                    <b>${substText}</b>
+                                </button>
+                            </h2>
                         </div>
+                        ${availableTeachers}
                     </div>
-                `);
+                `;
+                $("#lectures").append(htmlElement);
 
                 let substituteBlock = $("#lectures").find("ul#sub_teachers-" + assign.id);
                 let substituteOthersBlock = $("#lectures").find("ul#sub_teachers-others-" + assign.id);
@@ -190,4 +224,31 @@
             getTeacherAssignments();
         }
     }
+
+    async function sendSubstitutionEmail(assignId){
+        let url = "{% url 'substitution_teacher_email-view' 1234 %}"
+            .replace('1234', assignId);
+        let data = {
+            csrfmiddlewaretoken: Cookies.get('csrftoken'),
+        };
+        try{
+            data = await $.post(url, data=data);
+            alert(_TRANS['sent'])
+        }
+        catch{
+            alert(_TRANS['error'])
+        }
+    }
+    async function downloadSubstitutionTicket(assignId){
+        let url = "{% url 'substitution_teacher_email-view' 1234 %}"
+            .replace('1234', assignId);
+
+        window.location.href = url;
+    }
+
+
+    _TRANS = {
+        'sent': "{% trans 'Substitution email sent correctly!' %}",
+        'error': "° {% trans 'An error appears while sending the substitution email!' %}"
+    };
 {% endblock %}

@@ -1,0 +1,31 @@
+{% autoescape off %}
+{% load i18n %}
+
+<p>Gentile {{ user.first_name }} {{ user.last_name }},</p>
+<p>Ti informiamo che ti è stata assegnata la seguente sostituzione:</p>
+
+Classe: {{ assignment.course.year }} {{ assignment.course.section }}<br>
+Data: {{ assignment.date }}<br>
+Materia: {{ assignment.subject.name }}<br>
+Ora: {{ assignment.hour_start }} - {{ assignment.hour_end }}<br>
+Aula: {{ assignment.room }}<br>
+
+<p>Cordialmente,</p>
+<p>Il team di School Calendar</p>
+
+-------<br/>
+English version:<br/>
+
+<p>Dear {{ user.first_name }} {{ user.last_name }},</p>
+
+<p>We inform you that you were assigned to the following substitution:</p>
+
+Course: {{ assignment.course.year }} {{ assignment.course.section }}<br>
+Date: {{ assignment.date }}<br>
+Subject: {{ assignment.subject.name }}<br>
+Hour slot: {{ assignment.hour_start }} - {{ assignment.hour_end }}<br>
+Room: {{ assignment.room }}<br>
+
+<p>Sincerely,</p>
+<p>The School Calendar Team</p>
+{% endautoescape %}

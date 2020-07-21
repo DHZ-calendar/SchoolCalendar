@@ -2,8 +2,11 @@ import datetime
 
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import send_mail
 from django.db.models import Q
 from django.shortcuts import render, redirect, reverse
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
@@ -193,17 +196,16 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
                                                       hour_end=a.hour_end,
                                                       date__week_day=((a.date.weekday() + 2) % 7),
                                                       date__gte=from_date,
-                                                      date__lte=to_date).\
+                                                      date__lte=to_date). \
                     exclude(id=a.id). \
                     filter(Q(teacher=a.teacher) | Q(room__isnull=False, room=a.room))
                 if conflicts.filter(teacher=a.teacher) or (
-                    a.room is not None and conflicts.filter(room=a.room).count() >= a.room.capacity
+                        a.room is not None and conflicts.filter(room=a.room).count() >= a.room.capacity
                 ):
                     # There are conflicts!
                     return JsonResponse(
                         AssignmentSerializer(conflicts, context={'request': request}, many=True).data,
                         safe=False, status=400)
-
 
             # delete the assignments of that course in the specified period of time
             school = utils.get_school_from_user(request.user)
@@ -288,9 +290,9 @@ class TeacherSubstitutionView(UserPassesTestMixin, View):
         teachers_list = utils.get_available_teachers(a, school)
 
         # Show all the other teachers (the ones that may be busy or have an absence block).
-        other_teachers = Teacher.objects.filter(school=school)\
-            .exclude(id__in=teachers_list.values('id'))\
-            .exclude(id=a.teacher.id)    # Exclude the teacher herself!
+        other_teachers = Teacher.objects.filter(school=school) \
+            .exclude(id__in=teachers_list.values('id')) \
+            .exclude(id=a.teacher.id)  # Exclude the teacher herself!
 
         data = dict(available_teachers=teachers_list,
                     other_teachers=other_teachers)
@@ -324,7 +326,7 @@ class SubstituteTeacherApiView(UserPassesTestMixin, View):
         teacher = self.kwargs.get('teacher_pk')
         school = utils.get_school_from_user(self.request.user)
 
-        a = Assignment.objects.get(id=self.kwargs.get('assignment_pk'),
+        a = Assignment.objects.get(id=assign,
                                    school=school.id)
         teachers_list = utils.get_available_teachers(a, school)
         other_teachers = Teacher.objects.filter(school=school).exclude(id__in=teachers_list.values('id'))
@@ -339,6 +341,7 @@ class SubstituteTeacherApiView(UserPassesTestMixin, View):
             hour_start=a.hour_start,
             hour_end=a.hour_end,
             bes=a.bes,
+            co_teaching=a.co_teaching,
             substitution=True,
             absent=False,
             free_substitution=False
@@ -705,6 +708,36 @@ class TimetableGeneralPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMix
 
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename=str(monday_date) + '.pdf')
+
+
+class SendTeacherSubstitutionEmailView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):
+    def post(self, request, *args, **kwargs):
+        assign_pk = kwargs.get('assign_pk')
+        assignment_to_subst = Assignment.objects.get(id=assign_pk)
+        assignment = Assignment.objects.filter(
+            course=assignment_to_subst.course,
+            subject=assignment_to_subst.subject,
+            room=assignment_to_subst.room,
+            school=assignment_to_subst.school,
+            date=assignment_to_subst.date,
+            hour_start=assignment_to_subst.hour_start,
+            hour_end=assignment_to_subst.hour_end,
+            bes=assignment_to_subst.bes,
+            co_teaching=assignment_to_subst.co_teaching,
+            substitution=True,
+            absent=False
+        ).first()
+        if assignment:
+            subject = 'SchoolCalendar - Substitution assigned'
+            html_message = render_to_string('email_templates/substitution.html',
+                                            {'user': assignment.teacher, 'assignment': assignment})
+            from_email = None
+            to = assignment.teacher.email
+
+            send_mail(subject, None, from_email, [to], html_message=html_message, fail_silently=False)
+            return HttpResponse(status=200)
+
+        return HttpResponse(status=400)
 
 
 class LoggedUserRedirectView(LoginRequiredMixin, RedirectView):

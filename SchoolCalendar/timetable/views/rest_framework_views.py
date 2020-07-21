@@ -202,7 +202,6 @@ class TeacherAssignmentsViewSet(UserPassesTestMixin, ListModelMixin, GenericView
             return Assignment.objects.none()
 
         return Assignment.objects.filter(teacher=teacher,
-                                         absent=False,
                                          course__school_year=school_year)
 
 
