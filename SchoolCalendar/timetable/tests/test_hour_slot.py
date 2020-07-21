@@ -120,3 +120,129 @@ class HourSlotTestCase(BaseTestCase):
         hs1.delete()
         self.assertTrue(f.is_valid(), msg=f.errors)
 
+    def test_hour_slot_on_conflicting_hours(self):
+        """
+        Test the creation of multiple hour slots for the same school and in concurrent time interval.
+        An error should be returned.
+        """
+        hs1 = HourSlot(hour_number=1,
+                       starts_at=time(hour=8, minute=45),
+                       ends_at=time(hour=9, minute=35),
+                       school=self.s1,
+                       school_year=self.school_year_2020,
+                       day_of_week=1,
+                       legal_duration=timedelta(seconds=3600))
+        hs1.save()
+        data = {'hour_number': '2',
+                'starts_at': '9:05',   # Conflicting time interval.
+                'ends_at': '10:00',
+                'school': self.s1,
+                'school_year': self.school_year_2020,
+                'day_of_week': '1',
+                'legal_duration_0': '1',
+                'legal_duration_1': '0'}
+        f = HourSlotForm(user=self.a1, data=data)
+        f.full_clean()
+        self.assertFalse(f.is_valid())
+
+    def test_hour_slot_on_conflicting_hours_2(self):
+        """
+        Test the creation of multiple hour slots for the same school and in concurrent time interval.
+        An error should be returned.
+        """
+        hs1 = HourSlot(hour_number=2,
+                       starts_at=time(hour=8, minute=45),
+                       ends_at=time(hour=9, minute=35),
+                       school=self.s1,
+                       school_year=self.school_year_2020,
+                       day_of_week=1,
+                       legal_duration=timedelta(seconds=3600))
+        hs1.save()
+        data = {'hour_number': '1',
+                'starts_at': '7:55',   # Conflicting time interval.
+                'ends_at': '8:55',
+                'school': self.s1,
+                'school_year': self.school_year_2020,
+                'day_of_week': '1',
+                'legal_duration_0': '1',
+                'legal_duration_1': '0'}
+        f = HourSlotForm(user=self.a1, data=data)
+        f.full_clean()
+        self.assertFalse(f.is_valid())
+
+    def test_hour_slot_on_conflicting_hours_3(self):
+        """
+        Test the creation of multiple hour slots for the same school and in concurrent time interval.
+        An error should be returned.
+        """
+        hs1 = HourSlot(hour_number=1,
+                       starts_at=time(hour=8, minute=45),
+                       ends_at=time(hour=9, minute=35),
+                       school=self.s1,
+                       school_year=self.school_year_2020,
+                       day_of_week=1,
+                       legal_duration=timedelta(seconds=3600))
+        hs1.save()
+        data = {'hour_number': '2',
+                'starts_at': '9:00',   # Conflicting time interval.
+                'ends_at': '9:30',
+                'school': self.s1,
+                'school_year': self.school_year_2020,
+                'day_of_week': '1',
+                'legal_duration_0': '1',
+                'legal_duration_1': '0'}
+        f = HourSlotForm(user=self.a1, data=data)
+        f.full_clean()
+        self.assertFalse(f.is_valid())
+
+    def test_hour_slot_on_conflicting_hours_but_different_days(self):
+        """
+        Test the creation of multiple hour slots for the same school and in concurrent time interval, but on
+        different days.
+        No error should be returned.
+        """
+        hs1 = HourSlot(hour_number=1,
+                       starts_at=time(hour=8, minute=45),
+                       ends_at=time(hour=9, minute=35),
+                       school=self.s1,
+                       school_year=self.school_year_2020,
+                       day_of_week=1,
+                       legal_duration=timedelta(seconds=3600))
+        hs1.save()
+        data = {'hour_number': '2',
+                'starts_at': '9:05',   # Conflicting time interval.
+                'ends_at': '10:00',
+                'school': self.s1,
+                'school_year': self.school_year_2020,
+                'day_of_week': '2',      # But different day
+                'legal_duration_0': '1',
+                'legal_duration_1': '0'}
+        f = HourSlotForm(user=self.a1, data=data)
+        f.full_clean()
+        self.assertTrue(f.is_valid())
+
+    def test_hour_slot_on_conflicting_hours_but_different_schools(self):
+        """
+        Test the creation of multiple hour slots for the same school and in concurrent time interval, but in
+        different schools.
+        No error should be returned.
+        """
+        hs1 = HourSlot(hour_number=1,
+                       starts_at=time(hour=8, minute=45),
+                       ends_at=time(hour=9, minute=35),
+                       school=self.s1,
+                       school_year=self.school_year_2020,
+                       day_of_week=1,
+                       legal_duration=timedelta(seconds=3600))
+        hs1.save()
+        data = {'hour_number': '2',
+                'starts_at': '9:05',   # Conflicting time interval.
+                'ends_at': '10:00',
+                'school': self.s2,
+                'school_year': self.school_year_2020,
+                'day_of_week': '1',
+                'legal_duration_0': '1',
+                'legal_duration_1': '0'}
+        f = HourSlotForm(user=self.a2, data=data)
+        f.full_clean()
+        self.assertTrue(f.is_valid())
