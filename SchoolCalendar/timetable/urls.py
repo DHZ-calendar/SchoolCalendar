@@ -22,7 +22,7 @@ from timetable.views.other_views import TimetableView, SubstituteTeacherView, Te
     SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView, \
     TeacherSubstitutionView, SubstituteTeacherApiView, TimetableReportView, TimetableTeacherPDFReportView, \
     TimetableCoursePDFReportView, TimetableGeneralPDFReportView, CourseSummaryView, RoomTimetableView, \
-    SendTeacherSubstitutionEmailView
+    SendTeacherSubstitutionEmailView, DownloadTeacherSubstitutionTicketView
 
 from rest_framework.routers import DefaultRouter
 
@@ -71,6 +71,8 @@ urlpatterns = [
             TimetableCoursePDFReportView.as_view(), name='timetable_course_pdf_report-view'),
     re_path(r'timetable_general_pdf_report_view/(?P<school_year_pk>[0-9]+)/(?P<monday_date>\d\d\d\d-\d\d-\d\d)',
             TimetableGeneralPDFReportView.as_view(), name='timetable_general_pdf_report-view'),
+    path('substitution_pdf_ticket/<assign_pk>', DownloadTeacherSubstitutionTicketView.as_view(),
+         name='substitution_pdf_ticket-view'),
     path('substitution_teacher_email/<assign_pk>', SendTeacherSubstitutionEmailView.as_view(),
          name='substitution_teacher_email-view'),
     path('invite_teacher/<user_pk>', SendInvitationTeacherEmailView.as_view(), name='teacher_invitation-view'),

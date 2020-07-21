@@ -740,6 +740,66 @@ class SendTeacherSubstitutionEmailView(LoginRequiredMixin, AdminSchoolPermission
         return HttpResponse(status=400)
 
 
+class DownloadTeacherSubstitutionTicketView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):
+    def get(self, request, *args, **kwargs):
+        assign_pk = kwargs.get('assign_pk')
+        assignment_to_subst = Assignment.objects.get(id=assign_pk)
+        assignment = Assignment.objects.filter(
+            course=assignment_to_subst.course,
+            subject=assignment_to_subst.subject,
+            room=assignment_to_subst.room,
+            school=assignment_to_subst.school,
+            date=assignment_to_subst.date,
+            hour_start=assignment_to_subst.hour_start,
+            hour_end=assignment_to_subst.hour_end,
+            bes=assignment_to_subst.bes,
+            co_teaching=assignment_to_subst.co_teaching,
+            substitution=True,
+            absent=False
+        ).first()
+        if assignment:
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=letter)
+            styles = getSampleStyleSheet()
+            styles.add(ParagraphStyle(name='title_style', fontName="Helvetica-Bold", fontSize=10, alignment=TA_CENTER))
+            styles.add(ParagraphStyle(name='text_bold', fontName="Helvetica-Bold", fontSize=7, alignment=TA_CENTER))
+            styles.add(ParagraphStyle(name='text_small', fontName="Helvetica", fontSize=4, alignment=TA_CENTER,
+                                      borderPadding=0, leading=4))
+            title_style = styles['title_style']
+            text_bold = styles['text_bold']
+
+            table = [
+                [_("Substitute teacher"), Paragraph(str(assignment.teacher), style=text_bold)],
+                [_("Date"), Paragraph(str(assignment.date), style=text_bold)],
+                [_("Course"), Paragraph(str(assignment.course), style=text_bold)],
+                [_("Hour slot"), Paragraph(str(assignment.hour_start) + ' - ' + str(assignment.hour_end), style=text_bold)],
+                [_("Subject"), Paragraph(assignment.subject.name, style=text_bold)],
+                [_("Room"), Paragraph(str(assignment.room.name) if assignment.room is not None else '', style=text_bold)],
+            ]
+
+            elements = [
+                Paragraph(_("Substitution ticket"), title_style),
+                Spacer(0, 6),
+                Spacer(0, 12)
+            ]
+            t = Table(table)
+
+            t.setStyle(TableStyle(
+                [
+                    ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+                    ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+                ]))
+
+            elements.append(t)
+
+            doc.build(elements)
+
+            buffer.seek(0)
+            return FileResponse(buffer, as_attachment=True, filename='substitution.pdf')
+
+        return HttpResponse(status=400)
+
+
 class LoggedUserRedirectView(LoginRequiredMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         if utils.is_adminschool(self.request.user):
