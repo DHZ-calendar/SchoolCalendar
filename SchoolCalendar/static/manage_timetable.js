@@ -52,7 +52,7 @@ async function goNextWeek(teacher=false, room=false){
     currentDate = moment(currentDate).add(7, 'days').toDate();
     if(teacher)
         await loadTeacherData();
-    else if(teacher)
+    else if(room)
         await loadRoomData();
     else
         loadData();
@@ -61,7 +61,7 @@ async function goPrevWeek(teacher=false, room=false){
     currentDate = moment(currentDate).subtract(7, 'days').toDate();
     if(teacher)
         await loadTeacherData();
-    else if(teacher)
+    else if(room)
         await loadRoomData();
     else
         loadData();
@@ -196,7 +196,7 @@ async function getTeachers(){
                 <li class="list-group-item list-teachers" data-teacher-id="${tea.id}">
                     <div class="row">
                         <div class="col-10">
-                            <b>${tea.teacher.first_name} ${tea.teacher.last_name}</b> - ${tea.subject.name}
+                            <b>${tea.teacher.last_name} ${tea.teacher.first_name}</b> - ${tea.subject.name}
                         </div>
                         <div class="col-2 p-0">
                             <button class="btn btn-link text-right" style="color: inherit" data-toggle="collapse" data-target="#tea-collapse-${tea.id}" aria-expanded="true" aria-controls="tea-collapse-${tea.id}">
@@ -227,8 +227,9 @@ async function getTeachers(){
                         </div>
                     </div>
                     <div class="row">
-                        <button type="button" class="col-6 btn btn-sm cal-event" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false)">${_TRANS['assign_lecture']}</button>
-                        <button type="button" class="col-6 btn btn-sm cal-event-bes" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, true)">${_TRANS['assign_bes']}</button>
+                        <button type="button" class="col-6 btn btn-sm cal-event" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false, false)">${_TRANS['assign_lecture']}</button>
+                        <button type="button" class="col-6 btn btn-sm cal-event-bes" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, true, false)">${_TRANS['assign_bes']}</button>
+                        <button type="button" class="col-12 btn btn-sm cal-event-co-teaching" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false, true)">${_TRANS['assign_co-teaching']}</button>
                     </div>
                 </li>`;
             $('#teachers_list').append(html);
@@ -261,8 +262,7 @@ async function refreshTeachers(){
     }
 }
 
-async function getAssignments(startDate, endDate){
-    let url = _URL['assignments'];
+async function getAssignmentsGeneric(url, startDate, endDate){
     let data = {
         'school_year': $('#school_year').val(),
         'course': $('#course_section').val(),
@@ -294,64 +294,8 @@ async function getAssignments(startDate, endDate){
             if(assign.bes){
                 customEvent.htmlElement.addClass('cal-event-bes');
             }
-            else if(assign.absent){
-                customEvent.htmlElement.addClass('cal-event-absent');
-            }
-            else if(assign.substitution){
-                customEvent.htmlElement.addClass('cal-event-substitution');
-            }
-
-            let lbl_room = '';
-            if (assign.room)
-                lbl_room = 'Room: ' + assign.room.name;
-            customEvent.htmlElement.tooltip({
-                title: `
-                    <b>${teacher}</b><br/>
-                    ${assign.subject.name}<br/>
-                    ${lbl_room}<br/>
-                    ${assign.hour_start.slice(0, -3)} - ${assign.hour_end.slice(0, -3)}
-                `,
-                html: true,
-                boundary: 'window' 
-            })
-        }
-    }
-    catch{
-        console.log("No assignments");
-    }
-}
-
-async function getTeacherAssignments(startDate, endDate){
-    let url = _URL['teacher_timetable'];
-    let data = {
-        'school_year': $('#school_year').val(),
-        'from_date': formatDate(startDate),
-        'to_date': formatDate(endDate)
-    };
-    timetable.deleteAllEvents();
-    try{
-        data = await $.get(url, data=data);
-        for(let assign of data){
-            let blockId = assign.hour_slot;
-            if(blockId === null){
-                blockId = createExtraBlock(assign.date, assign.hour_start, assign.hour_end).id;
-            }
-
-            let teacher = assign.teacher.first_name + " " + assign.teacher.last_name;
-            let subject = assign.subject.name + ` (${assign.course.year} ${assign.course.section})`;
-            if (assign.room)
-                subject = `
-                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-tag-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" d="M2 1a1 1 0 0 0-1 1v4.586a1 1 0 0 0 .293.707l7 7a1 1 0 0 0 1.414 0l4.586-4.586a1 1 0 0 0 0-1.414l-7-7A1 1 0 0 0 6.586 1H2zm4 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
-                </svg> ` + subject;
-            let customEvent = new Event(assign.id, teacher, subject);
-            let clickEvent = (event) => {
-                alert("Lecture " + event.lecture + ", teacher " + event.teacher);
-            };
-            timetable.addEvent(customEvent, blockId, clickEvent);
-
-            if(assign.bes){
-                customEvent.htmlElement.addClass('cal-event-bes');
+            else if(assign.co_teaching){
+                customEvent.htmlElement.addClass('cal-event-co-teaching');
             }
             else if(assign.absent){
                 customEvent.htmlElement.addClass('cal-event-absent');
@@ -367,68 +311,6 @@ async function getTeacherAssignments(startDate, endDate){
                 title: `
                     <b>${teacher}</b><br/>
                     ${assign.subject.name}<br/>
-                    ${assign.course.year} ${assign.course.section}<br/>
-                    ${lbl_room}<br/>
-                    ${assign.hour_start.slice(0, -3)} - ${assign.hour_end.slice(0, -3)}
-                `,
-                html: true,
-                boundary: 'window' 
-            })
-        }        
-    }
-    catch{
-        console.log("No teacher assignments");
-    }
-}
-
-async function getRoomAssignments(startDate, endDate){
-    let url = _URL['room_timetable']
-        .replace('1234', $('#room').val());
-    let data = {
-        'school_year': $('#school_year').val(),
-        'from_date': formatDate(startDate),
-        'to_date': formatDate(endDate)
-    };
-    timetable.deleteAllEvents();
-    try{
-        data = await $.get(url, data=data);
-        for(let assign of data){
-            let blockId = assign.hour_slot;
-            if(blockId === null){
-                blockId = createExtraBlock(assign.date, assign.hour_start, assign.hour_end).id;
-            }
-
-            let teacher = assign.teacher.first_name + " " + assign.teacher.last_name;
-            let subject = assign.subject.name + ` (${assign.course.year} ${assign.course.section})`;
-            if (assign.room)
-                subject = `
-                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-tag-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" d="M2 1a1 1 0 0 0-1 1v4.586a1 1 0 0 0 .293.707l7 7a1 1 0 0 0 1.414 0l4.586-4.586a1 1 0 0 0 0-1.414l-7-7A1 1 0 0 0 6.586 1H2zm4 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
-                </svg> ` + subject;
-            let customEvent = new Event(assign.id, teacher, subject);
-            let clickEvent = (event) => {
-                alert("Lecture " + event.lecture + ", teacher " + event.teacher);
-            };
-            timetable.addEvent(customEvent, blockId, clickEvent);
-
-            if(assign.bes){
-                customEvent.htmlElement.addClass('cal-event-bes');
-            }
-            else if(assign.absent){
-                customEvent.htmlElement.addClass('cal-event-absent');
-            }
-            else if(assign.substitution){
-                customEvent.htmlElement.addClass('cal-event-substitution');
-            }
-
-            let lbl_room = '';
-            if (assign.room)
-                lbl_room = 'Room: ' + assign.room.name;
-            customEvent.htmlElement.tooltip({
-                title: `
-                    <b>${teacher}</b><br/>
-                    ${assign.subject.name}<br/>
-                    ${assign.course.year} ${assign.course.section}<br/>
                     ${lbl_room}<br/>
                     ${assign.hour_start.slice(0, -3)} - ${assign.hour_end.slice(0, -3)}
                 `,
@@ -438,8 +320,24 @@ async function getRoomAssignments(startDate, endDate){
         }
     }
     catch{
-        console.log("No room assignments");
+        console.log("No assignments");
     }
+}
+
+async function getAssignments(startDate, endDate){
+    let url = _URL['assignments'];
+    await getAssignmentsGeneric(url, startDate, endDate);
+}
+
+async function getTeacherAssignments(startDate, endDate){
+    let url = _URL['teacher_timetable'];
+    await getAssignmentsGeneric(url, startDate, endDate);
+}
+
+async function getRoomAssignments(startDate, endDate){
+    let url = _URL['room_timetable']
+        .replace('1234', $('#room').val());
+    await getAssignmentsGeneric(url, startDate, endDate);
 }
 
 async function getHolidays(startDate, endDate){
@@ -488,7 +386,7 @@ async function getStages(startDate, endDate){
     }
 }
 
-async function teacherClick(btn, teaId, teacherId, subjId, schoolId, bes){
+async function teacherClick(btn, teaId, teacherId, subjId, schoolId, bes, co_teaching){
     btn = $(btn);
 
     if(!btn.hasClass('active')){
@@ -497,7 +395,7 @@ async function teacherClick(btn, teaId, teacherId, subjId, schoolId, bes){
 
         for(let blk of Object.keys(timetable.blocks)){
             timetable.getBlock(blk).setState('available');
-            timetable.getBlock(blk).setOnClick((blk) => chooseAssignmentRoom(teaId, teacherId, subjId, schoolId, blk, bes));
+            timetable.getBlock(blk).setOnClick((blk) => chooseAssignmentRoom(teaId, teacherId, subjId, schoolId, blk, bes, co_teaching));
         }
 
         await setLockedBlocksTeacher(teacherId);
@@ -576,7 +474,7 @@ async function setLockedBlocksAbsenceTeacher(teacherId){
     }
 }
 
-async function chooseAssignmentRoom(teaId, teacherId, subjId, schoolId, block, bes){
+async function chooseAssignmentRoom(teaId, teacherId, subjId, schoolId, block, bes, co_teaching){
     //get free rooms without conflicts
     let url = _URL['room'];
     let date = moment(currentDate).add(block.day, 'days').format('YYYY-MM-DD');
@@ -600,13 +498,13 @@ async function chooseAssignmentRoom(teaId, teacherId, subjId, schoolId, block, b
     $('#btn-room-add-assignment').unbind("click");
     //attach click event to the confirmation button
     $('#btn-room-add-assignment').click(() => {
-        addAssignment(teaId, teacherId, subjId, schoolId, block, bes)
+        addAssignment(teaId, teacherId, subjId, schoolId, block, bes, co_teaching)
     });
 
     //show the modal
     $('#modalChooseRoom').modal('show');
 }
-async function addAssignment(teaId, teacherId, subjId, schoolId, block, bes){
+async function addAssignment(teaId, teacherId, subjId, schoolId, block, bes, co_teaching){
     let url = _URL['assignments'];
 
     let date = moment(currentDate).add(block.day, 'days').format('YYYY-MM-DD');
@@ -622,6 +520,7 @@ async function addAssignment(teaId, teacherId, subjId, schoolId, block, bes){
         hour_start: block.startTime.hours + ':' + block.startTime.min,
         hour_end: block.endTime.hours + ':' + block.endTime.min,
         bes: bes,
+        co_teaching: co_teaching,
         substitution: false,
         absent: false
     };
