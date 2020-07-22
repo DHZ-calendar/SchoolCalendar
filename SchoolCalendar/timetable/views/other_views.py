@@ -114,14 +114,15 @@ class CheckWeekReplicationView(UserPassesTestMixin, View):
         Check conflicts with the assignments of a week if repeated in a specific date range
         """
         assignments = request.POST.getlist('assignments[]')
+        # TODO: this long try catch should be better modularized! (error for date parsing, for serializer wrong etc)
         try:
             from_date = datetime.datetime.strptime(kwargs.get('from'), '%Y-%m-%d').date()
             to_date = datetime.datetime.strptime(kwargs.get('to'), '%Y-%m-%d').date()
             course_conflicts = Assignment.objects.none()
             teacher_conflicts = Assignment.objects.none()
             room_conflicts = Assignment.objects.none()
-            for assign in assignments:
-                a = Assignment.objects.get(pk=assign)
+            assignments_qs = Assignment.objects.filter(id__in=assignments)
+            for a in assignments_qs:
                 # Return all assignments from the same course or teacher that would collide in the future.
                 # excluding the assignment in the url.
                 conflicts = Assignment.objects.filter(course__school_year=a.course.school_year,
@@ -137,12 +138,11 @@ class CheckWeekReplicationView(UserPassesTestMixin, View):
                 conf_room = conflicts.filter(room__isnull=False, room=a.room, substitution=False)
                 if a.room is not None and conf_room.count() >= a.room.capacity:
                     room_conflicts |= conf_room
-
             data = dict(course_conflicts=course_conflicts,
                         teacher_conflicts=teacher_conflicts,
                         room_conflicts=room_conflicts)
             serializer = ReplicationConflictsSerializer(data=data, context={'request': request})
-            serializer.is_valid()
+            serializer.is_valid()     # Not sure it is the right way of doing things
             return JsonResponse(serializer.data)
         except ObjectDoesNotExist:
             return HttpResponse(_("One of the assignments specified doesn't exist"), 400)
