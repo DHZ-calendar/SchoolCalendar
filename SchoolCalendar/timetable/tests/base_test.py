@@ -17,5 +17,7 @@ class BaseTestCase(TestCase):
         self.a2 = AdminSchool(first_name='andrea', last_name='verdi', username='preside2', email='a.v@fake.com',
                               password='password_demo', school=self.s2)
         self.sy.save()
+        self.a1.set_password("password_demo")
         self.a1.save()
+        self.a2.set_password("password_demo")
         self.a2.save()
