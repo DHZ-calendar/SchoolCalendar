@@ -3,7 +3,7 @@ import datetime
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.shortcuts import render, redirect, reverse
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -136,8 +136,15 @@ class CheckWeekReplicationView(UserPassesTestMixin, View):
 
                 # Check both that the room is not null, and is the same as the current room!
                 conf_room = conflicts.filter(room__isnull=False, room=a.room, substitution=False)
-                if a.room is not None and conf_room.count() >= a.room.capacity:
-                    room_conflicts |= conf_room
+                # Select COUNT(*) FROM conf_room GROUP BY date HAVING COUNT() >= room.capacity
+                # This will select all conflicts happening on the same date.
+                conf_room_group_by_date = conf_room.values('date')\
+                    .annotate(count_conflicts=Count('date'))\
+                    .filter(count_conflicts__gte=a.room.capacity)\
+                    .values('date')
+                if a.room is not None and conf_room_group_by_date.count() > 0:
+                    conf_rooms_in_conflicting_dates = conf_room.filter(date__in=conf_room_group_by_date)
+                    room_conflicts |= conf_rooms_in_conflicting_dates
             data = dict(course_conflicts=course_conflicts,
                         teacher_conflicts=teacher_conflicts,
                         room_conflicts=room_conflicts)
