@@ -527,7 +527,7 @@ class TimetableCoursePDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixi
 
         for lecture in hours_assign:
             table.append(
-                [lecture] + [''] * 6
+                [lecture] + [[]] * 6
             )
 
         for i, slot in enumerate(hours_hour_slots):
@@ -539,7 +539,7 @@ class TimetableCoursePDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixi
                     break
             if not found:
                 table.insert(i,
-                             [slot] + [''] * 6
+                             [slot] + [[]] * 6
                              )
 
         for assign in assignments:
@@ -547,10 +547,19 @@ class TimetableCoursePDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixi
                 if row[0]['hour_start'] == assign.hour_start and \
                         row[0]['hour_end'] == assign.hour_end:
                     day_of_week = assign.date.weekday()
-                    row[day_of_week + 1] = [
-                        Paragraph(str(assign.subject), styles['text_bold']),
-                        Paragraph(str(assign.teacher), styles['Normal'])
-                    ]
+                    assignment_text = []
+                    if assign.bes:
+                        assignment_text.append(Paragraph(_('B.E.S.'), styles['text_bold']))
+                    elif assign.co_teaching:
+                        assignment_text.append(Paragraph(_('Co-teaching'), styles['text_bold']))
+                    else:
+                        assignment_text.append(Paragraph(str(assign.subject), styles['text_bold']))
+
+                    assignment_text.append(Paragraph(str(assign.teacher), styles['Normal']))
+                    if assign.room:
+                        assignment_text.append(Paragraph(assign.room.name, styles['Normal']))
+
+                    row[day_of_week + 1] = row[day_of_week + 1] + assignment_text
                     break
 
         # format the hours of the row
@@ -616,7 +625,7 @@ class TimetableGeneralPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMix
         styles.add(ParagraphStyle(name='title_style', fontName="Helvetica-Bold", fontSize=10, alignment=TA_CENTER))
         styles.add(ParagraphStyle(name='text_bold', fontName="Helvetica-Bold", fontSize=7, alignment=TA_CENTER))
         styles.add(ParagraphStyle(name='text_small', fontName="Helvetica", fontSize=4, alignment=TA_CENTER,
-                                  borderPadding=0, leading=4))
+                                  borderPadding=0, leading=0))
         title_style = styles['title_style']
 
         table = []
@@ -688,13 +697,15 @@ class TimetableGeneralPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMix
             spans.append(('SPAN', (start, 0), (end, 0)), )
 
         data = [headers] + [days] + table
-        t = Table(data, colWidths=[None] + [7 * mm] * (len(headers) - 2))
+        t = Table(data, colWidths=[None] + [6 * mm] * (len(headers) - 2))
 
         t.setStyle(TableStyle(
             spans +
             [
                 ('LEFTPADDING', (0, 0), (-1, -1), 0),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+                ('TOPPADDING', (0, 0), (-1, -1), 0),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
                 ('FONTNAME', (0, 0), (-1, 0), 'Courier-Bold'),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
