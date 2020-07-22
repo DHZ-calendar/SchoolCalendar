@@ -132,6 +132,11 @@
     }
 
     function getTeacherLink(){
+        if ($("#date").val() == ''){
+            alert("{% trans 'Select a date!' %}");
+            return;
+        }
+
         let date = moment($("#date").val(), 'DD-MM-YYYY');
         //get the monday of the week
         date = date.day(1).format('YYYY-MM-DD');
@@ -145,6 +150,11 @@
         window.location.href = url;
     }
     function getCourseLink(){
+        if ($("#date").val() == ''){
+            alert("{% trans 'Select a date!' %}");
+            return;
+        }
+
         let date = moment($("#date").val(), 'DD-MM-YYYY');
         //get the monday of the week
         date = date.day(1).format('YYYY-MM-DD');
@@ -158,6 +168,11 @@
         window.location.href = url;
     }
     function getGeneralLink(){
+        if ($("#date").val() == ''){
+            alert("{% trans 'Select a date!' %}");
+            return;
+        }
+
         let date = moment($("#date").val(), 'DD-MM-YYYY');
         //get the monday of the week
         date = date.day(1).format('YYYY-MM-DD');
