@@ -206,8 +206,13 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
                                                       date__lte=to_date). \
                     exclude(id=a.id). \
                     filter(Q(teacher=a.teacher) | Q(room__isnull=False, room=a.room))
+                # Check if there are conflicts on rooms (on the same date!!)
+                conf_room_group_by_date = conflicts.filter(room__isnull=False, room=a.room).values('date') \
+                    .annotate(count_conflicts=Count('date')) \
+                    .filter(count_conflicts__gte=a.room.capacity) \
+                    .values('date')
                 if conflicts.filter(teacher=a.teacher) or (
-                        a.room is not None and conflicts.filter(room=a.room).count() >= a.room.capacity
+                        a.room is not None and conf_room_group_by_date.count() > 0
                 ):
                     # There are conflicts!
                     return JsonResponse(
