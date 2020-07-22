@@ -185,8 +185,8 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
             return HttpResponse(_('The beginning of the period is greater then the end of the period'), 400)
         try:
             # check if there are conflicts
-            for assign in assignments:
-                a = Assignment.objects.get(id=assign)
+            assignments_qs = Assignment.objects.filter(id__in=assignments)
+            for a in assignments_qs:
 
                 # There can't be conflicts among the newly created assignments and the teaching hours of the same teacher!
                 # The same is not true for conflicts of the same class.
@@ -219,9 +219,8 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
 
             # replicate the assignments
             assignments_list = []
-            for assign in assignments:
+            for a in assignments_qs:
                 d = from_date
-                a = Assignment.objects.get(id=assign)
                 while d <= to_date:
                     if d != a.date and d.weekday() == a.date.weekday() and not \
                             Holiday.objects.filter(school=a.school,
