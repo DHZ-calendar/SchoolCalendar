@@ -5,6 +5,7 @@ import string
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.utils.text import capfirst
 from timetable.models import Teacher, AdminSchool, HoursPerTeacherInClass, Assignment, HourSlot, School
 
 
@@ -167,6 +168,14 @@ def assign_html_style_to_visible_forms_fields(form):
     for visible in form.visible_fields():
         if 'class' not in visible.field.widget.attrs:
             visible.field.widget.attrs['class'] = 'form-control'
+
+
+def assign_translated_labels_to_form_fields(form):
+    model_fields = list(map(lambda x: x.name, form.Meta.model._meta.get_fields()))
+
+    for field in form.fields.keys():
+        if field in model_fields:
+            form.fields[field].label = capfirst(form.Meta.model._meta.get_field(field).verbose_name)
 
 
 def generate_random_password():

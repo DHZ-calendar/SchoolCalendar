@@ -3,12 +3,13 @@ from django.db.models import Q
 from django.forms import ModelForm, Form
 from django.contrib.auth.forms import UserCreationForm
 from durationwidget.widgets import TimeDurationWidget
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 
 from timetable import models
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
     Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad, CoursesYearlyLoad
-from timetable.utils import get_school_from_user, assign_html_style_to_visible_forms_fields, generate_random_password
+from timetable.utils import get_school_from_user, assign_html_style_to_visible_forms_fields, generate_random_password, \
+    assign_translated_labels_to_form_fields
 
 
 class SchoolForm(ModelForm):
@@ -17,14 +18,28 @@ class SchoolForm(ModelForm):
         fields = ['name']
 
 
-class BaseFormWithSchoolCheck(ModelForm):
+class BaseFormWithUser(ModelForm):
     """
     Base form class, which allows to retrieve only the correct schools, and perform clean on the school field
     """
 
     def __init__(self, user, *args, **kwargs):
         self.user = user
-        super(BaseFormWithSchoolCheck, self).__init__(*args, **kwargs)
+        super(BaseFormWithUser, self).__init__(*args, **kwargs)
+
+        assign_translated_labels_to_form_fields(self)
+
+
+class BaseFormWithSchoolCheck(BaseFormWithUser):
+    """
+    Base form class, which allows to retrieve only the correct schools, and perform clean on the school field
+    """
+
+    def __init__(self, user, *args, **kwargs):
+        super(BaseFormWithSchoolCheck, self).__init__(user, *args, **kwargs)
+
+        # Populate with the correct schools
+        self.fields['school'].queryset = School.objects.filter(id=get_school_from_user(user).id)
 
     def clean_school(self):
         if get_school_from_user(self.user) != self.cleaned_data['school']:
@@ -32,13 +47,17 @@ class BaseFormWithSchoolCheck(ModelForm):
         return self.cleaned_data['school']
 
 
-class BaseFormWithTeacherAndSchoolCheck(BaseFormWithSchoolCheck):
+class BaseFormWithTeacherCheck(BaseFormWithUser):
     """
     Base form class, which allows to retrieve only the correct teachers according to the school of the user logged
     """
 
     def __init__(self, user, *args, **kwargs):
-        super(BaseFormWithTeacherAndSchoolCheck, self).__init__(user, *args, **kwargs)
+        super(BaseFormWithTeacherCheck, self).__init__(user, *args, **kwargs)
+
+        # Populate the teacher picker with the correct teachers
+        self.fields['teacher'].queryset = Teacher.objects.filter(school__id=get_school_from_user(user).id) \
+            .order_by('last_name', 'first_name')
 
     def clean_teacher(self):
         """
@@ -53,13 +72,17 @@ class BaseFormWithTeacherAndSchoolCheck(BaseFormWithSchoolCheck):
         return self.cleaned_data['teacher']
 
 
-class BaseFormWithHourSlotTeacherAndSchoolCheck(BaseFormWithTeacherAndSchoolCheck):
+class BaseFormWithHourSlotCheck(BaseFormWithUser):
     """
     Base form class, which checks if the hour_slot is correct for the user given
     """
 
     def __init__(self, user, *args, **kwargs):
-        super(BaseFormWithHourSlotTeacherAndSchoolCheck, self).__init__(user, *args, **kwargs)
+        super(BaseFormWithHourSlotCheck, self).__init__(user, *args, **kwargs)
+
+        # Get the correct hours slots
+        self.fields['hour_slot'].queryset = HourSlot.objects.filter(school__id=get_school_from_user(user).id) \
+            .order_by('day_of_week', 'starts_at')
 
     def clean_hour_slot(self):
         """
@@ -71,13 +94,15 @@ class BaseFormWithHourSlotTeacherAndSchoolCheck(BaseFormWithTeacherAndSchoolChec
         return self.cleaned_data['hour_slot']
 
 
-class BaseFormWithCourseTeacherAndSchoolCheck(BaseFormWithTeacherAndSchoolCheck):
+class BaseFormWithCourseCheck(BaseFormWithUser):
     """
     Base form class, which allows to retrieve only the correct course according to the school of the user logged
     """
 
     def __init__(self, user, *args, **kwargs):
-        super(BaseFormWithCourseTeacherAndSchoolCheck, self).__init__(user, *args, **kwargs)
+        super(BaseFormWithCourseCheck, self).__init__(user, *args, **kwargs)
+
+        self.fields['course'].queryset = Course.objects.filter(school__id=get_school_from_user(user).id)
 
     def clean_course(self):
         """
@@ -92,14 +117,16 @@ class BaseFormWithCourseTeacherAndSchoolCheck(BaseFormWithTeacherAndSchoolCheck)
         return self.cleaned_data['course']
 
 
-class BaseFormWithSubjectCourseTeacherAndSchoolCheck(BaseFormWithCourseTeacherAndSchoolCheck):
+class BaseFormWithSubjectCheck(BaseFormWithUser):
     """
     Base form class, which allows to retrieve only the correct subject according to the school of the user logged.
     Moreover it inherits from BaseFormWithCourseTeacherAndSchoolCheck
     """
 
     def __init__(self, user, *args, **kwargs):
-        super(BaseFormWithSubjectCourseTeacherAndSchoolCheck, self).__init__(user, *args, **kwargs)
+        super(BaseFormWithSubjectCheck, self).__init__(user, *args, **kwargs)
+
+        self.fields['subject'].queryset = Subject.objects.filter(school__id=get_school_from_user(user).id)
 
     def clean_subject(self):
         """
@@ -114,14 +141,16 @@ class BaseFormWithSubjectCourseTeacherAndSchoolCheck(BaseFormWithCourseTeacherAn
         return self.cleaned_data['subject']
 
 
-class BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck(BaseFormWithSubjectCourseTeacherAndSchoolCheck):
+class BaseFormWithRoomCheck(BaseFormWithUser):
     """
     Base form class, which allows to retrieve only the correct rooms according to the school of the user logged.
     Moreover it inherits from BaseFormWithSubjectCourseTeacherAndSchoolCheck
     """
 
     def __init__(self, user, *args, **kwargs):
-        super(BaseFormWithSubjectCourseTeacherAndSchoolCheck, self).__init__(user, *args, **kwargs)
+        super(BaseFormWithRoomCheck, self).__init__(user, *args, **kwargs)
+        self.fields['room'].queryset = Room.objects.filter(school__id=get_school_from_user(user).id)
+        self.fields['room'].queryset = Room.objects.filter(school__id=get_school_from_user(user).id)
 
     def clean_room(self):
         """
@@ -158,9 +187,6 @@ class UserCreationFormWithoutPassword(UserCreationForm):
 class TeacherForm(BaseFormWithSchoolCheck):
     def __init__(self, user, *args, **kwargs):
         super(TeacherForm, self).__init__(user, *args, **kwargs)
-        # Populate with the correct schools
-        self.fields['school'] = forms.ModelChoiceField(
-            queryset=School.objects.filter(id=get_school_from_user(user).id))
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
@@ -175,9 +201,6 @@ class TeacherCreationForm(UserCreationFormWithoutPassword, BaseFormWithSchoolChe
 
     def __init__(self, user, *args, **kwargs):
         super(TeacherCreationForm, self).__init__(user, *args, **kwargs)
-        # Populate with the correct schools
-        self.fields['school'] = forms.ModelChoiceField(
-            queryset=School.objects.filter(id=get_school_from_user(user).id))
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
@@ -243,9 +266,6 @@ class RoomForm(BaseFormWithSchoolCheck):
 
     def __init__(self, *args, **kwargs):
         super(RoomForm, self).__init__(*args, **kwargs)
-        # Populate schools options with the correct schools for the logged in user.
-        self.fields['school'] = forms.ModelChoiceField(
-            queryset=School.objects.filter(id=get_school_from_user(self.user).id))
         assign_html_style_to_visible_forms_fields(self)
 
     def clean_capacity(self):
@@ -267,9 +287,6 @@ class CourseForm(BaseFormWithSchoolCheck):
 
     def __init__(self, user, *args, **kwargs):
         super(CourseForm, self).__init__(user, *args, **kwargs)
-        # Populate the school picker with the correct for the given user
-        self.fields['school'] = forms.ModelChoiceField(
-            queryset=School.objects.filter(id=get_school_from_user(self.user).id))
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
@@ -293,14 +310,11 @@ class HourSlotForm(BaseFormWithSchoolCheck):
                                   show_hours=True,
                                   show_minutes=True,
                                   show_seconds=False,
-                                  attrs={'class': 'form-control duration-input'}),  # We need to remove form-control.
+                                  attrs={'class': 'form-control duration-input'}),
         required=False)
 
     def __init__(self, user, *args, **kwargs):
         super(HourSlotForm, self).__init__(user, *args, **kwargs)
-        # Populate the school picker with the correct for the given user
-        self.fields['school'] = forms.ModelChoiceField(
-            queryset=School.objects.filter(id=get_school_from_user(self.user).id))
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
@@ -382,14 +396,12 @@ class HourSlotCreateForm(HourSlotForm, Form):
     replicate_on_days = forms.MultipleChoiceField(
         choices=models.DAYS_OF_WEEK,
         help_text=_("Do you want to replicate the hour slot in multiple days?"
-                    " Use shift key and the mouse click to select multiple days.")
+                    " Use shift key and the mouse click to select multiple days."),
+        label=_("Replicate on days")
     )
 
     def __init__(self, user, *args, **kwargs):
         super(HourSlotForm, self).__init__(user, *args, **kwargs)
-        # Populate the school picker with the correct for the given user
-        self.fields['school'] = forms.ModelChoiceField(
-            queryset=School.objects.filter(id=get_school_from_user(self.user).id))
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
@@ -432,7 +444,7 @@ class HourSlotCreateForm(HourSlotForm, Form):
         return hs
 
 
-class AbsenceBlockForm(BaseFormWithHourSlotTeacherAndSchoolCheck):
+class AbsenceBlockForm(BaseFormWithHourSlotCheck, BaseFormWithTeacherCheck):
     """
     It actually inherits the clean_school method, but doesn't have the school field. It shouldn't be a problem.
     """
@@ -443,14 +455,6 @@ class AbsenceBlockForm(BaseFormWithHourSlotTeacherAndSchoolCheck):
         :param user: the user logged, the school is retrieved by her.
         """
         super(AbsenceBlockForm, self).__init__(user, *args, **kwargs)
-        # Populate the teacher picker with the correct teachers
-        self.fields['teacher'] = forms.ModelChoiceField(
-            queryset=Teacher.objects.filter(school__id=get_school_from_user(self.user).id).order_by('last_name',
-                                                                                                    'first_name'))
-        # Get the correct hours slots,
-        self.fields['hour_slot'] = forms.ModelChoiceField(
-            queryset=HourSlot.objects.filter(school__id=get_school_from_user(self.user).id).order_by('day_of_week',
-                                                                                                     'starts_at'))
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
@@ -458,7 +462,7 @@ class AbsenceBlockForm(BaseFormWithHourSlotTeacherAndSchoolCheck):
         fields = ['teacher', 'hour_slot']
 
 
-class AbsenceBlockCreateForm(AbsenceBlockForm, Form):
+class AbsenceBlockCreateForm(BaseFormWithTeacherCheck, Form):
     """
     It allows to create more absence blocks specifying more than one hour slots.
     """
@@ -470,15 +474,13 @@ class AbsenceBlockCreateForm(AbsenceBlockForm, Form):
         """
         super(AbsenceBlockCreateForm, self).__init__(user, *args, **kwargs)
 
-        # Delete the single hour_slot field
-        del self.fields['hour_slot']
-
         # Get the correct hours slots in the MultipleChoiceField
         self.fields['hour_slots'] = forms.ModelMultipleChoiceField(
             queryset=HourSlot.objects.filter(school__id=get_school_from_user(self.user).id).order_by(
                 'day_of_week', 'starts_at'),
             help_text=_("Do you want to assign multiple absence blocks?"
-                        " Use shift key and the mouse click to select multiple hour slots.")
+                        " Use shift key and the mouse click to select multiple hour slots."),
+            label=_('Hour slots')
         )
         assign_html_style_to_visible_forms_fields(self)
 
@@ -526,9 +528,6 @@ class HolidayForm(BaseFormWithSchoolCheck):
 
     def __init__(self, user, *args, **kwargs):
         super(HolidayForm, self).__init__(user, *args, **kwargs)
-        # Populate the school picker with the correct for the given user
-        self.fields['school'] = forms.ModelChoiceField(
-            queryset=School.objects.filter(id=get_school_from_user(self.user).id))
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
@@ -545,7 +544,7 @@ class HolidayForm(BaseFormWithSchoolCheck):
         return self.cleaned_data
 
 
-class StageForm(BaseFormWithCourseTeacherAndSchoolCheck):
+class StageForm(BaseFormWithCourseCheck, BaseFormWithSchoolCheck):
     date_start = forms.DateField(
         input_formats=['%Y-%m-%d'],
         widget=forms.DateInput(
@@ -565,10 +564,6 @@ class StageForm(BaseFormWithCourseTeacherAndSchoolCheck):
 
     def __init__(self, user, *args, **kwargs):
         super(StageForm, self).__init__(user, *args, **kwargs)
-        self.fields['school'] = forms.ModelChoiceField(
-            queryset=School.objects.filter(id=get_school_from_user(self.user).id))
-        self.fields['course'] = forms.ModelChoiceField(
-            queryset=Course.objects.filter(school__id=get_school_from_user(self.user).id))
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
@@ -590,8 +585,6 @@ class StageForm(BaseFormWithCourseTeacherAndSchoolCheck):
 class SubjectForm(BaseFormWithSchoolCheck):
     def __init__(self, user, *args, **kwargs):
         super(SubjectForm, self).__init__(user, *args, **kwargs)
-        self.fields['school'] = forms.ModelChoiceField(
-            queryset=School.objects.filter(id=get_school_from_user(self.user).id))
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
@@ -599,12 +592,10 @@ class SubjectForm(BaseFormWithSchoolCheck):
         fields = ['name', 'school']
 
 
-class TeachersYearlyLoadForm(BaseFormWithTeacherAndSchoolCheck):
+class TeachersYearlyLoadForm(BaseFormWithTeacherCheck):
 
     def __init__(self, user, *args, **kwargs):
         super(TeachersYearlyLoadForm, self).__init__(user, *args, **kwargs)
-        self.fields['teacher'] = forms.ModelChoiceField(
-            queryset=Teacher.objects.filter(school__id=get_school_from_user(self.user).id))
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
@@ -612,12 +603,9 @@ class TeachersYearlyLoadForm(BaseFormWithTeacherAndSchoolCheck):
         fields = ['teacher', 'school_year', 'yearly_load', 'yearly_load_bes', 'yearly_load_co_teaching']
 
 
-class CoursesYearlyLoadForm(BaseFormWithCourseTeacherAndSchoolCheck):
-
+class CoursesYearlyLoadForm(BaseFormWithCourseCheck):
     def __init__(self, user, *args, **kwargs):
         super(CoursesYearlyLoadForm, self).__init__(user, *args, **kwargs)
-        self.fields['course'] = forms.ModelChoiceField(
-            queryset=Course.objects.filter(school__id=get_school_from_user(self.user).id))
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
@@ -625,18 +613,10 @@ class CoursesYearlyLoadForm(BaseFormWithCourseTeacherAndSchoolCheck):
         fields = ['course', 'yearly_load', 'yearly_load_bes']
 
 
-class HoursPerTeacherInClassForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck):
-
+class HoursPerTeacherInClassForm(BaseFormWithSubjectCheck, BaseFormWithCourseCheck, BaseFormWithTeacherCheck,
+                                 BaseFormWithSchoolCheck):
     def __init__(self, user, *args, **kwargs):
         super(HoursPerTeacherInClassForm, self).__init__(user, *args, **kwargs)
-        self.fields['school'] = forms.ModelChoiceField(
-            queryset=School.objects.filter(id=get_school_from_user(self.user).id))
-        self.fields['teacher'] = forms.ModelChoiceField(
-            queryset=Teacher.objects.filter(school__id=get_school_from_user(self.user).id))
-        self.fields['course'] = forms.ModelChoiceField(
-            queryset=Course.objects.filter(school__id=get_school_from_user(self.user).id))
-        self.fields['subject'] = forms.ModelChoiceField(
-            queryset=Subject.objects.filter(school__id=get_school_from_user(user).id))
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
@@ -644,7 +624,8 @@ class HoursPerTeacherInClassForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck)
         fields = ['course', 'subject', 'teacher', 'school', 'hours', 'hours_bes', 'hours_co_teaching']
 
 
-class AssignmentForm(BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck):
+class AssignmentForm(BaseFormWithSubjectCheck, BaseFormWithCourseCheck, BaseFormWithTeacherCheck,
+                     BaseFormWithSchoolCheck, BaseFormWithRoomCheck):
     date = forms.DateField(
         input_formats=['%Y-%m-%d'],
         widget=forms.DateInput(
@@ -666,16 +647,7 @@ class AssignmentForm(BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck):
 
     def __init__(self, user, *args, **kwargs):
         super(AssignmentForm, self).__init__(user, *args, **kwargs)
-        self.fields['school'] = forms.ModelChoiceField(
-            queryset=School.objects.filter(id=get_school_from_user(self.user).id))
-        self.fields['teacher'] = forms.ModelChoiceField(
-            queryset=Teacher.objects.filter(school__id=get_school_from_user(self.user).id))
-        self.fields['course'] = forms.ModelChoiceField(
-            queryset=Course.objects.filter(school__id=get_school_from_user(self.user).id))
-        self.fields['subject'] = forms.ModelChoiceField(
-            queryset=Subject.objects.filter(school__id=get_school_from_user(user).id))
-        self.fields['room'] = forms.ModelChoiceField(
-            queryset=Room.objects.filter(school__id=get_school_from_user(user).id), required=False)
+        self.fields['room'].required = False
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
