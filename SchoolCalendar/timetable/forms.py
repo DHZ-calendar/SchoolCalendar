@@ -21,6 +21,7 @@ class BaseFormWithSchoolCheck(ModelForm):
     """
     Base form class, which allows to retrieve only the correct schools, and perform clean on the school field
     """
+
     def __init__(self, user, *args, **kwargs):
         self.user = user
         super(BaseFormWithSchoolCheck, self).__init__(*args, **kwargs)
@@ -35,6 +36,7 @@ class BaseFormWithTeacherAndSchoolCheck(BaseFormWithSchoolCheck):
     """
     Base form class, which allows to retrieve only the correct teachers according to the school of the user logged
     """
+
     def __init__(self, user, *args, **kwargs):
         super(BaseFormWithTeacherAndSchoolCheck, self).__init__(user, *args, **kwargs)
 
@@ -55,6 +57,7 @@ class BaseFormWithHourSlotTeacherAndSchoolCheck(BaseFormWithTeacherAndSchoolChec
     """
     Base form class, which checks if the hour_slot is correct for the user given
     """
+
     def __init__(self, user, *args, **kwargs):
         super(BaseFormWithHourSlotTeacherAndSchoolCheck, self).__init__(user, *args, **kwargs)
 
@@ -72,6 +75,7 @@ class BaseFormWithCourseTeacherAndSchoolCheck(BaseFormWithTeacherAndSchoolCheck)
     """
     Base form class, which allows to retrieve only the correct course according to the school of the user logged
     """
+
     def __init__(self, user, *args, **kwargs):
         super(BaseFormWithCourseTeacherAndSchoolCheck, self).__init__(user, *args, **kwargs)
 
@@ -93,6 +97,7 @@ class BaseFormWithSubjectCourseTeacherAndSchoolCheck(BaseFormWithCourseTeacherAn
     Base form class, which allows to retrieve only the correct subject according to the school of the user logged.
     Moreover it inherits from BaseFormWithCourseTeacherAndSchoolCheck
     """
+
     def __init__(self, user, *args, **kwargs):
         super(BaseFormWithSubjectCourseTeacherAndSchoolCheck, self).__init__(user, *args, **kwargs)
 
@@ -114,6 +119,7 @@ class BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck(BaseFormWithSubjectCour
     Base form class, which allows to retrieve only the correct rooms according to the school of the user logged.
     Moreover it inherits from BaseFormWithSubjectCourseTeacherAndSchoolCheck
     """
+
     def __init__(self, user, *args, **kwargs):
         super(BaseFormWithSubjectCourseTeacherAndSchoolCheck, self).__init__(user, *args, **kwargs)
 
@@ -123,7 +129,7 @@ class BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck(BaseFormWithSubjectCour
         Somewhere else we should check that the user logged has enough permissions to do anything with a room.
         :return:
         """
-        if 'room' in self.cleaned_data and\
+        if 'room' in self.cleaned_data and \
                 self.cleaned_data['room'] is not None and \
                 get_school_from_user(self.user) != self.cleaned_data['room'].school:
             self.add_error(None, forms.ValidationError(_('The room {} does not exist in the school ({}).'.format(
@@ -136,6 +142,7 @@ class UserCreationFormWithoutPassword(UserCreationForm):
     """
     A UserCreationForm without password inputs.
     """
+
     def __init__(self, *args, **kwargs):
         super(UserCreationFormWithoutPassword, self).__init__(*args, **kwargs)
         self.fields.pop('password1')
@@ -165,6 +172,7 @@ class TeacherCreationForm(UserCreationFormWithoutPassword, BaseFormWithSchoolChe
     """
     Form for creating a Teacher entity without asking passwords
     """
+
     def __init__(self, user, *args, **kwargs):
         super(TeacherCreationForm, self).__init__(user, *args, **kwargs)
         # Populate with the correct schools
@@ -191,6 +199,7 @@ class AdminSchoolCreationForm(UserCreationFormWithoutPassword):
     """
     Form for creating a AdminSchool entity without asking passwords
     """
+
     def __init__(self, user, *args, **kwargs):
         super(AdminSchoolCreationForm, self).__init__(*args, **kwargs)
         assign_html_style_to_visible_forms_fields(self)
@@ -203,9 +212,11 @@ class AdminSchoolCreationForm(UserCreationFormWithoutPassword):
 class SchoolYearForm(ModelForm):
     date_start = forms.DateField(
         input_formats=['%Y-%m-%d'],
-        widget=forms.DateInput(attrs={
-            'class': 'form-control datepicker-input datepicker'
-        })
+        widget=forms.DateInput(
+            format='%Y-%m-%d',
+            attrs={
+                'class': 'form-control datepicker-input datepicker'
+            })
     )
 
     def __init__(self, *args, **kwargs):
@@ -271,12 +282,12 @@ class HourSlotForm(BaseFormWithSchoolCheck):
         input_formats=['%H:%M'],
         widget=forms.TextInput(attrs={
             'class': 'form-control timepicker'
-    }))
+        }))
     ends_at = forms.TimeField(
         input_formats=['%H:%M'],
         widget=forms.TextInput(attrs={
             'class': 'form-control timepicker'
-    }))
+        }))
     legal_duration = forms.DurationField(
         widget=TimeDurationWidget(show_days=False,
                                   show_hours=True,
@@ -425,6 +436,7 @@ class AbsenceBlockForm(BaseFormWithHourSlotTeacherAndSchoolCheck):
     """
     It actually inherits the clean_school method, but doesn't have the school field. It shouldn't be a problem.
     """
+
     def __init__(self, user, *args, **kwargs):
         """
         Add hour_slot selection based on the current school, and ordered by week_day and starts_at
@@ -497,15 +509,19 @@ class AbsenceBlockCreateForm(AbsenceBlockForm, Form):
 class HolidayForm(BaseFormWithSchoolCheck):
     date_start = forms.DateField(
         input_formats=['%Y-%m-%d'],
-        widget=forms.DateInput(attrs={
-            'class': 'form-control datepicker-input datepicker'
-        })
+        widget=forms.DateInput(
+            format='%Y-%m-%d',
+            attrs={
+                'class': 'form-control datepicker-input datepicker'
+            })
     )
     date_end = forms.DateField(
         input_formats=['%Y-%m-%d'],
-        widget=forms.DateInput(attrs={
-            'class': 'form-control datepicker-input datepicker',
-        })
+        widget=forms.DateInput(
+            format='%Y-%m-%d',
+            attrs={
+                'class': 'form-control datepicker-input datepicker',
+            })
     )
 
     def __init__(self, user, *args, **kwargs):
@@ -532,15 +548,19 @@ class HolidayForm(BaseFormWithSchoolCheck):
 class StageForm(BaseFormWithCourseTeacherAndSchoolCheck):
     date_start = forms.DateField(
         input_formats=['%Y-%m-%d'],
-        widget=forms.DateInput(attrs={
-            'class': 'form-control datepicker-input datepicker'
-        })
+        widget=forms.DateInput(
+            format='%Y-%m-%d',
+            attrs={
+                'class': 'form-control datepicker-input datepicker'
+            })
     )
     date_end = forms.DateField(
         input_formats=['%Y-%m-%d'],
-        widget=forms.DateInput(attrs={
-            'class': 'form-control datepicker-input datepicker',
-        })
+        widget=forms.DateInput(
+            format='%Y-%m-%d',
+            attrs={
+                'class': 'form-control datepicker-input datepicker',
+            })
     )
 
     def __init__(self, user, *args, **kwargs):
@@ -627,20 +647,22 @@ class HoursPerTeacherInClassForm(BaseFormWithSubjectCourseTeacherAndSchoolCheck)
 class AssignmentForm(BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck):
     date = forms.DateField(
         input_formats=['%Y-%m-%d'],
-        widget=forms.DateInput(attrs={
-            'class': 'form-control datepicker-input datepicker'
-        })
+        widget=forms.DateInput(
+            format='%Y-%m-%d',
+            attrs={
+                'class': 'form-control datepicker-input datepicker'
+            })
     )
     hour_start = forms.TimeField(
         input_formats=['%H:%M'],
         widget=forms.TextInput(attrs={
             'class': 'form-control timepicker'
-    }))
+        }))
     hour_end = forms.TimeField(
         input_formats=['%H:%M'],
         widget=forms.TextInput(attrs={
             'class': 'form-control timepicker'
-    }))
+        }))
 
     def __init__(self, user, *args, **kwargs):
         super(AssignmentForm, self).__init__(user, *args, **kwargs)
@@ -673,15 +695,16 @@ class AssignmentForm(BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck):
         if not self.errors:
             # If there are already some errors, there is no need to check again!
             if self.cleaned_data['hour_start'] > self.cleaned_data['hour_end']:
-                self.add_error(None, forms.ValidationError(_('The start time field can\'t be greater than the end time')))
+                self.add_error(None,
+                               forms.ValidationError(_('The start time field can\'t be greater than the end time')))
             if not self.cleaned_data['substitution']:
                 # We need to check for the existence of a related HourPerTeacherInClass
                 hours_teacher_in_class = HoursPerTeacherInClass.objects.filter(
-                                                            teacher=self.cleaned_data['teacher'],
-                                                            course__school_year=self.cleaned_data['course'].school_year,
-                                                            school=self.cleaned_data['school'],
-                                                            course=self.cleaned_data['course'],
-                                                            subject=self.cleaned_data['subject'])
+                    teacher=self.cleaned_data['teacher'],
+                    course__school_year=self.cleaned_data['course'].school_year,
+                    school=self.cleaned_data['school'],
+                    course=self.cleaned_data['course'],
+                    subject=self.cleaned_data['subject'])
                 if not hours_teacher_in_class:
                     # If there is not an hours per teacher in class
                     self.add_error(None, forms.ValidationError(_('There is not a related '
@@ -706,14 +729,14 @@ class AssignmentForm(BaseFormWithRoomSubjectCourseTeacherAndSchoolCheck):
                 course__school_year=self.cleaned_data['course'].school_year,
                 hour_start=self.cleaned_data['hour_start'],
                 hour_end=self.cleaned_data['hour_end'],
-                date=self.cleaned_data['date'])\
+                date=self.cleaned_data['date']) \
                 .exclude(
-                    id= self.instance.id if self.instance is not None else None
-                )
+                id=self.instance.id if self.instance is not None else None
+            )
 
             if conflicts_teacher:
                 self.add_error(None, forms.ValidationError(_("The teacher is already in another class {}.".format(
-                    str([c.course for c in conflicts_teacher])    # TODO: Fix visualization of this error.
+                    str([c.course for c in conflicts_teacher])  # TODO: Fix visualization of this error.
                 ))))
             if self.cleaned_data['room'] is not None:
                 conflict_room = Assignment.objects.filter(
