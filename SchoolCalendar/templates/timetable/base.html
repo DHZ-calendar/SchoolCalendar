@@ -24,6 +24,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-timepicker/0.5.2/css/bootstrap-timepicker.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-timepicker/0.5.2/js/bootstrap-timepicker.min.js"></script>
 
+    <!-- library useful while managing datetime-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment-with-locales.min.js"></script>
+    <!-- library useful to easily access cookies -->
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
+    <!-- library providing cool icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
     <link rel="stylesheet" href="{% static 'sidebar.css' %}" />
 
     {% block head %}
@@ -300,6 +307,12 @@
 
 
     <script>
+        $(document).ready(() => {
+            /* set the locale of moment.js to the user one */
+            let locale = window.navigator.userLanguage || window.navigator.language;
+            moment.locale(locale);
+        });
+
         {% block script %}
         {% endblock %}
     </script>
