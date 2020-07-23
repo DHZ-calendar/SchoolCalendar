@@ -102,7 +102,8 @@ class BaseFormWithCourseCheck(BaseFormWithUser):
     def __init__(self, user, *args, **kwargs):
         super(BaseFormWithCourseCheck, self).__init__(user, *args, **kwargs)
 
-        self.fields['course'].queryset = Course.objects.filter(school__id=get_school_from_user(user).id)
+        self.fields['course'].queryset = Course.objects.filter(school__id=get_school_from_user(user).id) \
+            .order_by('year', 'section')
 
     def clean_course(self):
         """
@@ -126,7 +127,8 @@ class BaseFormWithSubjectCheck(BaseFormWithUser):
     def __init__(self, user, *args, **kwargs):
         super(BaseFormWithSubjectCheck, self).__init__(user, *args, **kwargs)
 
-        self.fields['subject'].queryset = Subject.objects.filter(school__id=get_school_from_user(user).id)
+        self.fields['subject'].queryset = Subject.objects.filter(school__id=get_school_from_user(user).id) \
+            .order_by('name')
 
     def clean_subject(self):
         """
@@ -149,8 +151,8 @@ class BaseFormWithRoomCheck(BaseFormWithUser):
 
     def __init__(self, user, *args, **kwargs):
         super(BaseFormWithRoomCheck, self).__init__(user, *args, **kwargs)
-        self.fields['room'].queryset = Room.objects.filter(school__id=get_school_from_user(user).id)
-        self.fields['room'].queryset = Room.objects.filter(school__id=get_school_from_user(user).id)
+        self.fields['room'].queryset = Room.objects.filter(school__id=get_school_from_user(user).id) \
+            .order_by('name')
 
     def clean_room(self):
         """
