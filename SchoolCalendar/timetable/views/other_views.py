@@ -136,15 +136,20 @@ class CheckWeekReplicationView(UserPassesTestMixin, View):
 
                 # Check both that the room is not null, and is the same as the current room!
                 conf_room = conflicts.filter(room__isnull=False, room=a.room, substitution=False)
-                # Select COUNT(*) FROM conf_room GROUP BY date HAVING COUNT() >= room.capacity
-                # This will select all conflicts happening on the same date.
-                conf_room_group_by_date = conf_room.values('date')\
-                    .annotate(count_conflicts=Count('date'))\
-                    .filter(count_conflicts__gte=a.room.capacity)\
-                    .values('date')
-                if a.room is not None and conf_room_group_by_date.count() > 0:
-                    conf_rooms_in_conflicting_dates = conf_room.filter(date__in=conf_room_group_by_date)
-                    room_conflicts |= conf_rooms_in_conflicting_dates
+                # TODO: This will be super slow!
+                for date in conflicts.values_list('date').distinct():
+                    # Select the distinct courses for the same date
+                    distinct_course_in_date = conf_room.filter(date=date[0]).values_list('course').distinct()
+                    # The format of values_list is a list of tuples, like [(1,), (4,), ]. Hence, flatten it.
+                    flatten_list = [item for sublist in distinct_course_in_date for item in sublist]
+                    if a.room is not None and\
+                            a.course.id not in flatten_list and\
+                            distinct_course_in_date.count() >= a.room.capacity:
+                        # If there is a room in the current assignment,
+                        # the course is not one of the already present in the course
+                        # and the capacity of the room is filled, then: mark the room conflict.
+                        conf_rooms_in_conflicting_dates = conf_room.filter(date=date[0])
+                        room_conflicts |= conf_rooms_in_conflicting_dates
             data = dict(course_conflicts=course_conflicts,
                         teacher_conflicts=teacher_conflicts,
                         room_conflicts=room_conflicts)
