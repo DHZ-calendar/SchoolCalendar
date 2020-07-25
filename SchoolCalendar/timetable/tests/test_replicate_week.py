@@ -407,3 +407,59 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass2.delete()
         ass3.delete()
         ass4.delete()
+
+    def test_speed_multiple_assignments_check_1(self):
+        """
+        Try to create a bunch of assignments, and test that the time taken by the view is not too long!
+        """
+        # Create a lot of assignments in the same hour slot.
+        start_date = datetime(year=2019, month=9, day=16)
+        assignments = []
+        assignments_to_check = []
+        for day in range(7):
+            for hour in range(8, 14):
+                for i in range(50):
+                    ass1 = Assignment(teacher=self.t1,
+                                      course=self.c1,
+                                      subject=self.sub1,
+                                      school=self.s1,
+                                      room=self.r1,
+                                      date=start_date + timedelta(days=day) + timedelta(days=7*i),
+                                      hour_start=time(hour=hour, minute=0),
+                                      hour_end=time(hour=hour + 1, minute=0),
+                                      bes=False,
+                                      co_teaching=False,
+                                      substitution=False,
+                                      absent=False,
+                                      free_substitution=False)
+                    ass1.save()
+                    assignments.append(ass1)
+                ass1 = Assignment(teacher=self.t1,
+                                  course=self.c1,
+                                  subject=self.sub1,
+                                  school=self.s1,
+                                  room=self.r1,
+                                  date=datetime(year=2019, month=9, day=9) + timedelta(days=day),
+                                  hour_start=time(hour=hour, minute=0),
+                                  hour_end=time(hour=hour + 1, minute=0),
+                                  bes=False,
+                                  co_teaching=False,
+                                  substitution=False,
+                                  absent=False,
+                                  free_substitution=False)
+                ass1.save()
+                assignments_to_check.append(ass1.id)
+
+        print(len(assignments))   # Make the assignments in advance.
+        print(len(assignments_to_check))
+        start = datetime.now()
+        response = self.c.post('/timetable/check_week_replication/2020-05-04/2020-05-24',
+                               {'assignments[]': assignments_to_check})
+        json_res = response.json()
+        print(len(json_res['teacher_conflicts']))
+        end = datetime.now()
+        print(start, end)
+        self.assertLessEqual((end - start).seconds, 2)
+        for el in assignments:
+            el.delete()
+        Assignment.objects.filter(id__in=assignments_to_check).delete()
