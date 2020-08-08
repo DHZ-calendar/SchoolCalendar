@@ -143,6 +143,7 @@ class RoomFilter(FilterSet):
         hour_start = self.request.GET.get('hour_start')
         hour_end = self.request.GET.get('hour_end')
         date = self.request.GET.get('date')
+        course = self.request.GET.get('course', None)
 
         if date:
             date = datetime.strptime(date, '%Y-%m-%d')
@@ -151,18 +152,26 @@ class RoomFilter(FilterSet):
             hour_end = datetime.strptime(hour_end, '%H:%M')
 
         if school and school_year and hour_start and hour_end and date:
-            # Search assignments with an intersection in time
-            used_rooms = Assignment.objects.filter(school=school,
-                                                   course__school_year=school_year,
-                                                   date=date,
-                                                   room__isnull=False) \
+            # Search assignments with an intersection in time but in a different course (in this way we allow to assign
+            # more teachers in the same course, in the same hour_slot and in the same room. Useful for co-teaching)
+            # and we group them by room, course, hour_start and hour_end
+            grouped_used_rooms = Assignment.objects.filter(school=school,
+                                                           course__school_year=school_year,
+                                                           date=date,
+                                                           room__isnull=False) \
+                .exclude(course=course) \
                 .filter(Q(hour_start__lte=hour_start, hour_end__gt=hour_start) |
                         Q(hour_start__lt=hour_end, hour_end__gte=hour_end)) \
-                .values('room').annotate(total=Count('room'))
+                .values('room', 'course', 'hour_start', 'hour_end') \
+                .annotate(Count('room'))
+            # We get all the assignments with a room and count the courses in each room
+            used_rooms = Assignment.objects.filter(room__isnull=False) \
+                .annotate(total=utils.SQCount(grouped_used_rooms)) \
+                .distinct().values('room', 'room__capacity', 'total')
+
             rooms_id = []
             for room in used_rooms:
-                if room['total'] >= Room.objects.get(id=room['room']).capacity:
+                if room['total'] >= room['room__capacity']:
                     rooms_id.append(room['room'])
             return queryset.exclude(id__in=rooms_id)
         return queryset
-

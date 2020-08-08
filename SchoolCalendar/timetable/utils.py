@@ -4,7 +4,8 @@ import string
 
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db import models
+from django.db.models import Q, Subquery
 from django.utils.text import capfirst
 from timetable.models import Teacher, AdminSchool, HoursPerTeacherInClass, Assignment, HourSlot, School
 
@@ -235,3 +236,18 @@ def send_invitation_email(user_pk, request):
         email_template_name='email_templates/invite.html',
         subject_template_name='email_templates/invite_subject.txt'
     )
+
+
+class SQCount(Subquery):
+    """
+    Count all the elements in the subquery
+    """
+
+    template = "(SELECT count(*) FROM (%(subquery)s))"
+    output_field = models.IntegerField()
+
+    def __ror__(self, other):
+        pass
+
+    def __rand__(self, other):
+        pass

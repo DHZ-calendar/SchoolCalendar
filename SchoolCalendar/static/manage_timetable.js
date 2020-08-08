@@ -490,6 +490,7 @@ async function chooseAssignmentRoom(teaId, teacherId, subjId, schoolId, block, b
         school_year: $('#school_year').val(),
         school: schoolId,
         date: date,
+        course: $('#course_section').val(),
         hour_start: block.startTime.hours + ':' + block.startTime.min,
         hour_end: block.endTime.hours + ':' + block.endTime.min
     };
