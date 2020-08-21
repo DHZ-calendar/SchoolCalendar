@@ -159,3 +159,21 @@ DEFAULT_FROM_EMAIL = local_settings.DEFAULT_FROM_EMAIL
 EMAIL_HOST_PASSWORD = local_settings.EMAIL_HOST_PASSWORD
 EMAIL_USE_TLS = local_settings.EMAIL_USE_TLS
 EMAIL_USE_SSL = local_settings.EMAIL_USE_SSL
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'logfile': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'server.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['logfile'],
+        },
+    },
+}
