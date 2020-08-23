@@ -243,7 +243,7 @@ class SQCount(Subquery):
     Count all the elements in the subquery
     """
 
-    template = "(SELECT count(*) FROM (%(subquery)s))"
+    template = "(SELECT count(*) FROM (%(subquery)s) AS agg_count)"
     output_field = models.IntegerField()
 
     def __ror__(self, other):
