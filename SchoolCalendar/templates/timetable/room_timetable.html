@@ -109,9 +109,11 @@
 
         $('#btn-go-date').click(async () => {
             let date = $('#navigation_date').datepicker('getDate');
-            currentDate = moment(date).day(1).toDate();
-            await loadRoomData();
-            $('#navigation_date').val('');
+            if(date !== undefined && date !== null && date !== ''){
+                currentDate = moment(date).day(1).toDate();
+                await loadRoomData();
+                $('#navigation_date').val('');
+            }
         });
     });
 
