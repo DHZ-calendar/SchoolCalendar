@@ -1,7 +1,7 @@
 from rest_framework.filters import BaseFilterBackend
 
 from django_filters import FilterSet, DateFilter, ChoiceFilter, NumberFilter, TimeFilter
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Subquery
 
 from datetime import datetime
 
@@ -161,17 +161,17 @@ class RoomFilter(FilterSet):
                                                            room__isnull=False) \
                 .exclude(course=course) \
                 .filter(Q(hour_start__lte=hour_start, hour_end__gt=hour_start) |
-                        Q(hour_start__lt=hour_end, hour_end__gte=hour_end)) \
-                .values('room', 'course', 'hour_start', 'hour_end') \
-                .annotate(Count('room'))
-            # We get all the assignments with a room and count the courses in each room
-            used_rooms = Assignment.objects.filter(room__isnull=False) \
-                .annotate(total=utils.SQCount(grouped_used_rooms)) \
-                .distinct().values('room', 'room__capacity', 'total')
+                        Q(hour_start__lt=hour_end, hour_end__gte=hour_end))\
+                .values('room', 'course', 'room__capacity').distinct()
 
+            used_rooms = {}
+            for el in grouped_used_rooms:
+                if el['room'] not in used_rooms:
+                    used_rooms[el['room']] = {'total': 0, 'capacity': el['room__capacity']}
+                used_rooms[el['room']]['total'] += 1
             rooms_id = []
-            for room in used_rooms:
-                if room['total'] >= room['room__capacity']:
-                    rooms_id.append(room['room'])
+            for key, room in used_rooms.items():
+                if room['total'] >= room['capacity']:
+                    rooms_id.append(key)
             return queryset.exclude(id__in=rooms_id)
         return queryset
