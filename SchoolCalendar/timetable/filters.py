@@ -154,7 +154,7 @@ class RoomFilter(FilterSet):
         if school and school_year and hour_start and hour_end and date:
             # Search assignments with an intersection in time but in a different course (in this way we allow to assign
             # more teachers in the same course, in the same hour_slot and in the same room. Useful for co-teaching)
-            # and we group them by room, course, hour_start and hour_end
+            # and we group them by room, course
             grouped_used_rooms = Assignment.objects.filter(school=school,
                                                            course__school_year=school_year,
                                                            date=date,
@@ -164,12 +164,15 @@ class RoomFilter(FilterSet):
                         Q(hour_start__lt=hour_end, hour_end__gte=hour_end))\
                 .values('room', 'course', 'room__capacity').distinct()
 
+            # Unfortunately, it looks like with django it is extremely cumbersome to count grouping by rooms and courses
+            # Hence, we do it by hand using the set used_room.
             used_rooms = {}
             for el in grouped_used_rooms:
                 if el['room'] not in used_rooms:
                     used_rooms[el['room']] = {'total': 0, 'capacity': el['room__capacity']}
-                used_rooms[el['room']]['total'] += 1
+                used_rooms[el['room']]['total'] += 1  # Counter of conflicts.
             rooms_id = []
+            # We remove from the returned rooms all the rooms that have already reached the maximum capacity.   
             for key, room in used_rooms.items():
                 if room['total'] >= room['capacity']:
                     rooms_id.append(key)
