@@ -319,6 +319,7 @@ async function getAssignmentsGeneric(url, startDate, endDate){
                 title: `
                     <b>${teacher}</b><br/>
                     ${assign.subject.name}<br/>
+                    ${assign.course.year} ${assign.course.section}<br/>
                     ${lbl_room}<br/>
                     ${assign.hour_start.slice(0, -3)} - ${assign.hour_end.slice(0, -3)}
                 `,
