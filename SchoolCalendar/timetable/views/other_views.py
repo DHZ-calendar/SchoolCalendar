@@ -125,12 +125,25 @@ class CheckWeekReplicationView(UserPassesTestMixin, View):
             for a in assignments_qs:
                 # Return all assignments from the same course or teacher that would collide in the future.
                 # excluding the assignment in the url.
-                conflicts = Assignment.objects.filter(course__school_year=a.course.school_year,
+                conflicts = Assignment.objects.filter(school=a.school,
+                                                      course__school_year=a.course.school_year,
                                                       # _week_day returns dates Sun-Sat (1,7), while weekday (Mon, Sun) (0,6)
                                                       date__week_day=(a.date.weekday() + 2) % 7,
                                                       hour_start=a.hour_start) \
                     .filter(date__gte=from_date, date__lte=to_date) \
                     .exclude(id=a.pk)
+                # Exclude lectures that are equivalent to the one that we want to replicate, since aren't conflicts
+                # but the same lecture already defined by the user
+                conflicts = conflicts.exclude(course=a.course,
+                                              teacher=a.teacher,
+                                              subject=a.subject,
+                                              hour_start=a.hour_start,
+                                              hour_end=a.hour_end,
+                                              bes=a.bes,
+                                              co_teaching=a.co_teaching,
+                                              absent=a.absent,
+                                              substitution=a.substitution)
+
                 course_conflicts |= conflicts.filter(course=a.course)
                 teacher_conflicts |= conflicts.filter(teacher=a.teacher)
 
@@ -209,8 +222,20 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
                                                       date__week_day=((a.date.weekday() + 2) % 7),
                                                       date__gte=from_date,
                                                       date__lte=to_date). \
-                    exclude(id=a.id). \
-                    filter(Q(teacher=a.teacher) | Q(room__isnull=False, room=a.room))
+                    exclude(id=a.id)
+                # Exclude lectures that are equivalent to the one that we want to replicate, since aren't conflicts
+                # but the same lecture already defined by the user
+                conflicts = conflicts.exclude(course=a.course,
+                                              teacher=a.teacher,
+                                              subject=a.subject,
+                                              hour_start=a.hour_start,
+                                              hour_end=a.hour_end,
+                                              bes=a.bes,
+                                              co_teaching=a.co_teaching,
+                                              absent=a.absent,
+                                              substitution=a.substitution)
+
+                conflicts = conflicts.filter(Q(teacher=a.teacher) | Q(room__isnull=False, room=a.room))
 
                 conf_room_group_by_date = Assignment.objects.none
                 if a.room is not None:
