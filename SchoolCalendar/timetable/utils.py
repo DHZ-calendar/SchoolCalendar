@@ -99,10 +99,10 @@ def compute_total_hours_assignments(assignments, hours_slots):
             el['legal_duration'] = datetime.datetime.combine(datetime.date.min, el['hour_end']) - \
                                    datetime.datetime.combine(datetime.date.min, el['hour_start'])
 
-    total = datetime.timedelta(0)
+    total = 0
     for el in assignments:
-        total += el['legal_duration']
-    return int(total.seconds / 3600)
+        total += el['legal_duration'].seconds
+    return int(total / 3600)
 
 
 def get_teachers_hours_info(school):

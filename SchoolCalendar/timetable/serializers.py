@@ -419,7 +419,8 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
                                                 subject=obj.subject,
                                                 school=obj.school,
                                                 course__school_year=obj.course.school_year,
-                                                bes=False).values('date__week_day', 'hour_start', 'hour_end')
+                                                bes=False,
+                                                co_teaching=False).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
         if start_date and utils.is_date_string_valid(start_date):
             assignments = assignments.filter(date__gte=start_date)
@@ -455,7 +456,8 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
                                                 subject=obj.subject,
                                                 school=obj.school,
                                                 course__school_year=obj.course.school_year,
-                                                bes=True).values('date__week_day', 'hour_start', 'hour_end')
+                                                bes=True,
+                                                co_teaching=False).values('date__week_day', 'hour_start', 'hour_end')
 
         # Filter in a time interval
         if start_date and utils.is_date_string_valid(start_date):
