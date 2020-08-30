@@ -524,3 +524,76 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass1.delete()
         ass2.delete()
         ass3.delete()
+
+    def test_course_already_present_in_replicated_week_2(self):
+        """
+        When we replicate a week, and in the next week we already have the assignment that we are replicating, then
+        no conflicts should be raised (test before) and no new assignment should be created.
+        """
+        ass1 = Assignment(teacher=self.t1,
+                          course=self.c1,
+                          subject=self.sub1,
+                          school=self.s1,
+                          room=self.r1,
+                          date=datetime(day=14, month=9, year=2020),
+                          hour_start=time(hour=7, minute=55),
+                          hour_end=time(hour=8, minute=45),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass2 = Assignment(teacher=self.t1,
+                          course=self.c1,
+                          subject=self.sub1,
+                          school=self.s1,
+                          room=self.r1,
+                          date=datetime(day=14, month=9, year=2020),
+                          hour_start=time(hour=8, minute=45),
+                          hour_end=time(hour=9, minute=35),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass3 = Assignment(teacher=self.t1,         # Replicated course. It should not be considered as a conflict.
+                          course=self.c1,
+                          subject=self.sub1,
+                          school=self.s1,
+                          room=self.r1,
+                          date=datetime(day=21, month=9, year=2020),
+                          hour_start=time(hour=7, minute=55),
+                          hour_end=time(hour=8, minute=45),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass1.save()
+        ass2.save()
+        ass3.save()
+        response = self.c.post('/timetable/replicate_week/add/{school_year}/{course}/2020-09-21/2020-09-27'.format(
+                school_year=self.school_year_2020.id,
+                course=self.c1.pk),
+            {'assignments[]': [ass1.id, ass2.id]})
+        # Assert that no conflict is raised, although there already is the copy of course 1 in week 21/9 - 27/9
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(Assignment.objects.filter(teacher=self.t1,
+                                                  course=self.c1,
+                                                  subject=self.sub1,
+                                                  school=self.s1,
+                                                  room=self.r1,
+                                                  date=datetime(day=21, month=9, year=2020),
+                                                  hour_start=time(hour=8, minute=45),
+                                                  hour_end=time(hour=9, minute=35)).exists())
+        self.assertTrue(Assignment.objects.filter(teacher=self.t1,
+                                                  course=self.c1,
+                                                  subject=self.sub1,
+                                                  school=self.s1,
+                                                  room=self.r1,
+                                                  date=datetime(day=21, month=9, year=2020),
+                                                  hour_start=time(hour=7, minute=55),
+                                                  hour_end=time(hour=8, minute=45)).exists())
+        ass1.delete()
+        ass2.delete()
+        ass3.delete()
