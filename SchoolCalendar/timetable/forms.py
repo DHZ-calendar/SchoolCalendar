@@ -286,6 +286,7 @@ class RoomForm(BaseFormWithSchoolCheck):
 
 class CourseForm(BaseFormWithSchoolCheck):
     year = forms.IntegerField(help_text=_("This is the class number, for class IA for instance it is 1."))
+    school_year = forms.ModelChoiceField(queryset=SchoolYear.objects.all().order_by('-year_start'))
 
     def __init__(self, user, *args, **kwargs):
         super(CourseForm, self).__init__(user, *args, **kwargs)
@@ -297,6 +298,7 @@ class CourseForm(BaseFormWithSchoolCheck):
 
 
 class HourSlotForm(BaseFormWithSchoolCheck):
+    school_year = forms.ModelChoiceField(queryset=SchoolYear.objects.all().order_by('-year_start'))
     starts_at = forms.TimeField(
         input_formats=['%H:%M'],
         widget=forms.TextInput(attrs={
@@ -321,7 +323,7 @@ class HourSlotForm(BaseFormWithSchoolCheck):
 
     class Meta:
         model = HourSlot
-        fields = ["hour_number", 'starts_at', 'ends_at', 'school', 'school_year', 'day_of_week', 'legal_duration']
+        fields = ['hour_number', 'starts_at', 'ends_at', 'school', 'school_year', 'day_of_week', 'legal_duration']
 
     def check_conflict_on_day(self, day_of_week):
         # Check if there is already the n-th hour of the day:
@@ -392,6 +394,7 @@ class HourSlotForm(BaseFormWithSchoolCheck):
 
 
 class HourSlotCreateForm(HourSlotForm, Form):
+    school_year = forms.ModelChoiceField(queryset=SchoolYear.objects.all().order_by('-year_start'))
     hour_number = forms.IntegerField(help_text=_('This is the order of the hour during the day. '
                                                  'For instance, if hour from 9 to 10 is the second hour of the morning,'
                                                  ' hour_number field must be 2.'))
@@ -408,7 +411,7 @@ class HourSlotCreateForm(HourSlotForm, Form):
 
     class Meta:
         model = HourSlot
-        fields = ["hour_number", 'starts_at', 'ends_at', 'school', 'school_year', 'legal_duration']
+        fields = ['hour_number', 'starts_at', 'ends_at', 'school', 'school_year', 'legal_duration']
 
     def clean(self):
         """
@@ -511,6 +514,7 @@ class AbsenceBlockCreateForm(BaseFormWithTeacherCheck, Form):
 
 
 class HolidayForm(BaseFormWithSchoolCheck):
+    school_year = forms.ModelChoiceField(queryset=SchoolYear.objects.all().order_by('-year_start'))
     date_start = forms.DateField(
         input_formats=['%Y-%m-%d'],
         widget=forms.DateInput(
@@ -595,6 +599,7 @@ class SubjectForm(BaseFormWithSchoolCheck):
 
 
 class TeachersYearlyLoadForm(BaseFormWithTeacherCheck):
+    school_year = forms.ModelChoiceField(queryset=SchoolYear.objects.all().order_by('-year_start'))
 
     def __init__(self, user, *args, **kwargs):
         super(TeachersYearlyLoadForm, self).__init__(user, *args, **kwargs)
