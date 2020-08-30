@@ -521,3 +521,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         self.assertTrue(len(json_res['teacher_conflicts']) == 0)
         self.assertTrue(len(json_res['room_conflicts']) == 0)
         self.assertTrue(len(json_res['course_conflicts']) == 0)
+        ass1.delete()
+        ass2.delete()
+        ass3.delete()
