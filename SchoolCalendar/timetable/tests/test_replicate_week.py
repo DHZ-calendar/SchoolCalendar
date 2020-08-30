@@ -463,3 +463,61 @@ class ReplicateWeekTestCase(BaseTestCase):
         for el in assignments:
             el.delete()
         Assignment.objects.filter(id__in=assignments_to_check).delete()
+
+    def test_course_already_present_in_replicated_week(self):
+        """
+        Assume we want to replicate one week. The week after should be empty so that no conflicts are shown.
+        But maybe we have the exact copy of one of the courses we are going to replicate.
+        So, although in theory one conflict should be shown, in practice we do not want to have any.
+        In this example, the assign1 is present in both week 1 and 2 (1 is the week we want to replicate into 2).
+        So, assign1 should not be shown as a conflict.
+        """
+        ass1 = Assignment(teacher=self.t1,
+                          course=self.c1,
+                          subject=self.sub1,
+                          school=self.s1,
+                          room=self.r1,
+                          date=datetime(day=14, month=9, year=2020),
+                          hour_start=time(hour=7, minute=55),
+                          hour_end=time(hour=8, minute=45),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass2 = Assignment(teacher=self.t1,
+                          course=self.c1,
+                          subject=self.sub1,
+                          school=self.s1,
+                          room=self.r1,
+                          date=datetime(day=14, month=9, year=2020),
+                          hour_start=time(hour=8, minute=45),
+                          hour_end=time(hour=9, minute=35),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass3 = Assignment(teacher=self.t1,         # Replicated course. It should not be considered as a conflict.
+                          course=self.c1,
+                          subject=self.sub1,
+                          school=self.s1,
+                          room=self.r1,
+                          date=datetime(day=21, month=9, year=2020),
+                          hour_start=time(hour=7, minute=55),
+                          hour_end=time(hour=8, minute=45),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass1.save()
+        ass2.save()
+        ass3.save()
+        response = self.c.post('/timetable/check_week_replication/2020-09-21/2020-09-27',
+                               {'assignments[]': [ass1.id, ass2.id]})
+        json_res = response.json()
+        # Assert that no conflict is raised, although there already is the copy of course 1 in week 21/9 - 27/9
+        self.assertTrue(len(json_res['teacher_conflicts']) == 0)
+        self.assertTrue(len(json_res['room_conflicts']) == 0)
+        self.assertTrue(len(json_res['course_conflicts']) == 0)
