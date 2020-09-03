@@ -58,6 +58,14 @@ class BaseFormWithTeacherCheck(BaseFormWithUser):
         # Populate the teacher picker with the correct teachers
         self.fields['teacher'].queryset = Teacher.objects.filter(school__id=get_school_from_user(user).id) \
             .order_by('last_name', 'first_name')
+        self.fields['teacher'].label_from_instance = self.teacher_label
+
+    @staticmethod
+    def teacher_label(obj):
+        """
+        It is desirable that teachers' names are written as last_name first_name
+        """
+        return "{} {}".format(obj.last_name, obj.first_name)
 
     def clean_teacher(self):
         """
