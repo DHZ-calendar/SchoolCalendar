@@ -92,6 +92,11 @@ class CoursesYearlyLoadFilter(FilterSet):
 
 
 class HourSlotFilter(FilterSet):
+    school_year = NumberFilter(field_name='school_year', method='school_year_filter')
+
+    def school_year_filter(self, queryset, name, value):
+        return queryset.filter(hour_slots_group__school_year__id=value)
+
     class Meta:
         model = HourSlot
         fields = ['school_year', 'day_of_week']
@@ -109,12 +114,22 @@ class HoursPerTeacherInClassFilter(FilterSet):
 
 
 class CourseSectionOnlyFilter(FilterSet):
+    school_year = NumberFilter(field_name='school_year', method='school_year_filter')
+
+    def school_year_filter(self, queryset, name, value):
+        return queryset.filter(hour_slots_group__school_year__id=value)
+
     class Meta:
         model = Course
         fields = ['school_year', 'year']
 
 
 class CourseYearOnlyFilter(FilterSet):
+    school_year = NumberFilter(field_name='school_year', method='school_year_filter')
+
+    def school_year_filter(self, queryset, name, value):
+        return queryset.filter(hour_slots_group__school_year__id=value)
+
     class Meta:
         model = Course
         fields = ['school_year']

@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 from timetable import models
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
-    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad, CoursesYearlyLoad
+    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad, CoursesYearlyLoad, HourSlotsGroup
 from timetable.utils import get_school_from_user, assign_html_style_to_visible_forms_fields, generate_random_password, \
     assign_translated_labels_to_form_fields
 
@@ -129,7 +129,7 @@ class BaseFormWithCourseCheck(BaseFormWithUser):
 class BaseFormWithSubjectCheck(BaseFormWithUser):
     """
     Base form class, which allows to retrieve only the correct subject according to the school of the user logged.
-    Moreover it inherits from BaseFormWithCourseTeacherAndSchoolCheck
+    Moreover it inherits from BaseFormWithUser
     """
 
     def __init__(self, user, *args, **kwargs):
@@ -154,7 +154,7 @@ class BaseFormWithSubjectCheck(BaseFormWithUser):
 class BaseFormWithRoomCheck(BaseFormWithUser):
     """
     Base form class, which allows to retrieve only the correct rooms according to the school of the user logged.
-    Moreover it inherits from BaseFormWithSubjectCourseTeacherAndSchoolCheck
+    Moreover it inherits from BaseFormWithUser
     """
 
     def __init__(self, user, *args, **kwargs):
@@ -175,6 +175,30 @@ class BaseFormWithRoomCheck(BaseFormWithUser):
                 self.cleaned_data['room'], self.cleaned_data['subject'].school
             ))))
         return self.cleaned_data['room']
+
+
+class BaseFormWithHourSlotsGroupCheck(BaseFormWithUser):
+    """
+    Base form class, which allows to retrieve only the correct hour_slots_groups according to the school of the user logged.
+    Moreover it inherits from BaseFormWithUser
+    """
+
+    def __init__(self, user, *args, **kwargs):
+        super(BaseFormWithHourSlotsGroupCheck, self).__init__(user, *args, **kwargs)
+        self.fields['hour_slots_group'].queryset = HourSlotsGroup.objects. \
+            filter(school__id=get_school_from_user(user).id).order_by('name')
+
+    def clean_hour_slots_group(self):
+        """
+        Check whether the hour_slots_group is in the school of the user logged.
+        Somewhere else we should check that the user logged has enough permissions to do anything with a subject.
+        :return:
+        """
+        if get_school_from_user(self.user) != self.cleaned_data['hour_slots_group'].school:
+            self.add_error(None, forms.ValidationError(_('The HourSlotsGroup {} is not taught in the school ({}).'.
+                format(self.cleaned_data['hour_slots_group'], self.cleaned_data['hour_slots_group'].school)
+            )))
+        return self.cleaned_data['hour_slots_group']
 
 
 class UserCreationFormWithoutPassword(UserCreationForm):
@@ -292,21 +316,17 @@ class RoomForm(BaseFormWithSchoolCheck):
         fields = ['name', 'capacity', 'school']
 
 
-class CourseForm(BaseFormWithSchoolCheck):
-    year = forms.IntegerField(help_text=_("This is the class number, for class IA for instance it is 1."))
-    school_year = forms.ModelChoiceField(queryset=SchoolYear.objects.all().order_by('-year_start'))
-
+class CourseForm(BaseFormWithHourSlotsGroupCheck):
     def __init__(self, user, *args, **kwargs):
         super(CourseForm, self).__init__(user, *args, **kwargs)
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
         model = Course
-        fields = ['year', 'section', 'school_year', 'school']
+        fields = ['year', 'section', 'hour_slots_group']
 
 
-class HourSlotForm(BaseFormWithSchoolCheck):
-    school_year = forms.ModelChoiceField(queryset=SchoolYear.objects.all().order_by('-year_start'))
+class HourSlotForm(BaseFormWithHourSlotsGroupCheck):
     starts_at = forms.TimeField(
         input_formats=['%H:%M'],
         widget=forms.TextInput(attrs={
@@ -331,13 +351,12 @@ class HourSlotForm(BaseFormWithSchoolCheck):
 
     class Meta:
         model = HourSlot
-        fields = ['hour_number', 'starts_at', 'ends_at', 'school', 'school_year', 'day_of_week', 'legal_duration']
+        fields = ['hour_number', 'starts_at', 'ends_at', 'hour_slots_group', 'day_of_week', 'legal_duration']
 
     def check_conflict_on_day(self, day_of_week):
         # Check if there is already the n-th hour of the day:
         conflicting_hour_number = HourSlot.objects.filter(
-            school=self.cleaned_data['school'],
-            school_year=self.cleaned_data['school_year'],
+            hour_slots_group=self.cleaned_data['hour_slots_group'],
             day_of_week=day_of_week,
             hour_number=self.cleaned_data['hour_number']
         )
@@ -354,7 +373,7 @@ class HourSlotForm(BaseFormWithSchoolCheck):
 
         # TODO: add tests for this check!
         conflicting_time_interval = HourSlot.objects.filter(
-            school=self.cleaned_data['school'],
+            hour_slots_group=self.cleaned_data['hour_slots_group'],
             school_year=self.cleaned_data['school_year'],
             day_of_week=day_of_week
         ).filter(
@@ -395,14 +414,14 @@ class HourSlotForm(BaseFormWithSchoolCheck):
             self.add_error(None, forms.ValidationError(_('The start hour must be strictly smaller that the '
                                                          'end hour.')))
 
-        if 'school' in self.cleaned_data:  # If school is not a key, clean_school has already failed.
+        if 'hour_slots_group' in self.cleaned_data:
+            # If hour_slots_group is not a key, clean_hour_slots_group has already failed.
             self.check_conflict_on_day(self.cleaned_data['day_of_week'])
 
         return self.cleaned_data
 
 
 class HourSlotCreateForm(HourSlotForm, Form):
-    school_year = forms.ModelChoiceField(queryset=SchoolYear.objects.all().order_by('-year_start'))
     hour_number = forms.IntegerField(help_text=_('This is the order of the hour during the day. '
                                                  'For instance, if hour from 9 to 10 is the second hour of the morning,'
                                                  ' hour_number field must be 2.'))
@@ -419,7 +438,7 @@ class HourSlotCreateForm(HourSlotForm, Form):
 
     class Meta:
         model = HourSlot
-        fields = ['hour_number', 'starts_at', 'ends_at', 'school', 'school_year', 'legal_duration']
+        fields = ['hour_number', 'starts_at', 'ends_at', 'hour_slots_group', 'legal_duration']
 
     def clean(self):
         """
@@ -429,7 +448,8 @@ class HourSlotCreateForm(HourSlotForm, Form):
         :return:
         """
 
-        if 'school' in self.cleaned_data:  # If school is not a key, clean_school has already failed.
+        if 'hour_slots_group' in self.cleaned_data:
+            # If hour_slots_group is not a key, clean_hour_slots_group has already failed.
             # Replicate the checks for all the day_of_week required.
             for day_of_week in self.cleaned_data['replicate_on_days']:
                 self.check_conflict_on_day(day_of_week)
@@ -446,8 +466,7 @@ class HourSlotCreateForm(HourSlotForm, Form):
                 hour_number=self.cleaned_data['hour_number'],
                 starts_at=self.cleaned_data['starts_at'],
                 ends_at=self.cleaned_data['ends_at'],
-                school=self.cleaned_data['school'],
-                school_year=self.cleaned_data['school_year'],
+                hour_slots_group=self.cleaned_data['hour_slots_group'],
                 day_of_week=day_of_week,
                 legal_duration=self.cleaned_data['legal_duration']
             )
