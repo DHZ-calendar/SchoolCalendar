@@ -88,22 +88,22 @@ class SchoolYear(models.Model):
         return "{}-{}".format(str(self.year_start), str(self.year_start + 1))
 
 
-class Course(models.Model):
+class HourSlotsGroup(models.Model):
     """
-    Course is an alias for the class (like IA and so on)
+    Group up several HourSlots to define the blocks that compose a week
     """
-    year = models.IntegerField(blank=False, null=False, verbose_name=_("year"))  # in class IA, year is 1
-    section = models.CharField(max_length=256, blank=False, null=False,
-                               verbose_name=_("section"))  # In class IA, the section is A
-    school_year = models.ForeignKey(SchoolYear, on_delete=models.PROTECT, blank=False, null=False,
+    name = models.CharField(max_length=256, null=False, blank=False, verbose_name=_("name"))
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("school"))
+    school_year = models.ForeignKey(SchoolYear, on_delete=models.PROTECT, null=False, blank=False,
                                     verbose_name=_("school year"))
-    school = models.ForeignKey(School, on_delete=models.CASCADE, blank=False, null=False, verbose_name=_("school"))
 
     def __str__(self):
         """
-        :return: classes as 1 A, 2 Bord and so on (according to what year and section are like)
+        :return: hourslots_group like "Standard week, 2019/2020"
         """
-        return "{} {}, {}".format(str(self.year), self.section, str(self.school_year))
+        return "{}, {}/{}".format(self.name,
+                                  str(self.school_year.year_start),
+                                  str(self.school_year.year_start + 1))
 
 
 class HourSlot(models.Model):
@@ -115,12 +115,11 @@ class HourSlot(models.Model):
         "hour number"))  # Used to store first, second third hour and so on.
     starts_at = models.TimeField(null=False, blank=False, verbose_name=_("begins at"))
     ends_at = models.TimeField(null=False, blank=False, verbose_name=_("ends at"))
-    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("school"))
-    school_year = models.ForeignKey(SchoolYear, on_delete=models.PROTECT, null=False, blank=False,
-                                    verbose_name=_("school year"))
     day_of_week = models.IntegerField(choices=DAYS_OF_WEEK, null=False, blank=False, verbose_name=_("day of the week"))
     # This counts the effective duration of each lecture (e.g., lectures of 55' actually are worth 1 hour)
     legal_duration = models.DurationField(null=False, blank=False, verbose_name=_("legal duration"))
+    hour_slots_group = models.ForeignKey(HourSlotsGroup, on_delete=models.CASCADE, null=False, blank=False,
+                                         verbose_name=_("hour slots group"))
 
     def __str__(self):
         """
@@ -129,8 +128,25 @@ class HourSlot(models.Model):
         return "{}, {}-{} {}/{}".format(DAYS_OF_WEEK[self.day_of_week][1],
                                         self.starts_at.strftime("%H:%M"),
                                         self.ends_at.strftime("%H:%M"),
-                                        str(self.school_year.year_start),
-                                        str(self.school_year.year_start + 1))
+                                        str(self.hour_slots_group.school_year.year_start),
+                                        str(self.hour_slots_group.school_year.year_start + 1))
+
+
+class Course(models.Model):
+    """
+    Course is an alias for the class (like IA and so on)
+    """
+    year = models.IntegerField(blank=False, null=False, verbose_name=_("year"))  # in class IA, year is 1
+    section = models.CharField(max_length=256, blank=False, null=False,
+                               verbose_name=_("section"))  # In class IA, the section is A
+    hour_slots_group = models.ForeignKey(HourSlotsGroup, on_delete=models.CASCADE, blank=False, null=False,
+                                         verbose_name=_("hour slots group"))
+
+    def __str__(self):
+        """
+        :return: classes as 1 A, 2 Bord and so on (according to what year and section are like)
+        """
+        return "{} {}, {}".format(str(self.year), self.section, str(self.school_year))
 
 
 class AbsenceBlock(models.Model):
