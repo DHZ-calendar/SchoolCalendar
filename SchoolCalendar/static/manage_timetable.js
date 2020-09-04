@@ -270,7 +270,7 @@ async function refreshTeachers(){
     }
 }
 
-async function getAssignmentsGeneric(url, startDate, endDate){
+async function getAssignmentsGeneric(url, startDate, endDate, showTeacher=true){
     let data = {
         'school_year': $('#school_year').val(),
         'course': $('#course_section').val(),
@@ -287,15 +287,20 @@ async function getAssignmentsGeneric(url, startDate, endDate){
             }
 
             let teacher = assign.teacher.first_name + " " + assign.teacher.last_name;
+            let course = assign.course.year + " " + assign.course.section;
             let subject = assign.subject.name;
+
+            let teacherLbl = teacher;
+            if (!showTeacher)
+                teacherLbl = course;
             if (assign.room)
                 subject = `
                 <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-tag-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" d="M2 1a1 1 0 0 0-1 1v4.586a1 1 0 0 0 .293.707l7 7a1 1 0 0 0 1.414 0l4.586-4.586a1 1 0 0 0 0-1.414l-7-7A1 1 0 0 0 6.586 1H2zm4 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
                 </svg> ` + subject;
-            let customEvent = new Event(assign.id, teacher, subject);
+            let customEvent = new Event(assign.id, teacherLbl, subject);
             let clickEvent = (event) => {
-                alert("Lecture " + assign.subject.name + ", teacher " + event.teacher);
+                alert(subject + " - " + teacher + " - " + course);
             };
             timetable.addEvent(customEvent, blockId, clickEvent, deleteAssignment);
 
@@ -318,8 +323,8 @@ async function getAssignmentsGeneric(url, startDate, endDate){
             customEvent.htmlElement.tooltip({
                 title: `
                     <b>${teacher}</b><br/>
-                    ${assign.subject.name}<br/>
-                    ${assign.course.year} ${assign.course.section}<br/>
+                    ${subject}<br/>
+                    ${course}<br/>
                     ${lbl_room}<br/>
                     ${assign.hour_start.slice(0, -3)} - ${assign.hour_end.slice(0, -3)}
                 `,
@@ -340,13 +345,13 @@ async function getAssignments(startDate, endDate){
 
 async function getTeacherAssignments(startDate, endDate){
     let url = _URL['teacher_timetable'];
-    await getAssignmentsGeneric(url, startDate, endDate);
+    await getAssignmentsGeneric(url, startDate, endDate, false);
 }
 
 async function getRoomAssignments(startDate, endDate){
     let url = _URL['room_timetable']
         .replace('1234', $('#room').val());
-    await getAssignmentsGeneric(url, startDate, endDate);
+    await getAssignmentsGeneric(url, startDate, endDate, false);
 }
 
 async function getHolidays(startDate, endDate){
