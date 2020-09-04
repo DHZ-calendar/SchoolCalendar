@@ -22,7 +22,7 @@ from timetable.views.other_views import TimetableView, SubstituteTeacherView, Te
     SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView, \
     TeacherSubstitutionView, SubstituteTeacherApiView, TimetableReportView, TimetableTeacherPDFReportView, \
     TimetableCoursePDFReportView, TimetableGeneralPDFReportView, CourseSummaryView, RoomTimetableView, \
-    SendTeacherSubstitutionEmailView, DownloadTeacherSubstitutionTicketView
+    SendTeacherSubstitutionEmailView, DownloadTeacherSubstitutionTicketView, TimetableRoomPDFReportView
 
 from rest_framework.routers import DefaultRouter
 
@@ -69,6 +69,9 @@ urlpatterns = [
     re_path(r'timetable_course_pdf_report_view/(?P<school_year_pk>[0-9]+)/(?P<course_pk>\d+)/'
             r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)',
             TimetableCoursePDFReportView.as_view(), name='timetable_course_pdf_report-view'),
+    re_path(r'timetable_room_pdf_report_view/(?P<school_year_pk>[0-9]+)/(?P<room_pk>\d+)/'
+            r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)',
+            TimetableRoomPDFReportView.as_view(), name='timetable_room_pdf_report-view'),
     re_path(r'timetable_general_pdf_report_view/(?P<school_year_pk>[0-9]+)/(?P<monday_date>\d\d\d\d-\d\d-\d\d)',
             TimetableGeneralPDFReportView.as_view(), name='timetable_general_pdf_report-view'),
     path('substitution_pdf_ticket/<assign_pk>', DownloadTeacherSubstitutionTicketView.as_view(),

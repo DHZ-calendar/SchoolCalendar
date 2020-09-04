@@ -27,7 +27,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 
 from timetable.mixins import AdminSchoolPermissionMixin, SuperUserPermissionMixin, TeacherPermissionMixin
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
-    Stage, Subject, HoursPerTeacherInClass, Assignment
+    Stage, Subject, HoursPerTeacherInClass, Assignment, Room
 from timetable import utils
 from timetable.serializers import ReplicationConflictsSerializer, AssignmentSerializer, SubstitutionSerializer
 from timetable.views.CRUD_views import TemplateViewWithSchoolYears
@@ -436,6 +436,8 @@ class TimetableTeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMix
         try:
             school_year = kwargs.get('school_year_pk')
             teacher = kwargs.get('teacher_pk')
+            # TODO: maybe it is better to get Monday date here,
+            # rather than letting JS doing the job and giving it for granted?
             monday_date = datetime.datetime.strptime(kwargs.get('monday_date'), '%Y-%m-%d').date()
             end_date = monday_date + datetime.timedelta(days=6)
             school = utils.get_school_from_user(request.user)
@@ -637,6 +639,124 @@ class TimetableCoursePDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixi
 
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename=str(course) + '.pdf')
+
+
+class TimetableRoomPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):
+    def test_func(self):
+        """
+        Returns True only when the user logged is an admin and the Course exists and is in the same school.
+        :return:
+        """
+        school_year = self.kwargs.get('school_year_pk')
+        room_pk = self.kwargs.get('room_pk')
+        school = utils.get_school_from_user(self.request.user)
+
+        if not (utils.is_adminschool(self.request.user) and SchoolYear.objects.filter(id=school_year).exists()):
+            return False
+        # Check that the room really exists.
+        if not Room.objects.filter(id=room_pk, school=school.id).exists():
+            return False
+        return True
+
+    def get(self, request, *args, **kwargs):
+        try:
+            school_year = kwargs.get('school_year_pk')
+            room = self.kwargs.get('room_pk')
+            monday_date = datetime.datetime.strptime(kwargs.get('monday_date'), '%Y-%m-%d').date()
+            end_date = monday_date + datetime.timedelta(days=6)
+            school = utils.get_school_from_user(request.user)
+        except ValueError:
+            # Wrong format of date: yyyy-mm-dd
+            return HttpResponse(_('Wrong format of date: yyyy-mm-dd'), 400)
+
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=landscape(letter))
+        styles = getSampleStyleSheet()
+        styles.add(ParagraphStyle(name='title_style', fontName="Helvetica-Bold", fontSize=12, alignment=TA_CENTER))
+        styles.add(ParagraphStyle(name='text_bold', fontName="Helvetica-Bold", fontSize=10))
+        title_style = styles['title_style']
+
+        table = []
+        hour_slots = HourSlot.objects.filter(school=school, school_year=school_year)
+        hours_hour_slots = hour_slots.extra(
+            select={
+                'hour_start': 'starts_at',
+                'hour_end': 'ends_at'
+            }
+        ).order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
+        assignments = Assignment.objects.filter(school=school, course__school_year=school_year, room=room,
+                                                date__gte=monday_date, date__lte=end_date)
+        hours_assign = assignments.order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
+
+        for lecture in hours_assign:
+            table.append(
+                [lecture] + [[]] * 6
+            )
+
+        for i, slot in enumerate(hours_hour_slots):
+            found = False
+            for row in table:
+                if row[0]['hour_start'] == slot['hour_start'] and \
+                        row[0]['hour_end'] == slot['hour_end']:
+                    found = True
+                    break
+            if not found:
+                table.insert(i,
+                             [slot] + [[]] * 6
+                             )
+
+        for assign in assignments:
+            for row in table:
+                if row[0]['hour_start'] == assign.hour_start and \
+                        row[0]['hour_end'] == assign.hour_end:
+                    day_of_week = assign.date.weekday()
+                    assignment_text = []
+                    if assign.bes:
+                        assignment_text.append(Paragraph(_('B.E.S.'), styles['text_bold']))
+                    elif assign.co_teaching:
+                        assignment_text.append(Paragraph(_('Co-teaching'), styles['text_bold']))
+                    else:
+                        assignment_text.append(Paragraph(str(assign.subject), styles['text_bold']))
+
+                    assignment_text.append(Paragraph(str(assign.teacher), styles['Normal']))
+                    if assign.room:
+                        assignment_text.append(Paragraph("{} {}".format(assign.course.year, assign.course.section),
+                                                         styles['Normal']))
+
+                    row[day_of_week + 1] = row[day_of_week + 1] + assignment_text
+                    break
+
+        # format the hours of the row
+        for row in table:
+            row[0] = row[0]['hour_start'].strftime("%H:%M") + '\n' + row[0]['hour_end'].strftime("%H:%M")
+
+        room = Room.objects.get(id=room)
+        elements = [
+            Paragraph(_("Room timetable"), title_style),
+            Spacer(0, 6),
+            Paragraph(_('Course') + ': ' + str(room), styles['Normal']),
+            Paragraph(_('Week of') + ': ' + monday_date.strftime("%d/%m/%Y") + ' - ' +
+                      end_date.strftime("%d/%m/%Y"), styles['Normal']),
+            Spacer(0, 12)
+        ]
+
+        headers = ['', _('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'), _('Friday'), _('Saturday')]
+        data = [headers] + table
+        t = Table(data)
+
+        t.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, 0), 'Courier-Bold'),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+        ]))
+
+        elements.append(t)
+
+        doc.build(elements)
+
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename=str(room) + '.pdf')
 
 
 class TimetableGeneralPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):

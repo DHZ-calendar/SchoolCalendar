@@ -33,6 +33,9 @@
             <h5>{% trans 'Course timetable' %}</h5>
         </div>
         <div class="col text-center">
+            <h5>{% trans 'Room timetable' %}</h5>
+        </div>
+        <div class="col text-center">
             <h5>{% trans 'General timetable' %}</h5>
         </div>
     </div>
@@ -43,6 +46,10 @@
         </div>
         <div class="col text-center">
             <select id="courses" class="form-control form-control-custom" onchange="getClassYears()">
+            </select>
+        </div>
+        <div class="col text-center">
+            <select id="rooms" class="form-control form-control-custom">
             </select>
         </div>
         <div class="col text-center">
@@ -78,6 +85,16 @@
             </a>
         </div>
         <div class="col text-center">
+            <a href="#" class="btn btn-danger" role="button" aria-pressed="true" onclick="getRoomLink()">
+                {% trans 'Download PDF' %}
+                <svg class="bi bi-download" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd" d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"/>
+                  <path fill-rule="evenodd" d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"/>
+                  <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0v-8A.5.5 0 0 1 8 1z"/>
+                </svg>
+            </a>
+        </div>
+        <div class="col text-center">
 
         </div>
     </div>
@@ -97,6 +114,7 @@
     function getEntities(){
         getTeachers();
         getCourses();
+        getRooms();
     }
 
     function getTeachers(){
@@ -124,6 +142,21 @@
             for(let course of data){
                 $("#courses").append(`
                     <option value="${course.id}">${course.year} ${course.section}</option>
+                `);
+            }
+        });
+    }
+
+    function getRooms(){
+        let url = "{% url 'room-list' %}";
+        let data = {
+            'school_year': $('#school_year').val()
+        };
+        $.get(url, data=data, function(data) {
+            $("#rooms").empty();
+            for(let room of data){
+                $("#rooms").append(`
+                    <option value="${room.id}">${room.name}</option>
                 `);
             }
         });
@@ -161,6 +194,24 @@
         let url = "{% url 'timetable_course_pdf_report-view' 1234 9999 '0000-00-00' %}"
             .replace('1234', school_year)
             .replace('9999', course)
+            .replace('0000-00-00', date);
+
+        window.location.href = url;
+    }
+    function getRoomLink(){
+        if ($("#date").val() == ''){
+            alert("{% trans 'Select a date!' %}");
+            return;
+        }
+
+        let date = moment($("#date").val(), 'DD-MM-YYYY');
+        //get the monday of the week
+        date = date.day(1).format('YYYY-MM-DD');
+        let school_year = $('#school_year').val();
+        let room = $('#rooms').val();
+        let url = "{% url 'timetable_room_pdf_report-view' 1234 9999 '0000-00-00' %}"
+            .replace('1234', school_year)
+            .replace('9999', room)
             .replace('0000-00-00', date);
 
         window.location.href = url;
