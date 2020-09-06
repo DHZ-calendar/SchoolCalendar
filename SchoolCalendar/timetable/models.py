@@ -146,7 +146,7 @@ class Course(models.Model):
         """
         :return: classes as 1 A, 2 Bord and so on (according to what year and section are like)
         """
-        return "{} {}, {}".format(str(self.year), self.section, str(self.school_year))
+        return "{} {}, {}".format(str(self.year), self.section, str(self.hour_slots_group.school_year))
 
 
 class AbsenceBlock(models.Model):
