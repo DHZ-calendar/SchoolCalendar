@@ -9,7 +9,7 @@
 {% block body %}
 <div class="container">
     <div class="row">
-        <h1 class="col text-center">{% trans 'Hour Slot' %}</h1>
+        <h1 class="col text-center">{% trans 'Hour slots group' %}</h1>
     </div>
     <div class="row">
         <div class="col">
@@ -32,15 +32,4 @@
         </form>
     </div>
 </div>
-
-
-    <script>
-        $('.timepicker').timepicker({
-                minuteStep: 1,
-                appendWidgetTo: 'body',
-                showSeconds: false,
-                showMeridian: false,
-                defaultTime: false
-            });
-    </script>
 {% endblock %}

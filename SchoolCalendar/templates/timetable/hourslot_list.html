@@ -12,13 +12,16 @@
         <h1 class="col text-center">{% trans "Hour Slots" %}</h1>
     </div>
     <div class="row">
+        <p class="col text-center">Group name: <b id="group_name"></b></p>
+    </div>
+    <div class="row">
         <div class="col">
-            {% trans 'School year:' %}
-            <select id="school_year" class="form-control form-control-custom" onchange="getHourSlots()">
-                {% for year in school_years %}
-                    <option value="{{ year.id }}">{{ year }}</option>
-                {% endfor %}
-            </select>
+            <a class="btn btn-primary" href="{% url 'hourslotsgroup-listview' %}" role="button">
+                <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-left-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3.86 8.753l5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
+                </svg>
+                {% trans 'Back' %}
+            </a>
         </div>
         <div class="col">
             {% trans 'Day of week:' %}
@@ -67,13 +70,30 @@
 
 {% block script %}
     $(document).ready(async () => {
-        await getHourSlots();
+        //getting the group param
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const hour_slots_group = urlParams.get('hour_slots_group');
+
+        await getHourSlotsGroupName(hour_slots_group);
+        await getHourSlots(hour_slots_group);
     });
 
-    async function getHourSlots(){
+    async function getHourSlotsGroupName(hour_slots_group){
+        let url = _URL['hour_slots_group'] + hour_slots_group;
+        try{
+            let data = await $.get(url);
+            $('#group_name').text(data.name);
+        }
+        catch{
+            console.log("No data");
+        }
+    }
+
+    async function getHourSlots(hour_slots_group){
         let url = _URL['hour_slots'];
         let data = {
-            'school_year': $('#school_year').val(),
+            'hour_slots_group': hour_slots_group,
             'day_of_week': $('#day_of_week').val()
         };
         $('#table-body').empty();
@@ -114,6 +134,7 @@
     _URL = {
         'hour_slots': "{% url 'hour_slot-list' %}",
         'hour_slots_edit': "{% url 'hourslot-edit' 1234 %}",
-        'hour_slots_delete': "{% url 'hourslot-delete' 1234 %}"
+        'hour_slots_delete': "{% url 'hourslot-delete' 1234 %}",
+        'hour_slots_group': "{% url 'hour_slots_group-list' %}"
     };
 {% endblock %}

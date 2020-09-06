@@ -8,7 +8,7 @@ from rest_framework.serializers import HyperlinkedModelSerializer, ModelSerializ
 import datetime
 
 from timetable.models import Teacher, Holiday, Stage, AbsenceBlock, Assignment, HoursPerTeacherInClass, HourSlot, \
-    Course, Subject, Room, TeachersYearlyLoad, CoursesYearlyLoad
+    Course, Subject, Room, TeachersYearlyLoad, CoursesYearlyLoad, HourSlotsGroup
 from timetable import utils
 
 
@@ -330,7 +330,7 @@ class RoomSerializer(ModelSerializer):
 class CourseSerializer(ModelSerializer):
     class Meta:
         model = Course
-        fields = ['id', 'year', 'school', 'school_year', 'section']
+        fields = ['id', 'year', 'section', 'hour_slots_group']
 
 
 class TeachersYearlyLoadSerializer(ModelSerializer):
@@ -383,7 +383,17 @@ class HourSlotSerializer(ModelSerializer):
 
     class Meta:
         model = HourSlot
-        fields = ['id', 'hour_number', 'starts_at', 'ends_at', 'school', 'school_year', 'day_of_week', 'legal_duration']
+        fields = ['id', 'hour_number', 'starts_at', 'ends_at', 'hour_slots_group', 'day_of_week', 'legal_duration']
+
+
+class HourSlotsGroupSerializer(ModelSerializer):
+    """
+    Serializer for Hour Slots Groups.
+    """
+
+    class Meta:
+        model = HourSlotsGroup
+        fields = ['id', 'name', 'school_year']
 
 
 class HoursPerTeacherInClassSerializer(ModelSerializer):
@@ -418,7 +428,6 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
                                                 course=obj.course,
                                                 subject=obj.subject,
                                                 school=obj.school,
-                                                course__school_year=obj.course.school_year,
                                                 bes=False,
                                                 co_teaching=False).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
@@ -430,8 +439,8 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
         for el in assignments:
             el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
 
-        hours_slots = HourSlot.objects.filter(school=obj.school,
-                                              school_year=obj.course.school_year
+        hours_slots = HourSlot.objects.filter(hour_slots_group__school=obj.school,
+                                              hour_slots_group__school_year=obj.course.hour_slots_group.school_year
                                               ).values("day_of_week",
                                                        "starts_at",
                                                        "ends_at",
@@ -455,7 +464,6 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
                                                 course=obj.course,
                                                 subject=obj.subject,
                                                 school=obj.school,
-                                                course__school_year=obj.course.school_year,
                                                 bes=True,
                                                 co_teaching=False).values('date__week_day', 'hour_start', 'hour_end')
 
@@ -468,8 +476,8 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
         for el in assignments:
             el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
 
-        hours_slots = HourSlot.objects.filter(school=obj.school,
-                                              school_year=obj.course.school_year
+        hours_slots = HourSlot.objects.filter(hour_slots_group__school=obj.school,
+                                              hour_slots_group__school_year=obj.course.hour_slots_group.school_year
                                               ).values("day_of_week",
                                                        "starts_at",
                                                        "ends_at",
@@ -494,7 +502,6 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
                                                 course=obj.course,
                                                 subject=obj.subject,
                                                 school=obj.school,
-                                                course__school_year=obj.course.school_year,
                                                 co_teaching=True).values('date__week_day', 'hour_start', 'hour_end')
 
         # Filter in a time interval
@@ -506,8 +513,8 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
         for el in assignments:
             el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
 
-        hours_slots = HourSlot.objects.filter(school=obj.school,
-                                              school_year=obj.course.school_year
+        hours_slots = HourSlot.objects.filter(hour_slots_group__school=obj.school,
+                                              hour_slots_group__school_year=obj.course.hour_slots_group.school_year
                                               ).values("day_of_week",
                                                        "starts_at",
                                                        "ends_at",
@@ -549,8 +556,8 @@ class AssignmentSerializer(ModelSerializer):
             day_of_week=obj.date.weekday(),
             starts_at=obj.hour_start,
             ends_at=obj.hour_end,
-            school=obj.school,
-            school_year=obj.course.school_year
+            hour_slots_group__school=obj.school,
+            hour_slots_group__school_year=obj.course.hour_slots_group.school_year
         )
         if el:
             return el[0].id

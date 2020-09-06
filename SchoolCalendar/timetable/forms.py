@@ -7,7 +7,8 @@ from django.utils.translation import gettext_lazy as _
 
 from timetable import models
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
-    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad, CoursesYearlyLoad, HourSlotsGroup
+    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad, CoursesYearlyLoad, HourSlotsGroup, \
+    HourSlotsGroup
 from timetable.utils import get_school_from_user, assign_html_style_to_visible_forms_fields, generate_random_password, \
     assign_translated_labels_to_form_fields
 
@@ -326,6 +327,18 @@ class CourseForm(BaseFormWithHourSlotsGroupCheck):
         fields = ['year', 'section', 'hour_slots_group']
 
 
+class HourSlotsGroupForm(BaseFormWithSchoolCheck):
+    school_year = forms.ModelChoiceField(queryset=SchoolYear.objects.all().order_by('-year_start'))
+
+    def __init__(self, *args, **kwargs):
+        super(HourSlotsGroupForm, self).__init__(*args, **kwargs)
+        assign_html_style_to_visible_forms_fields(self)
+
+    class Meta:
+        model = HourSlotsGroup
+        fields = ['name', 'school', 'school_year']
+
+
 class HourSlotForm(BaseFormWithHourSlotsGroupCheck):
     starts_at = forms.TimeField(
         input_formats=['%H:%M'],
@@ -374,7 +387,6 @@ class HourSlotForm(BaseFormWithHourSlotsGroupCheck):
         # TODO: add tests for this check!
         conflicting_time_interval = HourSlot.objects.filter(
             hour_slots_group=self.cleaned_data['hour_slots_group'],
-            school_year=self.cleaned_data['school_year'],
             day_of_week=day_of_week
         ).filter(
             # Conflicting interval is when the start of the new interval is above the end of an existing one,

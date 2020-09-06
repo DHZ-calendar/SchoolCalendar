@@ -8,7 +8,7 @@ from datetime import datetime
 from timetable import utils
 from timetable.utils import get_school_from_user, convert_weekday_into_0_6_format
 from timetable.models import Holiday, Stage, AbsenceBlock, Teacher, AdminSchool, HourSlot, HoursPerTeacherInClass, \
-    Course, Assignment, Subject, Room, TeachersYearlyLoad, CoursesYearlyLoad
+    Course, Assignment, Subject, Room, TeachersYearlyLoad, CoursesYearlyLoad, HourSlotsGroup
 
 
 class TeacherFromSameSchoolFilterBackend(BaseFilterBackend):
@@ -29,6 +29,16 @@ class CourseFromSameSchoolFilterBackend(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         school = get_school_from_user(request.user)
         return queryset.filter(course__school=school.id)
+
+
+class HourSlotsGroupFromSameSchoolFilterBackend(BaseFilterBackend):
+    """
+    Get all hour_slots_groups in the school of the user logged
+    """
+
+    def filter_queryset(self, request, queryset, view):
+        school = get_school_from_user(request.user)
+        return queryset.filter(hour_slots_group__school=school.id)
 
 
 class QuerysetFromSameSchool(BaseFilterBackend):
@@ -56,7 +66,7 @@ class StageFilter(FilterSet):
     school_year = NumberFilter(field_name='school_year', method='school_year_filter')
 
     def school_year_filter(self, queryset, name, value):
-        return queryset.filter(course__school_year__id=value)
+        return queryset.filter(course__hour_slots_group__school_year__id=value)
 
     class Meta:
         model = Stage
@@ -93,20 +103,31 @@ class CoursesYearlyLoadFilter(FilterSet):
 
 class HourSlotFilter(FilterSet):
     school_year = NumberFilter(field_name='school_year', method='school_year_filter')
+    course = NumberFilter(field_name='course', method='course_filter')
 
     def school_year_filter(self, queryset, name, value):
         return queryset.filter(hour_slots_group__school_year__id=value)
 
+    def course_filter(self, queryset, name, value):
+        hour_slots_group = Course.objects.get(id=value).hour_slots_group
+        return queryset.filter(hour_slots_group__id=hour_slots_group.id)
+
     class Meta:
         model = HourSlot
-        fields = ['school_year', 'day_of_week']
+        fields = ['school_year', 'day_of_week', 'course', 'hour_slots_group']
+
+
+class HourSlotsGroupFilter(FilterSet):
+    class Meta:
+        model = HourSlotsGroup
+        fields = ['school_year', 'name']
 
 
 class HoursPerTeacherInClassFilter(FilterSet):
     school_year = NumberFilter(field_name='school_year', method='school_year_filter')
 
     def school_year_filter(self, queryset, name, value):
-        return queryset.filter(course__school_year__id=value)
+        return queryset.filter(course__hour_slots_group__school_year__id=value)
 
     class Meta:
         model = HoursPerTeacherInClass
@@ -141,7 +162,7 @@ class AssignmentFilter(FilterSet):
     school_year = NumberFilter(field_name='school_year', method='school_year_filter')
 
     def school_year_filter(self, queryset, name, value):
-        return queryset.filter(course__school_year__id=value)
+        return queryset.filter(course__hour_slots_group__school_year__id=value)
 
     class Meta:
         model = Assignment
@@ -171,7 +192,7 @@ class RoomFilter(FilterSet):
             # more teachers in the same course, in the same hour_slot and in the same room. Useful for co-teaching)
             # and we group them by room, course
             grouped_used_rooms = Assignment.objects.filter(school=school,
-                                                           course__school_year=school_year,
+                                                           course__hour_slots_group__school_year=school_year,
                                                            date=date,
                                                            room__isnull=False) \
                 .exclude(course=course) \

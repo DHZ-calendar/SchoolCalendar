@@ -127,7 +127,8 @@ function createExtraBlock(date, hourStart, hourEnd, deletable=false){
 async function getBlocks(){
     let url = _URL['hour_slot'];
     let data = {
-        'school_year': $('#school_year').val()
+        'school_year': $('#school_year').val(),
+        'course': $('#course_section').val()
     };
     try{
         data = await $.get(url, data=data);

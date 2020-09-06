@@ -10,13 +10,14 @@ from timetable.views.CRUD_views import SchoolCreate, TeacherCreate, AdminSchoolC
     SchoolDelete, TeacherDelete, AdminSchoolDelete, SchoolYearDelete, CourseDelete, HourSlotDelete, AbsenceBlockDelete, \
     HolidayDelete, StageDelete, SubjectDelete, HoursPerTeacherInClassDelete, RoomCreate, RoomUpdate, RoomDelete, \
     RoomList, TeachersYearlyLoadCreate, TeachersYearlyLoadUpdate, TeachersYearlyLoadDelete, TeachersYearlyLoadList, \
-    CoursesYearlyLoadCreate, CoursesYearlyLoadUpdate, CoursesYearlyLoadDelete, CoursesYearlyLoadList
+    CoursesYearlyLoadCreate, CoursesYearlyLoadUpdate, CoursesYearlyLoadDelete, CoursesYearlyLoadList, \
+    HourSlotsGroupCreate, HourSlotsGroupUpdate, HourSlotsGroupDelete, HourSlotsGroupList
 from timetable.views.rest_framework_views import TeacherViewSet, \
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
     AbsenceBlocksPerTeacherViewSet, TeacherTimetableViewSet, AbsenceBlockViewSet, \
     SubjectViewSet, RoomViewSet, TeacherSummaryViewSet, CourseSummaryViewSet, TeachersYearlyLoadViewSet, \
-    CoursesYearlyLoadViewSet, RoomTimetableViewSet
+    CoursesYearlyLoadViewSet, RoomTimetableViewSet, HourSlotsGroupViewSet
 from timetable.views.other_views import TimetableView, SubstituteTeacherView, TeacherTimetableView, \
     LoggedUserRedirectView, TeacherSummaryView, TeacherPDFReportView, SendInvitationTeacherEmailView, \
     SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView, \
@@ -35,6 +36,7 @@ router.register(r'rooms', RoomViewSet, basename='room')
 router.register(r'stages', StageViewSet, basename='stage')
 router.register(r'subjects', SubjectViewSet, basename='subject')
 router.register(r'hour_slots', HourSlotViewSet, basename='hour_slot')
+router.register(r'hour_slots_groups', HourSlotsGroupViewSet, basename='hour_slots_group')
 router.register(r'hour_per_teacher_in_class/?(start_date=\d\d\d\d-\d\d-\d\d)?(end_date=\d\d\d\d-\d\d-\d\d)?',
                 HoursPerTeacherInClassViewSet, basename='hour_per_teacher_in_class')
 router.register(r'assignments', AssignmentViewSet, basename='assignments')
@@ -107,6 +109,10 @@ urlpatterns = [
     path('course/<pk>/edit/', CourseUpdate.as_view(), name='course-edit'),
     path('course/<pk>/delete/', CourseDelete.as_view(), name='course-delete'),
     path('course/', CourseList.as_view(), name='course-listview'),
+    path('hour_slots_group/add/', HourSlotsGroupCreate.as_view(), name='hourslotsgroup-add'),
+    path('hour_slots_group/<pk>/edit/', HourSlotsGroupUpdate.as_view(), name='hourslotsgroup-edit'),
+    path('hour_slots_group/<pk>/delete/', HourSlotsGroupDelete.as_view(), name='hourslotsgroup-delete'),
+    path('hour_slots_group/', HourSlotsGroupList.as_view(), name='hourslotsgroup-listview'),
     path('hour_slot/add/', HourSlotCreate.as_view(), name='hourslot-add'),
     path('hour_slot/<pk>/edit/', HourSlotUpdate.as_view(), name='hourslot-edit'),
     path('hour_slot/<pk>/delete/', HourSlotDelete.as_view(), name='hourslot-delete'),

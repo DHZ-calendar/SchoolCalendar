@@ -7,17 +7,17 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.core.exceptions import ObjectDoesNotExist
 
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
-    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad, CoursesYearlyLoad
+    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad, CoursesYearlyLoad, HourSlotsGroup
 from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, CourseSectionOnlySerializer, \
     HolidaySerializer, StageSerializer, HourSlotSerializer, HoursPerTeacherInClassSerializer, AssignmentSerializer, \
     AbsenceBlockSerializer, TeacherSubstitutionSerializer, SubjectSerializer, ReplicationConflictsSerializer, \
     RoomSerializer, TeacherSummarySerializer, CourseSummarySerializer, TeachersYearlyLoadSerializer, \
-    CoursesYearlyLoadSerializer
+    CoursesYearlyLoadSerializer, HourSlotsGroupSerializer
 from timetable.permissions import SchoolAdminCanWriteDelete, TeacherCanView
 from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
     StageFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
     AssignmentFilter, AbsenceBlockFilter, RoomFilter, TeachersYearlyLoadFilter, CoursesYearlyLoadFilter, \
-    CourseFromSameSchoolFilterBackend
+    CourseFromSameSchoolFilterBackend, HourSlotsGroupFromSameSchoolFilterBackend, HourSlotsGroupFilter
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 
 from timetable import utils
@@ -96,7 +96,7 @@ class CourseYearOnlyListViewSet(ListModelMixin, GenericViewSet):
     queryset = Course.objects.all()  # I think it gets overridden by get_queryset
     permission_classes = [IsAuthenticated]
     filterset_class = CourseYearOnlyFilter
-    filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, HourSlotsGroupFromSameSchoolFilterBackend)
     ordering = ['year']
 
     def get_queryset(self):
@@ -105,7 +105,7 @@ class CourseYearOnlyListViewSet(ListModelMixin, GenericViewSet):
         """
         school = utils.get_school_from_user(self.request.user)
         if school:
-            return Course.objects.filter(school=school).values('year').distinct()
+            return Course.objects.filter(hour_slots_group__school=school).values('year').distinct()
 
 
 class CourseSectionOnlyListViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin,
@@ -114,7 +114,7 @@ class CourseSectionOnlyListViewSet(RetrieveModelMixin, UpdateModelMixin, Destroy
     queryset = Course.objects.all()
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filterset_class = CourseSectionOnlyFilter
-    filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, HourSlotsGroupFromSameSchoolFilterBackend)
     ordering = ['year', 'section']
 
 
@@ -136,11 +136,20 @@ class StageViewSet(ListModelMixin, GenericViewSet):
     ordering = ['date_start', 'name']
 
 
+class HourSlotsGroupViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
+    queryset = HourSlotsGroup.objects.all()
+    serializer_class = HourSlotsGroupSerializer
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
+    filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool)
+    filterset_class = HourSlotsGroupFilter
+    ordering = ['school_year', 'name']
+
+
 class HourSlotViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
     queryset = HourSlot.objects.all()
     serializer_class = HourSlotSerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
-    filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool,)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, HourSlotsGroupFromSameSchoolFilterBackend)
     filterset_class = HourSlotFilter
     ordering = ['day_of_week', 'starts_at']
 
@@ -202,7 +211,7 @@ class TeacherAssignmentsViewSet(UserPassesTestMixin, ListModelMixin, GenericView
             return Assignment.objects.none()
 
         return Assignment.objects.filter(teacher=teacher,
-                                         course__school_year=school_year)
+                                         course__hour_slots_group__school_year=school_year)
 
 
 class AbsenceBlocksPerTeacherViewSet(UserPassesTestMixin, ListModelMixin, GenericViewSet):
@@ -240,7 +249,7 @@ class AbsenceBlocksPerTeacherViewSet(UserPassesTestMixin, ListModelMixin, Generi
             return Assignment.objects.none()
 
         return AbsenceBlock.objects.filter(teacher=teacher,
-                                           hour_slot__school_year=school_year)
+                                           hour_slot__hour_slots_group__school_year=school_year)
 
 
 class TeacherTimetableViewSet(ListModelMixin, GenericViewSet):

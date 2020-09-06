@@ -6,10 +6,10 @@ from django.urls import reverse_lazy
 from timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYearForm, CourseForm, HourSlotForm, \
     AbsenceBlockForm, HolidayForm, StageForm, SubjectForm, HoursPerTeacherInClassForm, \
     AssignmentForm, TeacherCreationForm, AdminSchoolCreationForm, RoomForm, HourSlotCreateForm, TeachersYearlyLoadForm, \
-    CoursesYearlyLoadForm, AbsenceBlockCreateForm
+    CoursesYearlyLoadForm, AbsenceBlockCreateForm, HourSlotsGroupForm
 from timetable.mixins import AdminSchoolPermissionMixin, SuperUserPermissionMixin, TeacherPermissionMixin
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
-    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad, CoursesYearlyLoad
+    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad, CoursesYearlyLoad, HourSlotsGroup
 
 
 class CreateViewWithUser(CreateView):
@@ -243,6 +243,32 @@ class CoursesYearlyLoadDelete(AdminSchoolPermissionMixin, DeleteView):
 
 class CoursesYearlyLoadList(AdminSchoolPermissionMixin, TemplateViewWithSchoolYears):
     template_name = 'timetable/coursesyearlyload_list.html'
+
+
+# HourSlotsGroup CRUD
+class HourSlotsGroupCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
+    model = HourSlotsGroup
+    form_class = HourSlotsGroupForm
+    template_name = 'timetable/hourslotsgroup_form.html'
+    success_url = reverse_lazy('hourslotsgroup-listview')
+
+
+class HourSlotsGroupUpdate(AdminSchoolPermissionMixin, UpdateViewWithUser):
+    model = HourSlotsGroup
+    form_class = HourSlotsGroupForm
+    template_name = 'timetable/hourslotsgroup_form.html'
+    success_url = reverse_lazy('hourslotsgroup-listview')
+
+
+class HourSlotsGroupDelete(AdminSchoolPermissionMixin, DeleteView):
+    model = HourSlotsGroup
+    form_class = HourSlotsGroupForm
+    template_name = 'timetable/delete_form.html'
+    success_url = reverse_lazy('hourslotsgroup-listview')
+
+
+class HourSlotsGroupList(AdminSchoolPermissionMixin, TemplateViewWithSchoolYears):
+    template_name = 'timetable/hourslotsgroup_list.html'
 
 
 # CRUD HourSlot
