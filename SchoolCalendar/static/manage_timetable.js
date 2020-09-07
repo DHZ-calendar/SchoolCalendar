@@ -437,17 +437,19 @@ async function setLockedBlocksTeacher(teacherId){
     };
     try{
         data = await $.get(url, data=data);
-        for(let block of data){
-            let blockId = block.hour_slot;
-            let create = true;
-            if(blockId === null){
-                if(!extraBlockExists(block.date, block.hour_start, block.hour_end))
-                    create = false; 
+        for(let assign of data){
+            for(let blockId of assign.conflicting_hour_slots){
+                if(blockId in timetable.blocks) {
+                    timetable.getBlock(blockId).setState('conflict');
+                    timetable.getBlock(blockId).setOnClick();
+                }
             }
-
-            if(create){
-                timetable.getBlock(blockId).setState('conflict');
-                timetable.getBlock(blockId).setOnClick();
+            if(assign.hour_slot === null){ // it's an extra hour_slot
+                //TODO: we should manage time conflicts in extra hour_slots
+                if(extraBlockExists(assign.date, assign.hour_start, assign.hour_end)){
+                    timetable.getBlock(assign.hour_slot).setState('conflict');
+                    timetable.getBlock(assign.hour_slot).setOnClick();
+                }
             }
         }    
     }

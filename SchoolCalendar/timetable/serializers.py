@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.http import JsonResponse
 from django.utils.translation import gettext as _
 
@@ -533,6 +534,7 @@ class AssignmentSerializer(ModelSerializer):
     subject = SubjectSerializer(read_only=True)
     subject_id = PrimaryKeyRelatedField(write_only=True, queryset=Subject.objects.all(), source='subject')
     hour_slot = SerializerMethodField(read_only=True)
+    conflicting_hour_slots = SerializerMethodField(read_only=True)
     course_id = PrimaryKeyRelatedField(write_only=True, queryset=Course.objects.all(), source='course')
     course = CourseSerializer(read_only=True)
     room_id = PrimaryKeyRelatedField(write_only=True, required=False, queryset=Room.objects.all(), source='room')
@@ -562,6 +564,22 @@ class AssignmentSerializer(ModelSerializer):
         if el:
             return el[0].id
         return None
+
+    def get_conflicting_hour_slots(self, obj, *args, **kwargs):
+        """
+        Returns all the hour_slots of the school that can create a school conflict (from every hour_slots_group)
+        :param obj: the assignment instance
+        :return:
+        """
+        conflicts = HourSlot.objects.filter(
+            day_of_week=obj.date.weekday(),
+            hour_slots_group__school=obj.school,
+            hour_slots_group__school_year=obj.course.hour_slots_group.school_year
+        ).filter(Q(starts_at__lte=obj.hour_start, ends_at__gt=obj.hour_start) |
+                 Q(starts_at__lt=obj.hour_end, ends_at__gte=obj.hour_end) |
+                 Q(starts_at__gt=obj.hour_start, ends_at__lt=obj.hour_end))  # the hour_slot's time is included in the assignment's time
+
+        return conflicts.values_list('id', flat=True)
 
     def get_eventual_substitute(self, obj, *args, **kwargs):
         """
