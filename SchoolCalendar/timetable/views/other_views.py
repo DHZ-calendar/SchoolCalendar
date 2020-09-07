@@ -126,7 +126,7 @@ class CheckWeekReplicationView(UserPassesTestMixin, View):
                 # Return all assignments from the same course or teacher that would collide in the future.
                 # excluding the assignment in the url.
                 conflicts = Assignment.objects.filter(school=a.school,
-                                                      course__school_year=a.course.school_year,
+                                                      course__hour_slots_group__school_year=a.course.hour_slots_group.school_year,
                                                       # _week_day returns dates Sun-Sat (1,7), while weekday (Mon, Sun) (0,6)
                                                       date__week_day=(a.date.weekday() + 2) % 7,
                                                       hour_start=a.hour_start) \
@@ -216,7 +216,7 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
                 # There can't be conflicts among the newly created assignments and the teaching hours of the same teacher!
                 # The same is not true for conflicts of the same class.
                 conflicts = Assignment.objects.filter(school=a.school,
-                                                      course__school_year=a.course.school_year,
+                                                      course__hour_slots_group__school_year=a.course.hour_slots_group.school_year,
                                                       hour_start=a.hour_start,
                                                       hour_end=a.hour_end,
                                                       date__week_day=((a.date.weekday() + 2) % 7),
@@ -256,7 +256,7 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
             school = utils.get_school_from_user(request.user)
             assign_to_del = Assignment.objects.filter(school=school,
                                                       course=course_pk,
-                                                      course__school_year=school_year_pk,
+                                                      course__hour_slots_group__school_year=school_year_pk,
                                                       date__gte=from_date,
                                                       date__lte=to_date). \
                 exclude(id__in=assignments)  # avoid removing replicating assignments
@@ -269,11 +269,11 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
                 while d <= to_date:
                     if d != a.date and d.weekday() == a.date.weekday() and not \
                             Holiday.objects.filter(school=a.school,
-                                                   school_year=a.course.school_year,
+                                                   school_year=a.course.hour_slots_group.school_year,
                                                    date_end__gte=d,
                                                    date_start__lte=d).exists() and not \
                             Stage.objects.filter(school=a.school,
-                                                 course__school_year=a.course.school_year,
+                                                 course__hour_slots_group__school_year=a.course.hour_slots_group.school_year,
                                                  date_start__lte=d,
                                                  date_end__gte=d,
                                                  course=a.course):
