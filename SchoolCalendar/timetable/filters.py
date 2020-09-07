@@ -28,7 +28,7 @@ class CourseFromSameSchoolFilterBackend(BaseFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         school = get_school_from_user(request.user)
-        return queryset.filter(course__school=school.id)
+        return queryset.filter(course__hour_slots_group__school=school.id)
 
 
 class HourSlotsGroupFromSameSchoolFilterBackend(BaseFilterBackend):
@@ -94,7 +94,7 @@ class CoursesYearlyLoadFilter(FilterSet):
     school_year = NumberFilter(field_name='school_year', method='school_year_filter')
 
     def school_year_filter(self, queryset, name, value):
-        return queryset.filter(course__school_year__id=value)
+        return queryset.filter(course__hour_slots_group__school_year__id=value)
 
     class Meta:
         model = CoursesYearlyLoad

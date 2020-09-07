@@ -246,9 +246,9 @@ class CoursesYearlyLoad(models.Model):
     # TODO: Do we want the co teaching hours in a course yearly load? :/
 
     def __str__(self):
-        return _("{} in {}: {} and {} of bes").format(str(self.course),
-                                                      self.yearly_load,
-                                                      self.yearly_load_bes)
+        return _("{}: {} and {} of bes").format(str(self.course),
+                                                self.yearly_load,
+                                                self.yearly_load_bes)
 
 
 class HoursPerTeacherInClass(models.Model):

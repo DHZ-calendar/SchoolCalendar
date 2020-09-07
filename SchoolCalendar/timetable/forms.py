@@ -111,7 +111,7 @@ class BaseFormWithCourseCheck(BaseFormWithUser):
     def __init__(self, user, *args, **kwargs):
         super(BaseFormWithCourseCheck, self).__init__(user, *args, **kwargs)
 
-        self.fields['course'].queryset = Course.objects.filter(school__id=get_school_from_user(user).id) \
+        self.fields['course'].queryset = Course.objects.filter(hour_slots_group__school__id=get_school_from_user(user).id) \
             .order_by('year', 'section')
 
     def clean_course(self):
@@ -120,9 +120,9 @@ class BaseFormWithCourseCheck(BaseFormWithUser):
         Somewhere else we should check that the user logged has enough permissions to do anything with a course.
         :return:
         """
-        if get_school_from_user(self.user) != self.cleaned_data['course'].school:
+        if get_school_from_user(self.user) != self.cleaned_data['course'].hour_slots_group.school:
             self.add_error(None, forms.ValidationError(_('The course {} is not in the school ({}).'.format(
-                self.cleaned_data['course'], self.cleaned_data['course'].school
+                self.cleaned_data['course'], self.cleaned_data['course'].hour_slots_group.school
             ))))
         return self.cleaned_data['course']
 
