@@ -58,6 +58,7 @@ def create_hourSlotsGroup_per_school_and_school_year(apps, schema_editor):
     HourSlotsGroup.objects.filter(name='Default').delete()
 
 
+
 def remove_hourSlotsGroup_per_school_and_school_year(apps, schema_editor):
     """
     This should not be necessary. All HourSlotsGroups are deleted in the remove_default_hourSlotsGroup method.
