@@ -17,7 +17,7 @@ def restore_FK(apps, schema_editor):
         h.school_year = h.hour_slots_group.school_year
         h.school = h.hour_slots_group.school
         h.save()
-        
+
 
 class Migration(migrations.Migration):
 
