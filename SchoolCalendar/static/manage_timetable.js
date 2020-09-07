@@ -23,7 +23,6 @@ async function loadData(loadAssign=true, resetTeachers=true){
 async function loadTeacherData(){
     timetable.deleteAllEvents();
     timetable.deleteAllBlocks();
-    await getBlocks();
 
     let startDate = currentDate;
     let endDate = moment(startDate).add(6, 'days').toDate();
@@ -37,7 +36,6 @@ async function loadTeacherData(){
 async function loadRoomData(){
     timetable.deleteAllEvents();
     timetable.deleteAllBlocks();
-    await getBlocks();
 
     let startDate = currentDate;
     let endDate = moment(startDate).add(6, 'days').toDate();
@@ -283,7 +281,8 @@ async function getAssignmentsGeneric(url, startDate, endDate, showTeacher=true){
         data = await $.get(url, data=data);
         for(let assign of data){
             let blockId = assign.hour_slot;
-            if(blockId === null){
+            let blockCreated = blockId in timetable.blocks; //for room and teacher timetable, the blocks are not created (due to hourSlotsGroups)
+            if(blockId === null || !blockCreated){
                 blockId = createExtraBlock(assign.date, assign.hour_start, assign.hour_end).id;
             }
 
