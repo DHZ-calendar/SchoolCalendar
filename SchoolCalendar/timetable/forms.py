@@ -590,7 +590,7 @@ class HolidayForm(BaseFormWithSchoolCheck):
         return self.cleaned_data
 
 
-class StageForm(BaseFormWithCourseCheck, BaseFormWithSchoolCheck):
+class StageForm(BaseFormWithCourseCheck):
     date_start = forms.DateField(
         input_formats=['%Y-%m-%d'],
         widget=forms.DateInput(
@@ -614,7 +614,7 @@ class StageForm(BaseFormWithCourseCheck, BaseFormWithSchoolCheck):
 
     class Meta:
         model = Stage
-        fields = ['date_start', 'date_end', 'course', 'name', 'school']
+        fields = ['date_start', 'date_end', 'course', 'name']
 
     def clean(self):
         """
@@ -660,19 +660,18 @@ class CoursesYearlyLoadForm(BaseFormWithCourseCheck):
         fields = ['course', 'yearly_load', 'yearly_load_bes']
 
 
-class HoursPerTeacherInClassForm(BaseFormWithSubjectCheck, BaseFormWithCourseCheck, BaseFormWithTeacherCheck,
-                                 BaseFormWithSchoolCheck):
+class HoursPerTeacherInClassForm(BaseFormWithSubjectCheck, BaseFormWithCourseCheck, BaseFormWithTeacherCheck):
     def __init__(self, user, *args, **kwargs):
         super(HoursPerTeacherInClassForm, self).__init__(user, *args, **kwargs)
         assign_html_style_to_visible_forms_fields(self)
 
     class Meta:
         model = HoursPerTeacherInClass
-        fields = ['course', 'subject', 'teacher', 'school', 'hours', 'hours_bes', 'hours_co_teaching']
+        fields = ['course', 'subject', 'teacher', 'hours', 'hours_bes', 'hours_co_teaching']
 
 
 class AssignmentForm(BaseFormWithSubjectCheck, BaseFormWithCourseCheck, BaseFormWithTeacherCheck,
-                     BaseFormWithSchoolCheck, BaseFormWithRoomCheck):
+                     BaseFormWithRoomCheck):
     date = forms.DateField(
         input_formats=['%Y-%m-%d'],
         widget=forms.DateInput(
@@ -699,7 +698,7 @@ class AssignmentForm(BaseFormWithSubjectCheck, BaseFormWithCourseCheck, BaseForm
 
     class Meta:
         model = Assignment
-        fields = ['teacher', 'course', 'subject', 'school', 'date', 'hour_start', 'hour_end', 'bes',
+        fields = ['teacher', 'course', 'subject', 'date', 'hour_start', 'hour_end', 'bes',
                   'substitution', 'co_teaching', 'absent', 'room']
 
     def clean(self):
@@ -721,7 +720,6 @@ class AssignmentForm(BaseFormWithSubjectCheck, BaseFormWithCourseCheck, BaseForm
                 hours_teacher_in_class = HoursPerTeacherInClass.objects.filter(
                     teacher=self.cleaned_data['teacher'],
                     course__school_year=self.cleaned_data['course'].school_year,
-                    school=self.cleaned_data['school'],
                     course=self.cleaned_data['course'],
                     subject=self.cleaned_data['subject'])
                 if not hours_teacher_in_class:
@@ -743,7 +741,6 @@ class AssignmentForm(BaseFormWithSubjectCheck, BaseFormWithCourseCheck, BaseForm
                                                                  'in this course.')))
 
             conflicts_teacher = Assignment.objects.filter(
-                school=self.cleaned_data['school'],
                 teacher=self.cleaned_data['teacher'],
                 course__school_year=self.cleaned_data['course'].school_year,
                 hour_start=self.cleaned_data['hour_start'],
@@ -759,7 +756,6 @@ class AssignmentForm(BaseFormWithSubjectCheck, BaseFormWithCourseCheck, BaseForm
                 ))))
             if self.cleaned_data['room'] is not None:
                 conflict_room = Assignment.objects.filter(
-                    school=self.cleaned_data['school'],
                     room=self.cleaned_data['room'],
                     course__school_year=self.cleaned_data['course'].school_year,
                     hour_start=self.cleaned_data['hour_start'],

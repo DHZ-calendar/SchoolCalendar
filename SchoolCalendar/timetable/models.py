@@ -3,7 +3,7 @@ from django.contrib.auth.models import User, UserManager, AbstractUser
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from queryable_properties.managers import QueryablePropertiesManager
-from queryable_properties.properties import queryable_property
+from queryable_properties.properties import queryable_property, SetterMixin, QueryableProperty
 
 # Create your models here.
 
@@ -24,6 +24,76 @@ class MyUser(User):
     Custom Subclass for User (in case we ever need it)
     """
     pass
+
+
+class SchoolFromHourSlotsGroupProperty(SetterMixin, QueryableProperty):
+    def get_value(self, obj):
+        return obj.hour_slots_group.school
+
+    def get_filter(self, cls, lookup, value):
+        if lookup != 'exact':
+            raise NotImplementedError()
+        return Q(hour_slots_group__school=value)
+
+
+class SchoolYearFromHourSlotsGroupProperty(SetterMixin, QueryableProperty):
+    def get_value(self, obj):
+        return obj.hour_slots_group.school_year
+
+    def get_filter(self, cls, lookup, value):
+        if lookup != 'exact':
+            raise NotImplementedError()
+        return Q(hour_slots_group__school_year=value)
+
+
+class SchoolFromHourSlotProperty(SetterMixin, QueryableProperty):
+    def get_value(self, obj):
+        return obj.hour_slot.school
+
+    def get_filter(self, cls, lookup, value):
+        if lookup != 'exact':
+            raise NotImplementedError()
+        return Q(hour_slot__school=value)
+
+
+class SchoolYearFromHourSlotProperty(SetterMixin, QueryableProperty):
+    def get_value(self, obj):
+        return obj.hour_slot.school_year
+
+    def get_filter(self, cls, lookup, value):
+        if lookup != 'exact':
+            raise NotImplementedError()
+        return Q(hour_slot__school_year=value)
+
+
+class SchoolFromCourseProperty(SetterMixin, QueryableProperty):
+    def get_value(self, obj):
+        return obj.course.school
+
+    def get_filter(self, cls, lookup, value):
+        if lookup != 'exact':
+            raise NotImplementedError()
+        return Q(course__school=value)
+
+
+class SchoolYearFromCourseProperty(SetterMixin, QueryableProperty):
+    def get_value(self, obj):
+        return obj.course.school_year
+
+    def get_filter(self, cls, lookup, value):
+        if lookup != 'exact':
+            raise NotImplementedError()
+        return Q(course__school_year=value)
+
+
+class SchoolFromTeacherProperty(SetterMixin, QueryableProperty):
+    def get_value(self, obj):
+        return obj.teacher.school
+
+    def get_filter(self, cls, lookup, value):
+        if lookup != 'exact':
+            raise NotImplementedError()
+        return Q(teacher__school=value)
 
 
 class School(models.Model):
@@ -124,27 +194,8 @@ class HourSlot(models.Model):
     hour_slots_group = models.ForeignKey(HourSlotsGroup, on_delete=models.CASCADE, null=False, blank=False,
                                          verbose_name=_("hour slots group"))
 
-    @queryable_property
-    def school(self):
-        return self.hour_slots_group.school
-
-    @school.filter
-    @classmethod
-    def school(cls, lookup, value):
-        if lookup != 'exact':
-            raise NotImplementedError()
-        return Q(hour_slots_group__school=value)
-
-    @queryable_property
-    def school_year(self):
-        return self.hour_slots_group.school_year
-
-    @school_year.filter
-    @classmethod
-    def school_year(cls, lookup, value):
-        if lookup != 'exact':
-            raise NotImplementedError()
-        return Q(hour_slots_group__school_year=value)
+    school = SchoolFromHourSlotsGroupProperty()
+    school_year = SchoolYearFromHourSlotsGroupProperty()
 
     objects = QueryablePropertiesManager()
 
@@ -169,27 +220,8 @@ class Course(models.Model):
     hour_slots_group = models.ForeignKey(HourSlotsGroup, on_delete=models.CASCADE, blank=False, null=False,
                                          verbose_name=_("hour slots group"))
 
-    @queryable_property
-    def school(self):
-        return self.hour_slots_group.school
-
-    @school.filter
-    @classmethod
-    def school(cls, lookup, value):
-        if lookup != 'exact':
-            raise NotImplementedError()
-        return Q(hour_slots_group__school=value)
-
-    @queryable_property
-    def school_year(self):
-        return self.hour_slots_group.school_year
-
-    @school_year.filter
-    @classmethod
-    def school_year(cls, lookup, value):
-        if lookup != 'exact':
-            raise NotImplementedError()
-        return Q(hour_slots_group__school_year=value)
+    school = SchoolFromHourSlotsGroupProperty()
+    school_year = SchoolYearFromHourSlotsGroupProperty()
 
     objects = QueryablePropertiesManager()
 
@@ -209,27 +241,8 @@ class AbsenceBlock(models.Model):
     hour_slot = models.ForeignKey(HourSlot, on_delete=models.CASCADE, null=False, blank=False,
                                   verbose_name=_("hour slot"))
 
-    @queryable_property
-    def school(self):
-        return self.hour_slot.school
-
-    @school.filter
-    @classmethod
-    def school(cls, lookup, value):
-        if lookup != 'exact':
-            raise NotImplementedError()
-        return Q(hour_slot__school=value)
-
-    @queryable_property
-    def school_year(self):
-        return self.hour_slot.school_year
-
-    @school_year.filter
-    @classmethod
-    def school_year(cls, lookup, value):
-        if lookup != 'exact':
-            raise NotImplementedError()
-        return Q(hour_slot__school_year=value)
+    school = SchoolFromHourSlotProperty()
+    school_year = SchoolYearFromHourSlotProperty()
 
     objects = QueryablePropertiesManager()
 
@@ -265,30 +278,10 @@ class Stage(models.Model):
     date_start = models.DateField(null=False, blank=False, verbose_name=_("start date"))
     date_end = models.DateField(null=False, blank=False, verbose_name=_("end date"))
     course = models.ForeignKey(Course, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("course"))
-    school = models.ForeignKey(School, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("school"))
     name = models.CharField(null=True, blank=True, max_length=256, verbose_name=_("name"))
 
-    #@queryable_property
-    #def school(self):
-    #    return self.course.school
-
-    #@school.filter
-    #@classmethod
-    #def school(cls, lookup, value):
-    #    if lookup != 'exact':
-    #        raise NotImplementedError()
-    #    return Q(course__school=value)
-
-    @queryable_property
-    def school_year(self):
-        return self.course.school_year
-
-    @school_year.filter
-    @classmethod
-    def school_year(cls, lookup, value):
-        if lookup != 'exact':
-            raise NotImplementedError()
-        return Q(course__school_year=value)
+    school = SchoolFromCourseProperty()
+    school_year = SchoolYearFromCourseProperty()
 
     objects = QueryablePropertiesManager()
 
@@ -326,16 +319,7 @@ class TeachersYearlyLoad(models.Model):
     school_year = models.ForeignKey(SchoolYear, null=False, blank=False, on_delete=models.CASCADE,
                                     verbose_name=_("school year"))
 
-    @queryable_property
-    def school(self):
-        return self.teacher.school
-
-    @school.filter
-    @classmethod
-    def school(cls, lookup, value):
-        if lookup != 'exact':
-            raise NotImplementedError()
-        return Q(teacher__school=value)
+    school = SchoolFromTeacherProperty()
 
     objects = QueryablePropertiesManager()
 
@@ -357,27 +341,8 @@ class CoursesYearlyLoad(models.Model):
     yearly_load_bes = models.IntegerField(null=False, blank=False, verbose_name=_("yearly load bes"))
     # TODO: Do we want the co teaching hours in a course yearly load? :/
 
-    @queryable_property
-    def school(self):
-        return self.course.school
-
-    @school.filter
-    @classmethod
-    def school(cls, lookup, value):
-        if lookup != 'exact':
-            raise NotImplementedError()
-        return Q(course__school=value)
-
-    @queryable_property
-    def school_year(self):
-        return self.course.school_year
-
-    @school_year.filter
-    @classmethod
-    def school_year(cls, lookup, value):
-        if lookup != 'exact':
-            raise NotImplementedError()
-        return Q(course__school_year=value)
+    school = SchoolFromCourseProperty()
+    school_year = SchoolYearFromCourseProperty()
 
     objects = QueryablePropertiesManager()
 
@@ -395,34 +360,14 @@ class HoursPerTeacherInClass(models.Model):
                                 verbose_name=_("teacher"))
     course = models.ForeignKey(Course, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("course"))
     subject = models.ForeignKey(Subject, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("subject"))
-    school = models.ForeignKey(School, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("school"))
 
     # A teacher has "normal" hours, "bes" hours and co-teaching hours.
     hours = models.IntegerField(null=False, blank=False, verbose_name=_("hours"))
     hours_bes = models.IntegerField(null=False, blank=False, verbose_name=_("hours BES"))
     hours_co_teaching = models.IntegerField(null=False, blank=False, verbose_name=_("Hours co-teaching"))
 
-    #@queryable_property
-    #def school(self):
-    #    return self.course.school
-
-    #@school.filter
-    #@classmethod
-    #def school(cls, lookup, value):
-    #    if lookup != 'exact':
-    #        raise NotImplementedError()
-    #    return Q(course__school=value)
-
-    @queryable_property
-    def school_year(self):
-        return self.course.school_year
-
-    @school_year.filter
-    @classmethod
-    def school_year(cls, lookup, value):
-        if lookup != 'exact':
-            raise NotImplementedError()
-        return Q(course__school_year=value)
+    school = SchoolFromCourseProperty()
+    school_year = SchoolYearFromCourseProperty()
 
     objects = QueryablePropertiesManager()
 
@@ -439,7 +384,6 @@ class Assignment(models.Model):
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("teacher"))
     course = models.ForeignKey(Course, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("course"))
     subject = models.ForeignKey(Subject, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("subject"))
-    school = models.ForeignKey(School, null=False, blank=False, on_delete=models.CASCADE, verbose_name=_("school"))
     room = models.ForeignKey(Room, null=True, blank=True, on_delete=models.CASCADE, verbose_name=_("room"))
 
     date = models.DateField(null=False, blank=False, verbose_name=_("date"))
@@ -456,27 +400,8 @@ class Assignment(models.Model):
     # it means that the substitution should not be considered when counting the total hours of substitutions
     free_substitution = models.BooleanField(null=False, blank=False, default=False, verbose_name=_("free substitution"))
 
-    #@queryable_property
-    #def school(self):
-    #    return self.course.school
-
-    #@school.filter
-    #@classmethod
-    #def school(cls, lookup, value):
-    #    if lookup != 'exact':
-    #        raise NotImplementedError()
-    #    return Q(course__school=value)
-
-    @queryable_property
-    def school_year(self):
-        return self.course.school_year
-
-    @school_year.filter
-    @classmethod
-    def school_year(cls, lookup, value):
-        if lookup != 'exact':
-            raise NotImplementedError()
-        return Q(course__school_year=value)
+    school = SchoolFromCourseProperty()
+    school_year = SchoolYearFromCourseProperty()
 
     objects = QueryablePropertiesManager()
 

@@ -276,21 +276,21 @@ class HourSlotCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
     model = HourSlot
     form_class = HourSlotCreateForm
     template_name = 'timetable/hourslot_form.html'
-    success_url = reverse_lazy('hourslot-listview')
+    success_url = reverse_lazy('hourslotsgroup-listview')
 
 
 class HourSlotUpdate(AdminSchoolPermissionMixin, UpdateViewWithUser):
     model = HourSlot
     form_class = HourSlotForm
     template_name = 'timetable/hourslot_form.html'
-    success_url = reverse_lazy('hourslot-listview')
+    success_url = reverse_lazy('hourslotsgroup-listview')
 
 
 class HourSlotDelete(AdminSchoolPermissionMixin, DeleteView):
     model = HourSlot
     form_class = HourSlotForm
     template_name = 'timetable/delete_form.html'
-    success_url = reverse_lazy('hourslot-listview')
+    success_url = reverse_lazy('hourslotsgroup-listview')
 
 
 class HourSlotList(AdminSchoolPermissionMixin, TemplateViewWithSchoolYears):
