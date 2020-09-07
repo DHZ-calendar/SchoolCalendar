@@ -192,7 +192,7 @@ class RoomFilter(FilterSet):
             # more teachers in the same course, in the same hour_slot and in the same room. Useful for co-teaching)
             # and we group them by room, course
             grouped_used_rooms = Assignment.objects.filter(school=school,
-                                                           course__hour_slots_group__school_year=school_year,
+                                                           school_year=school_year,
                                                            date=date,
                                                            room__isnull=False) \
                 .exclude(course=course) \

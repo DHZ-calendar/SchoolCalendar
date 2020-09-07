@@ -105,7 +105,7 @@ class CourseYearOnlyListViewSet(ListModelMixin, GenericViewSet):
         """
         school = utils.get_school_from_user(self.request.user)
         if school:
-            return Course.objects.filter(hour_slots_group__school=school).values('year').distinct()
+            return Course.objects.filter(school=school).values('year').distinct()
 
 
 class CourseSectionOnlyListViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin,
@@ -211,7 +211,7 @@ class TeacherAssignmentsViewSet(UserPassesTestMixin, ListModelMixin, GenericView
             return Assignment.objects.none()
 
         return Assignment.objects.filter(teacher=teacher,
-                                         course__hour_slots_group__school_year=school_year)
+                                         school_year=school_year)
 
 
 class AbsenceBlocksPerTeacherViewSet(UserPassesTestMixin, ListModelMixin, GenericViewSet):
@@ -249,7 +249,7 @@ class AbsenceBlocksPerTeacherViewSet(UserPassesTestMixin, ListModelMixin, Generi
             return Assignment.objects.none()
 
         return AbsenceBlock.objects.filter(teacher=teacher,
-                                           hour_slot__hour_slots_group__school_year=school_year)
+                                           school_year=school_year)
 
 
 class TeacherTimetableViewSet(ListModelMixin, GenericViewSet):

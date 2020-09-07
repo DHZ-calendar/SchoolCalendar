@@ -94,7 +94,7 @@ class TeacherSummarySerializer(ModelSerializer):
 
         assignments = Assignment.objects.filter(teacher=obj.id,
                                                 school=obj.school,
-                                                course__school_year=school_year,
+                                                school_year=school_year,
                                                 substitution=False,
                                                 bes=False).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
@@ -121,7 +121,7 @@ class TeacherSummarySerializer(ModelSerializer):
 
         assignments = Assignment.objects.filter(teacher=obj.id,
                                                 school=obj.school,
-                                                course__school_year=school_year,
+                                                school_year=school_year,
                                                 bes=True).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
         if start_date and utils.is_date_string_valid(start_date):
@@ -147,7 +147,7 @@ class TeacherSummarySerializer(ModelSerializer):
 
         assignments = Assignment.objects.filter(teacher=obj.id,
                                                 school=obj.school,
-                                                course__school_year=school_year,
+                                                school_year=school_year,
                                                 co_teaching=True).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
         if start_date and utils.is_date_string_valid(start_date):
@@ -173,7 +173,7 @@ class TeacherSummarySerializer(ModelSerializer):
 
         assignments = Assignment.objects.filter(teacher=obj.id,
                                                 school=obj.school,
-                                                course__school_year=school_year,
+                                                school_year=school_year,
                                                 substitution=True).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
         if start_date and utils.is_date_string_valid(start_date):
@@ -239,7 +239,7 @@ class CourseSummarySerializer(ModelSerializer):
 
         assignments = Assignment.objects.filter(course=obj.id,
                                                 school=obj.school,
-                                                course__school_year=school_year,
+                                                school_year=school_year,
                                                 substitution=False,
                                                 bes=False).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
@@ -266,7 +266,7 @@ class CourseSummarySerializer(ModelSerializer):
 
         assignments = Assignment.objects.filter(course=obj.id,
                                                 school=obj.school,
-                                                course__school_year=school_year,
+                                                school_year=school_year,
                                                 bes=True).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
         if start_date and utils.is_date_string_valid(start_date):
@@ -292,7 +292,7 @@ class CourseSummarySerializer(ModelSerializer):
 
         assignments = Assignment.objects.filter(course=obj.id,
                                                 school=obj.school,
-                                                course__school_year=school_year,
+                                                school_year=school_year,
                                                 substitution=True).values('date__week_day', 'hour_start', 'hour_end')
         # Filter in a time interval
         if start_date and utils.is_date_string_valid(start_date):
@@ -440,8 +440,8 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
         for el in assignments:
             el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
 
-        hours_slots = HourSlot.objects.filter(hour_slots_group__school=obj.school,
-                                              hour_slots_group__school_year=obj.course.hour_slots_group.school_year
+        hours_slots = HourSlot.objects.filter(school=obj.school,
+                                              school_year=obj.school_year
                                               ).values("day_of_week",
                                                        "starts_at",
                                                        "ends_at",
@@ -477,8 +477,8 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
         for el in assignments:
             el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
 
-        hours_slots = HourSlot.objects.filter(hour_slots_group__school=obj.school,
-                                              hour_slots_group__school_year=obj.course.hour_slots_group.school_year
+        hours_slots = HourSlot.objects.filter(school=obj.school,
+                                              school_year=obj.school_year
                                               ).values("day_of_week",
                                                        "starts_at",
                                                        "ends_at",
@@ -514,8 +514,8 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
         for el in assignments:
             el['date__week_day'] = utils.convert_weekday_into_0_6_format(el['date__week_day'])
 
-        hours_slots = HourSlot.objects.filter(hour_slots_group__school=obj.school,
-                                              hour_slots_group__school_year=obj.course.hour_slots_group.school_year
+        hours_slots = HourSlot.objects.filter(school=obj.school,
+                                              school_year=obj.school_year
                                               ).values("day_of_week",
                                                        "starts_at",
                                                        "ends_at",
@@ -558,8 +558,8 @@ class AssignmentSerializer(ModelSerializer):
             day_of_week=obj.date.weekday(),
             starts_at=obj.hour_start,
             ends_at=obj.hour_end,
-            hour_slots_group__school=obj.school,
-            hour_slots_group__school_year=obj.course.hour_slots_group.school_year
+            school=obj.school,
+            school_year=obj.school_year
         )
         if el:
             return el[0].id
@@ -573,8 +573,8 @@ class AssignmentSerializer(ModelSerializer):
         """
         conflicts = HourSlot.objects.filter(
             day_of_week=obj.date.weekday(),
-            hour_slots_group__school=obj.school,
-            hour_slots_group__school_year=obj.course.hour_slots_group.school_year
+            school=obj.school,
+            school_year=obj.school_year
         ).filter(Q(starts_at__lte=obj.hour_start, ends_at__gt=obj.hour_start) |
                  Q(starts_at__lt=obj.hour_end, ends_at__gte=obj.hour_end) |
                  Q(starts_at__gt=obj.hour_start, ends_at__lt=obj.hour_end))  # the hour_slot's time is included in the assignment's time
@@ -712,7 +712,7 @@ class TeacherSubstitutionSerializer(ModelSerializer):
     def get_substitutions_made_so_far(self, obj, *args, **kwargs):
         return Assignment.objects.filter(teacher=obj.id,
                                          school=obj.school,
-                                         course__school_year=self.assignment_to_substitute.course.school_year,
+                                         school_year=self.assignment_to_substitute.school_year,
                                          substitution=True).count()
 
     def get_has_hour_after(self, obj, *args, **kwargs):
@@ -720,7 +720,7 @@ class TeacherSubstitutionSerializer(ModelSerializer):
                                                     ends_at=self.assignment_to_substitute.hour_end,
                                                     day_of_week=self.assignment_to_substitute.date.weekday(),
                                                     school=obj.school,
-                                                    school_year=self.assignment_to_substitute.course.school_year).first()
+                                                    school_year=self.assignment_to_substitute.school_year).first()
         if not related_hour_slot:
             # If there is not a related hour slot, then we are talking about a non standard assignment.
             # We return False by default
@@ -728,12 +728,12 @@ class TeacherSubstitutionSerializer(ModelSerializer):
         if related_hour_slot.hour_number == max(HourSlot.objects.filter(
                 day_of_week=self.assignment_to_substitute.date.weekday(),
                 school=obj.school,
-                school_year=self.assignment_to_substitute.course.school_year)
+                school_year=self.assignment_to_substitute.school_year)
                                                         .values_list('hour_number')[0]):
             # It is the last hour of the day, the teacher can't be at school after.
             return False
         later_hour_slot = HourSlot.objects.filter(school=obj.school,
-                                                  school_year=self.assignment_to_substitute.course.school_year,
+                                                  school_year=self.assignment_to_substitute.school_year,
                                                   hour_number=related_hour_slot.hour_number + 1,
                                                   day_of_week=self.assignment_to_substitute.date.weekday()).first()
         if not later_hour_slot:
@@ -743,7 +743,7 @@ class TeacherSubstitutionSerializer(ModelSerializer):
         return Assignment.objects.filter(teacher=obj,
                                          date=self.assignment_to_substitute.date,
                                          school=obj.school,
-                                         course__school_year=self.assignment_to_substitute.course.school_year,
+                                         school_year=self.assignment_to_substitute.school_year,
                                          hour_start=later_hour_slot.starts_at,
                                          hour_end=later_hour_slot.ends_at).exists()
 
@@ -752,7 +752,7 @@ class TeacherSubstitutionSerializer(ModelSerializer):
                                                     ends_at=self.assignment_to_substitute.hour_end,
                                                     day_of_week=self.assignment_to_substitute.date.weekday(),
                                                     school=obj.school,
-                                                    school_year=self.assignment_to_substitute.course.school_year).first()
+                                                    school_year=self.assignment_to_substitute.school_year).first()
         if not related_hour_slot:
             # If there is not a related hour slot, then we are talking about a non standard assignment.
             # We return False by default
@@ -761,7 +761,7 @@ class TeacherSubstitutionSerializer(ModelSerializer):
             # It is the first hour of the day, the teacher can't be at school before.
             return False
         previous_hour_slot = HourSlot.objects.filter(school=obj.school,
-                                                     school_year=self.assignment_to_substitute.course.school_year,
+                                                     school_year=self.assignment_to_substitute.school_year,
                                                      hour_number=related_hour_slot.hour_number - 1,
                                                      day_of_week=self.assignment_to_substitute.date.weekday()).first()
         if not previous_hour_slot:
@@ -771,7 +771,7 @@ class TeacherSubstitutionSerializer(ModelSerializer):
         return Assignment.objects.filter(teacher=obj,
                                          date=self.assignment_to_substitute.date,
                                          school=obj.school,
-                                         course__school_year=self.assignment_to_substitute.course.school_year,
+                                         school_year=self.assignment_to_substitute.school_year,
                                          hour_start=previous_hour_slot.starts_at,
                                          hour_end=previous_hour_slot.ends_at).exists()
 
