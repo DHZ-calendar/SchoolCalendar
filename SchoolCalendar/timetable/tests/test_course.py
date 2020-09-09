@@ -13,11 +13,14 @@ class CourseTestCase(BaseTestCase):
         self.school_year_2020 = SchoolYear(year_start=2020, date_start=datetime(month=8, year=2020, day=31))
         self.school_year_2020.save()
 
+        # Create HourSlotsGroup
+        self.hsg1 = HourSlotsGroup(school=self.s1, school_year=self.school_year_2020, name='Default school 1')
+        self.hsg1.save()
+
         self.form_data = {
             "year": 1,
             "section": 'A',
-            "school": self.s1,
-            "school_year": self.school_year_2020,
+            "hour_slots_group": self.hsg1.id,
         }
 
     def test_course_correct_creation(self):
@@ -39,4 +42,4 @@ class CourseTestCase(BaseTestCase):
         # But admin of school 1
         f = CourseForm(user=self.a2, data=self.form_data)
         f.full_clean()
-        self.assertTrue(f.has_error('school'))   # The form should have an error on the school field.
+        self.assertTrue(f.has_error('hour_slots_group'))   # The form should have an error on the school field.
