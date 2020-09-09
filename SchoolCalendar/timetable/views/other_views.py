@@ -283,7 +283,6 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
                             course=a.course,
                             subject=a.subject,
                             room=a.room,
-                            school=a.school,
                             hour_start=a.hour_start,
                             hour_end=a.hour_end,
                             bes=a.bes,
