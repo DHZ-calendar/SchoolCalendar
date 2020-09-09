@@ -32,19 +32,22 @@ class AbsenceBlockTestCase(BaseTestCase):
         self.teacher1.save()
         self.teacher2.save()
 
+        # Create hour slots and hour slots groups.
+        self.hsg1 = HourSlotsGroup(name='default1', school=self.s1, school_year=self.school_year_2020)
+        self.hsg2 = HourSlotsGroup(name='default2', school=self.s2, school_year=self.school_year_2020)
+        self.hsg1.save()
+        self.hsg2.save()
         # Create two hour_slots in two different schools
         self.hs1 = HourSlot(hour_number=4,
                             starts_at=time(hour=9, minute=0),
                             ends_at=time(hour=10, minute=5),
-                            school=self.s1,
-                            school_year=self.school_year_2020,
+                            hour_slots_group=self.hsg1,
                             day_of_week=0,
                             legal_duration=timedelta(seconds=3600))
         self.hs2 = HourSlot(hour_number=4,
                             starts_at=time(hour=9, minute=0),
                             ends_at=time(hour=10, minute=5),
-                            school=self.s2,
-                            school_year=self.school_year_2020,
+                            hour_slots_group=self.hsg2,
                             day_of_week=0,
                             legal_duration=timedelta(seconds=3600))
         self.hs1.save()
