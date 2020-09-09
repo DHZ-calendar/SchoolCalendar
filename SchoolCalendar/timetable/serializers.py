@@ -558,8 +558,7 @@ class AssignmentSerializer(ModelSerializer):
             day_of_week=obj.date.weekday(),
             starts_at=obj.hour_start,
             ends_at=obj.hour_end,
-            school=obj.school,
-            school_year=obj.school_year
+            hour_slots_group=obj.course.hour_slots_group  # TODO add property to Assignment model
         )
         if el:
             return el[0].id
@@ -573,13 +572,11 @@ class AssignmentSerializer(ModelSerializer):
         """
         conflicts = HourSlot.objects.filter(
             day_of_week=obj.date.weekday(),
-            school=obj.school,
-            school_year=obj.school_year
+            hour_slots_group=obj.course.hour_slots_group
         ).filter(Q(starts_at__lte=obj.hour_start, ends_at__gt=obj.hour_start) |
                  Q(starts_at__lt=obj.hour_end, ends_at__gte=obj.hour_end) |
                  Q(starts_at__gt=obj.hour_start, ends_at__lt=obj.hour_end))  # the hour_slot's time is included in the assignment's time
-
-        return conflicts.values_list('id', flat=True)
+        return [x for x in conflicts.values_list('id', flat=True)]
 
     def get_eventual_substitute(self, obj, *args, **kwargs):
         """
@@ -590,7 +587,6 @@ class AssignmentSerializer(ModelSerializer):
                 course=obj.course,
                 subject=obj.subject,
                 room=obj.room,
-                school=obj.school,
                 date=obj.date,
                 hour_start=obj.hour_start,
                 hour_end=obj.hour_end,
