@@ -374,7 +374,7 @@ class StageSerializer(AbstractTimePeriodSerializer):
 
     class Meta:
         model = Stage
-        fields = ['id', 'start', 'end', 'date_start', 'date_end', 'name', 'course', 'school']
+        fields = ['id', 'start', 'end', 'date_start', 'date_end', 'name', 'course']
 
 
 class HourSlotSerializer(ModelSerializer):
@@ -410,7 +410,7 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
 
     class Meta:
         model = HoursPerTeacherInClass
-        fields = ['id', 'teacher', 'course', 'subject', 'school', 'hours', 'hours_bes', 'hours_co_teaching',
+        fields = ['id', 'teacher', 'course', 'subject', 'hours', 'hours_bes', 'hours_co_teaching',
                   'missing_hours', 'missing_hours_bes', 'missing_hours_co_teaching']
 
     def get_missing_hours(self, obj, *args, **kwargs):
@@ -674,7 +674,9 @@ class AssignmentSerializer(ModelSerializer):
 
     class Meta:
         model = Assignment
-        fields = '__all__'
+        fields = ['id', 'teacher', 'teacher_id', 'course', 'course_id', 'subject', 'subject_id', 'room', 'room_id',
+                  'date', 'hour_start', 'hour_end', 'bes', 'co_teaching', 'substitution', 'absent', 'free_substitution',
+                  'hour_slot', 'conflicting_hour_slots', 'eventual_substitute']
 
 
 class AbsenceBlockSerializer(ModelSerializer):
