@@ -13,8 +13,14 @@ class StageTestCase(BaseTestCase):
         self.school_year_2020 = SchoolYear(year_start=2020, date_start=datetime(month=8, year=2020, day=31))
         self.school_year_2020.save()
         # Create a course for the school s1
-        self.course1 = Course(year=1, section='A', school_year=self.school_year_2020, school=self.s1)
-        self.course2 = Course(year=1, section='A', school_year=self.school_year_2020, school=self.s2)
+
+        self.hsg1 = HourSlotsGroup(name='Default1', school_year=self.school_year_2020, school=self.s1)
+        self.hsg2 = HourSlotsGroup(name='Default2', school_year=self.school_year_2020, school=self.s2)
+        self.hsg1.save()
+        self.hsg2.save()
+
+        self.course1 = Course(year=1, section='A', hour_slots_group=self.hsg1)
+        self.course2 = Course(year=1, section='A', hour_slots_group=self.hsg2)
         self.course1.save()
         self.course2.save()
 
@@ -44,7 +50,7 @@ class StageTestCase(BaseTestCase):
         # But admin of school 1
         f = StageForm(user=self.a2, data=self.form_data)
         f.full_clean()
-        self.assertTrue(f.has_error('school'))   # The form should have an error on the school field.
+        self.assertTrue(f.has_error('course'))   # The form should have an error on the course field.
 
     def test_stage_wrong_course_for_school_creation(self):
         """
