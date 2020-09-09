@@ -90,7 +90,8 @@ class BaseFormWithHourSlotCheck(BaseFormWithUser):
         super(BaseFormWithHourSlotCheck, self).__init__(user, *args, **kwargs)
 
         # Get the correct hours slots
-        self.fields['hour_slot'].queryset = HourSlot.objects.filter(school__id=get_school_from_user(user).id) \
+        self.fields['hour_slot'].queryset = HourSlot.objects.filter(
+            hour_slots_group__school__id=get_school_from_user(user).id) \
             .order_by('day_of_week', 'starts_at')
 
     def clean_hour_slot(self):
