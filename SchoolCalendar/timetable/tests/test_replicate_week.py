@@ -27,10 +27,15 @@ class ReplicateWeekTestCase(BaseTestCase):
         self.t2.save()
         self.t3.save()
         self.t4.save()
+
+        # Create 2 hour slots groups in two different schools.
+        self.hsg1 = HourSlotsGroup(school=self.s1, school_year=self.school_year_2020, name='Dafault school 1')
+        self.hsg1.save()
+
         # Create some courses
-        self.c1 = Course(year=1, section='A', school_year=self.school_year_2020, school=self.s1)
-        self.c2 = Course(year=1, section='B', school_year=self.school_year_2020, school=self.s1)
-        self.c3 = Course(year=1, section='C', school_year=self.school_year_2020, school=self.s1)
+        self.c1 = Course(year=1, section='A', hour_slots_group=self.hsg1)
+        self.c2 = Course(year=1, section='B', hour_slots_group=self.hsg1)
+        self.c3 = Course(year=1, section='C', hour_slots_group=self.hsg1)
         self.c1.save()
         self.c2.save()
         self.c3.save()
@@ -48,42 +53,36 @@ class ReplicateWeekTestCase(BaseTestCase):
         self.h1_1 = HoursPerTeacherInClass(teacher=self.t1,
                                            course=self.c1,
                                            subject=self.sub1,
-                                           school=self.s1,
                                            hours=100,
                                            hours_bes=100,
                                            hours_co_teaching=100)
         self.h1_2 = HoursPerTeacherInClass(teacher=self.t1,
                                            course=self.c2,
                                            subject=self.sub1,
-                                           school=self.s1,
                                            hours=100,
                                            hours_bes=100,
                                            hours_co_teaching=100)
         self.h2_2 = HoursPerTeacherInClass(teacher=self.t2,
                                            course=self.c2,
                                            subject=self.sub2,
-                                           school=self.s1,
                                            hours=100,
                                            hours_bes=100,
                                            hours_co_teaching=100)
         self.h3_2 = HoursPerTeacherInClass(teacher=self.t3,
                                            course=self.c2,
                                            subject=self.sub3,
-                                           school=self.s1,
                                            hours=100,
                                            hours_bes=100,
                                            hours_co_teaching=100)
         self.h3_3 = HoursPerTeacherInClass(teacher=self.t3,
                                            course=self.c3,
                                            subject=self.sub3,
-                                           school=self.s1,
                                            hours=100,
                                            hours_bes=100,
                                            hours_co_teaching=100)
         self.h4_1 = HoursPerTeacherInClass(teacher=self.t4,
                                            course=self.c1,
                                            subject=self.sub1,
-                                           school=self.s1,
                                            hours=100,
                                            hours_bes=100,
                                            hours_co_teaching=100)
@@ -94,11 +93,18 @@ class ReplicateWeekTestCase(BaseTestCase):
         self.h3_3.save()
         self.h4_1.save()
 
+        self.hs1 = HourSlot(hour_number=2,
+                            starts_at=time(hour=9, minute=0),
+                            ends_at=time(hour=10, minute=0),
+                            day_of_week=0,
+                            legal_duration=timedelta(hours=1,minutes=0),
+                            hour_slots_group=self.hsg1)
+        self.hs1.save()
+
         # Fill one week with some assignments that are going to be replicated.
         self.ass1 = Assignment(teacher=self.t1,
                                course=self.c1,
                                subject=self.sub1,
-                               school=self.s1,
                                room=self.r1,
                                date=datetime(year=2020, month=5, day=4),  # Monday 4/5/2020
                                hour_start=time(hour=9, minute=0),
@@ -133,7 +139,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass2 = Assignment(teacher=self.t1,
                           course=self.c2,    # In course 2
                           subject=self.sub1,
-                          school=self.s1,
                           room=self.r1,
                           date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
                           hour_start=time(hour=9, minute=0),
@@ -159,7 +164,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass2 = Assignment(teacher=self.t2,
                           course=self.c1,    # In course 1, hence a course conflict
                           subject=self.sub1,
-                          school=self.s1,
                           room=self.r1,
                           date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
                           hour_start=time(hour=9, minute=0),
@@ -185,7 +189,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass2 = Assignment(teacher=self.t2,
                           course=self.c2,    # In course 1, hence a course conflict
                           subject=self.sub2,
-                          school=self.s1,
                           room=self.r1,
                           date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
                           hour_start=time(hour=9, minute=0),
@@ -211,7 +214,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass2 = Assignment(teacher=self.t2,
                           course=self.c2,
                           subject=self.sub2,
-                          school=self.s1,
                           room=self.r1,            # Room 1 is already filled with 2 courses.
                           date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
                           hour_start=time(hour=9, minute=0),
@@ -225,7 +227,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass3 = Assignment(teacher=self.t3,
                           course=self.c3,
                           subject=self.sub3,
-                          school=self.s1,
                           room=self.r1,           # room 1 is filled with 2 courses already
                           date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
                           hour_start=time(hour=9, minute=0),
@@ -241,7 +242,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass4 = Assignment(teacher=self.t3,
                           course=self.c3,
                           subject=self.sub3,
-                          school=self.s1,
                           room=self.r1,           # room 1 is filled with 2 courses already
                           date=datetime(year=2020, month=5, day=18),  # Monday 18/5/2020
                           hour_start=time(hour=9, minute=0),
@@ -269,7 +269,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass2 = Assignment(teacher=self.t2,
                           course=self.c2,
                           subject=self.sub2,
-                          school=self.s1,
                           room=self.r1,
                           date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
                           hour_start=time(hour=9, minute=0),
@@ -283,7 +282,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass3 = Assignment(teacher=self.t2,
                           course=self.c2,
                           subject=self.sub2,
-                          school=self.s1,
                           room=self.r1,
                           date=datetime(year=2020, month=5, day=18),  # Monday 18/5/2020
                           hour_start=time(hour=9, minute=0),
@@ -313,7 +311,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass2 = Assignment(teacher=self.t2,   # Theacher 2 in course 2
                           course=self.c2,
                           subject=self.sub2,
-                          school=self.s1,
                           room=self.r1,
                           date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
                           hour_start=time(hour=9, minute=0),
@@ -327,7 +324,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass3 = Assignment(teacher=self.t3,    # Teacher 3 in course 2.
                           course=self.c2,
                           subject=self.sub2,
-                          school=self.s1,
                           room=self.r1,
                           date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
                           hour_start=time(hour=9, minute=0),
@@ -358,7 +354,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass2 = Assignment(teacher=self.t2,   # Theacher 2 in course 2
                           course=self.c2,
                           subject=self.sub2,
-                          school=self.s1,
                           room=self.r1,
                           date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
                           hour_start=time(hour=9, minute=0),
@@ -372,7 +367,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass3 = Assignment(teacher=self.t3,    # Teacher 3 in course 2.
                           course=self.c2,
                           subject=self.sub2,
-                          school=self.s1,
                           room=self.r1,
                           date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
                           hour_start=time(hour=9, minute=0),
@@ -386,7 +380,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass4 = Assignment(teacher=self.t4,  # Teacher 3 in course 2.
                           course=self.c1,
                           subject=self.sub2,
-                          school=self.s1,
                           room=self.r1,
                           date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
                           hour_start=time(hour=9, minute=0),
@@ -422,7 +415,6 @@ class ReplicateWeekTestCase(BaseTestCase):
                     ass1 = Assignment(teacher=self.t1,
                                       course=self.c1,
                                       subject=self.sub1,
-                                      school=self.s1,
                                       room=self.r1,
                                       date=start_date + timedelta(days=day) + timedelta(days=7*i),
                                       hour_start=time(hour=hour, minute=0),
@@ -437,7 +429,6 @@ class ReplicateWeekTestCase(BaseTestCase):
                 ass1 = Assignment(teacher=self.t1,
                                   course=self.c1,
                                   subject=self.sub1,
-                                  school=self.s1,
                                   room=self.r1,
                                   date=datetime(year=2019, month=9, day=9) + timedelta(days=day),
                                   hour_start=time(hour=hour, minute=0),
@@ -475,7 +466,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass1 = Assignment(teacher=self.t1,
                           course=self.c1,
                           subject=self.sub1,
-                          school=self.s1,
                           room=self.r1,
                           date=datetime(day=14, month=9, year=2020),
                           hour_start=time(hour=7, minute=55),
@@ -488,7 +478,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass2 = Assignment(teacher=self.t1,
                           course=self.c1,
                           subject=self.sub1,
-                          school=self.s1,
                           room=self.r1,
                           date=datetime(day=14, month=9, year=2020),
                           hour_start=time(hour=8, minute=45),
@@ -501,7 +490,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass3 = Assignment(teacher=self.t1,         # Replicated course. It should not be considered as a conflict.
                           course=self.c1,
                           subject=self.sub1,
-                          school=self.s1,
                           room=self.r1,
                           date=datetime(day=21, month=9, year=2020),
                           hour_start=time(hour=7, minute=55),
@@ -533,7 +521,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass1 = Assignment(teacher=self.t1,
                           course=self.c1,
                           subject=self.sub1,
-                          school=self.s1,
                           room=self.r1,
                           date=datetime(day=14, month=9, year=2020),
                           hour_start=time(hour=7, minute=55),
@@ -546,7 +533,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass2 = Assignment(teacher=self.t1,
                           course=self.c1,
                           subject=self.sub1,
-                          school=self.s1,
                           room=self.r1,
                           date=datetime(day=14, month=9, year=2020),
                           hour_start=time(hour=8, minute=45),
@@ -559,7 +545,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass3 = Assignment(teacher=self.t1,         # Replicated course. It should not be considered as a conflict.
                           course=self.c1,
                           subject=self.sub1,
-                          school=self.s1,
                           room=self.r1,
                           date=datetime(day=21, month=9, year=2020),
                           hour_start=time(hour=7, minute=55),
@@ -581,7 +566,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         self.assertTrue(Assignment.objects.filter(teacher=self.t1,
                                                   course=self.c1,
                                                   subject=self.sub1,
-                                                  school=self.s1,
                                                   room=self.r1,
                                                   date=datetime(day=21, month=9, year=2020),
                                                   hour_start=time(hour=8, minute=45),
@@ -589,7 +573,6 @@ class ReplicateWeekTestCase(BaseTestCase):
         self.assertTrue(Assignment.objects.filter(teacher=self.t1,
                                                   course=self.c1,
                                                   subject=self.sub1,
-                                                  school=self.s1,
                                                   room=self.r1,
                                                   date=datetime(day=21, month=9, year=2020),
                                                   hour_start=time(hour=7, minute=55),
