@@ -38,9 +38,15 @@ class HoursTeacherInClassTestCase(BaseTestCase):
         self.subj1.save()
         self.subj2.save()
 
+        # Create 2 hour slots groups in two different schools.
+        self.hsg1 = HourSlotsGroup(school=self.s1, school_year=self.school_year_2020, name='Dafault school 1')
+        self.hsg2 = HourSlotsGroup(school=self.s2, school_year=self.school_year_2020, name='Dafault school 2')
+        self.hsg1.save()
+        self.hsg2.save()
+
         # Create two courses in different schools
-        self.c1 = Course(year=1, section='A', school_year=self.school_year_2020, school=self.s1)
-        self.c2 = Course(year=2, section='B', school_year=self.school_year_2020, school=self.s2)
+        self.c1 = Course(year=1, section='A', hour_slots_group=self.hsg1)
+        self.c2 = Course(year=2, section='B', hour_slots_group=self.hsg2)
         self.c1.save()
         self.c2.save()
 
