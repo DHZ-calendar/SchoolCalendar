@@ -58,7 +58,6 @@ class HoursTeacherInClassTestCase(BaseTestCase):
         data = {'course': self.c1,
                 'subject': self.subj1,
                 'teacher': self.teacher1,
-                'school': self.s1,
                 'hours': 100,
                 'hours_bes': 150,
                 'hours_co_teaching': 150}
@@ -74,32 +73,14 @@ class HoursTeacherInClassTestCase(BaseTestCase):
         data = {'course': self.c1,
                 'subject': self.subj1,
                 'teacher': self.teacher1,
-                'school': self.s1,
                 'hours': 100,
                 'hours_bes': 150,
                 'hours_co_teaching': 150}
         f = HoursPerTeacherInClassForm(user=self.a2, data=data)
         f.full_clean()
-        self.assertTrue(f.has_error('school'))
         self.assertTrue(f.has_error('course'))
         self.assertTrue(f.has_error('subject'))
         self.assertTrue(f.has_error('teacher'))
-
-    def test_hours_per_teacher_in_class_wrong_school_creation(self):
-        """
-        Test the creation of an HourPerTeacherInClass, using the wrong school for the admin.
-        :return:
-        """
-        data = {'course': self.c1,
-                'subject': self.subj1,
-                'teacher': self.teacher1,
-                'school': self.s2,
-                'hours': 100,
-                'hours_bes': 150,
-                'hours_co_teaching': 150}
-        f = HoursPerTeacherInClassForm(user=self.a1, data=data)
-        f.full_clean()
-        self.assertTrue(f.has_error('school'))
 
     def test_hours_per_teacher_in_class_wrong_teacher_creation(self):
         """
@@ -109,7 +90,6 @@ class HoursTeacherInClassTestCase(BaseTestCase):
         data = {'course': self.c1,
                 'subject': self.subj1,
                 'teacher': self.teacher2,
-                'school': self.s1,
                 'hours': 100,
                 'hours_bes': 150,
                 'hours_co_teaching': 150}
@@ -125,7 +105,6 @@ class HoursTeacherInClassTestCase(BaseTestCase):
         data = {'course': self.c2,
                 'subject': self.subj1,
                 'teacher': self.teacher1,
-                'school': self.s1,
                 'hours': 100,
                 'hours_bes': 150,
                 'hours_co_teaching': 150}
@@ -141,7 +120,6 @@ class HoursTeacherInClassTestCase(BaseTestCase):
         data = {'course': self.c1,
                 'subject': self.subj2,
                 'teacher': self.teacher1,
-                'school': self.s1,
                 'hours': 100,
                 'hours_bes': 150,
                 'hours_co_teaching': 150}
