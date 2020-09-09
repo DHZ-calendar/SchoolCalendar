@@ -47,10 +47,16 @@ class AssignmentTestCase(BaseTestCase):
         self.subj1.save()
         self.subj2.save()
 
+        # Create two hour slot groups, one per each school.
+        self.hsg1 = HourSlotsGroup(school=self.s1, school_year=self.school_year_2020, name='Default school 1')
+        self.hsg2 = HourSlotsGroup(school=self.s2, school_year=self.school_year_2020, name='Default school 2')
+        self.hsg1.save()
+        self.hsg2.save()
+
         # Create two courses in different schools
-        self.c1 = Course(year=1, section='A', school_year=self.school_year_2020, school=self.s1)
-        self.c3 = Course(year=2, section='B', school_year=self.school_year_2020, school=self.s1)
-        self.c2 = Course(year=2, section='B', school_year=self.school_year_2020, school=self.s2)
+        self.c1 = Course(year=1, section='A', hour_slots_group=self.hsg1)
+        self.c3 = Course(year=2, section='B', hour_slots_group=self.hsg1)
+        self.c2 = Course(year=2, section='B', hour_slots_group=self.hsg2)
         self.c1.save()
         self.c3.save()
         self.c2.save()
@@ -59,15 +65,13 @@ class AssignmentTestCase(BaseTestCase):
         self.hs1 = HourSlot(hour_number=4,
                             starts_at=time(hour=9, minute=0),
                             ends_at=time(hour=10, minute=5),
-                            school=self.s1,
-                            school_year=self.school_year_2020,
+                            hour_slots_group=self.hsg1,
                             day_of_week=0,
                             legal_duration=timedelta(seconds=3600))
         self.hs2 = HourSlot(hour_number=4,
                             starts_at=time(hour=9, minute=0),
                             ends_at=time(hour=10, minute=5),
-                            school=self.s2,
-                            school_year=self.school_year_2020,
+                            hour_slots_group=self.hsg2,
                             day_of_week=0,
                             legal_duration=timedelta(seconds=3600))
         self.hs1.save()
