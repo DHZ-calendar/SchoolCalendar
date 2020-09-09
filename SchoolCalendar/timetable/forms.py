@@ -197,7 +197,7 @@ class BaseFormWithHourSlotsGroupCheck(BaseFormWithUser):
         :return:
         """
         if get_school_from_user(self.user) != self.cleaned_data['hour_slots_group'].school:
-            self.add_error(None, forms.ValidationError(_('The HourSlotsGroup {} is not taught in the school ({}).'.
+            self.add_error(None, forms.ValidationError(_('The HourSlotsGroup {} is not present in the school ({}).'.
                 format(self.cleaned_data['hour_slots_group'], self.cleaned_data['hour_slots_group'].school)
             )))
         return self.cleaned_data['hour_slots_group']
