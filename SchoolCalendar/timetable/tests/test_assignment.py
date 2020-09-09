@@ -82,7 +82,6 @@ class AssignmentTestCase(BaseTestCase):
             course=self.c1,
             subject=self.subj1,
             teacher=self.teacher1,
-            school=self.s1,
             hours=100,
             hours_bes=100,
             hours_co_teaching=100)
@@ -90,7 +89,6 @@ class AssignmentTestCase(BaseTestCase):
             course=self.c3,
             subject=self.subj1,
             teacher=self.teacher3,
-            school=self.s1,
             hours=100,
             hours_bes=100,
             hours_co_teaching=100)
@@ -99,7 +97,6 @@ class AssignmentTestCase(BaseTestCase):
             course=self.c2,
             subject=self.subj2,
             teacher=self.teacher2,
-            school=self.s2,
             hours=100,
             hours_bes=100,
             hours_co_teaching=100)
@@ -115,7 +112,6 @@ class AssignmentTestCase(BaseTestCase):
         data = {'course': self.c1,
                 'subject': self.subj1,
                 'teacher': self.teacher1,
-                'school': self.s1,
                 'date': datetime(day=15, month=5, year=2020),
                 'hour_start': time(hour=9, minute=0),
                 'hour_end': time(hour=10, minute=5),
@@ -134,7 +130,6 @@ class AssignmentTestCase(BaseTestCase):
         data = {'course': self.c1,
                 'subject': self.subj1,
                 'teacher': self.teacher1,
-                'school': self.s1,
                 'date': datetime(day=15, month=5, year=2020),
                 'hour_start': time(hour=9, minute=0),
                 'hour_end': time(hour=10, minute=5),
@@ -143,29 +138,9 @@ class AssignmentTestCase(BaseTestCase):
                 'absent': 'false'}
         f = AssignmentForm(user=self.a2, data=data)
         f.full_clean()
-        self.assertTrue(f.has_error('school'))
         self.assertTrue(f.has_error('course'))
         self.assertTrue(f.has_error('subject'))
         self.assertTrue(f.has_error('teacher'))
-
-    def test_assignment_wrong_school_creation(self):
-        """
-        Test the creation of an Assignment, using the wrong school for the admin.
-        :return:
-        """
-        data = {'course': self.c1,
-                'subject': self.subj1,
-                'teacher': self.teacher1,
-                'school': self.s2,
-                'date': datetime(day=15, month=5, year=2020),
-                'hour_start': time(hour=9, minute=0),
-                'hour_end': time(hour=10, minute=5),
-                'bes': 'false',
-                'substitution': 'false',
-                'absent': 'false'}
-        f = AssignmentForm(user=self.a1, data=data)
-        f.full_clean()
-        self.assertTrue(f.has_error('school'))
 
     def test_hours_per_teacher_in_class_wrong_teacher_creation(self):
         """
@@ -175,7 +150,6 @@ class AssignmentTestCase(BaseTestCase):
         data = {'course': self.c1,
                 'subject': self.subj1,
                 'teacher': self.teacher2,
-                'school': self.s1,
                 'date': datetime(day=15, month=5, year=2020),
                 'hour_start': time(hour=9, minute=0),
                 'hour_end': time(hour=10, minute=5),
@@ -194,7 +168,6 @@ class AssignmentTestCase(BaseTestCase):
         data = {'course': self.c2,
                 'subject': self.subj1,
                 'teacher': self.teacher1,
-                'school': self.s1,
                 'date': datetime(day=15, month=5, year=2020),
                 'hour_start': time(hour=9, minute=0),
                 'hour_end': time(hour=10, minute=5),
@@ -213,7 +186,6 @@ class AssignmentTestCase(BaseTestCase):
         data = {'course': self.c1,
                 'subject': self.subj2,
                 'teacher': self.teacher1,
-                'school': self.s1,
                 'date': datetime(day=15, month=5, year=2020),
                 'hour_start': time(hour=9, minute=0),
                 'hour_end': time(hour=10, minute=5),
@@ -232,7 +204,6 @@ class AssignmentTestCase(BaseTestCase):
         data = {'course': self.c1,
                 'subject': self.subj2,
                 'teacher': self.teacher1,
-                'school': self.s1,
                 'date': datetime(day=15, month=5, year=2020),
                 'hour_start': time(hour=11, minute=0),
                 'hour_end': time(hour=10, minute=5),
@@ -251,7 +222,6 @@ class AssignmentTestCase(BaseTestCase):
         data = {'course': self.c1,
                 'subject': self.subj1,
                 'teacher': self.teacher3,   # This teacher does not have class for such course.
-                'school': self.s1,
                 'date': datetime(day=15, month=5, year=2020),
                 'hour_start': time(hour=9, minute=0),
                 'hour_end': time(hour=10, minute=5),
