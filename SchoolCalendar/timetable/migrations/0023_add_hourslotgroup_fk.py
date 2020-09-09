@@ -9,9 +9,11 @@ def create_default_hourSlotsGroup(apps, schema_editor):
     SchoolYear = apps.get_model("timetable", "SchoolYear")
     school = School.objects.first()
     school_year = SchoolYear.objects.first()
-    HourSlotsGroup.objects.using(db_alias).create(name="Default",
-                                                  school=school,
-                                                  school_year=school_year)
+    if school is not None and school_year is not None:
+        # When we are creating the db in the first place, we do not have any element in it so .first() returns None.
+        HourSlotsGroup.objects.using(db_alias).create(name="Default",
+                                                      school=school,
+                                                      school_year=school_year)
 
 
 def remove_default_hourSlotsGroup(apps, schema_editor):
@@ -53,7 +55,7 @@ def create_hourSlotsGroup_per_school_and_school_year(apps, schema_editor):
         h.save()
 
     # Here we can safely delete the Default HourSlotsGroup (the one with id=1)
-    HourSlotsGroup.objects.get(name='Default').delete()
+    HourSlotsGroup.objects.filter(name='Default').delete()
 
 
 def remove_hourSlotsGroup_per_school_and_school_year(apps, schema_editor):
