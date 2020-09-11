@@ -367,7 +367,7 @@ async function getHolidays(startDate, endDate){
             let start = moment(day.start);
             let end = moment(day.end);
             while(start <= end) {
-                timetable.lockDay(start.weekday() - 1, day.name);
+                timetable.lockDay(start.day() - 1, day.name);
                 start.add(1, 'days');
             }
         }    
@@ -390,7 +390,7 @@ async function getStages(startDate, endDate){
             let start = moment(day.start);
             let end = moment(day.end);
             while(start <= end) {
-                timetable.lockDay(start.weekday() - 1, day.name);
+                timetable.lockDay(start.day() - 1, day.name);
                 start.add(1, 'days');
             }
         }
