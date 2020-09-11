@@ -192,12 +192,14 @@ def get_available_teachers(assign: Assignment, school: School):
     """
     Return the list of all the available teachers to make a substitution for a given assignment
     """
+    school_year = assign.course.hour_slots_group.school_year.id
+
     teachers_list = Teacher.objects.filter(school=school) \
         .exclude(id=assign.teacher.id) \
-        .filter(hoursperteacherinclass__course__school_year=assign.school_year).distinct()
+        .filter(hoursperteacherinclass__course__hour_slots_group__school_year=school_year).distinct()
     # Remove all teachers who have an absence block there.
     hour_slot = HourSlot.objects.filter(school=assign.school,
-                                        school_year=assign.school_year,
+                                        school_year=school_year,
                                         starts_at=assign.hour_start,
                                         ends_at=assign.hour_end,
                                         day_of_week=assign.date.weekday()).first()
@@ -208,7 +210,7 @@ def get_available_teachers(assign: Assignment, school: School):
 
         # Exclude from the choice the teachers that are already busy with other assignments.
         teachers_to_exclude = Assignment.objects.filter(school=assign.school,
-                                                        school_year=assign.school_year,
+                                                        school_year=school_year,
                                                         hour_start=assign.hour_start,
                                                         hour_end=assign.hour_end,
                                                         date=assign.date).values_list('teacher__id')
