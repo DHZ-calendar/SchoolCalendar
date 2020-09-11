@@ -378,7 +378,6 @@ class SubstituteTeacherApiView(UserPassesTestMixin, View):
             teacher=Teacher.objects.get(id=teacher),
             course=a.course,
             subject=a.subject,
-            school=a.school,
             room=a.room,
             date=a.date,
             hour_start=a.hour_start,

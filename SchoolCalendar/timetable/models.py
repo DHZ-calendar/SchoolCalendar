@@ -128,6 +128,8 @@ class Teacher(MyUser):
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("school"))
     notes = models.TextField(blank=True, null=True, verbose_name=_("notes"))  # Optional field
 
+    objects = QueryablePropertiesManager()
+
     def __str__(self):
         return "{} {}".format(self.first_name, self.last_name)
 
