@@ -66,7 +66,7 @@ class StageFilter(FilterSet):
     school_year = NumberFilter(field_name='school_year', method='school_year_filter')
 
     def school_year_filter(self, queryset, name, value):
-        return queryset.filter(course__hour_slots_group__school_year__id=value)
+        return queryset.filter(school_year=value)
 
     class Meta:
         model = Stage
@@ -77,7 +77,7 @@ class AbsenceBlockFilter(FilterSet):
     school_year = NumberFilter(field_name='school_year', method='school_year_filter')
 
     def school_year_filter(self, queryset, name, value):
-        return queryset.filter(hour_slot__school_year__id=value)
+        return queryset.filter(school_year=value)
 
     class Meta:
         model = AbsenceBlock
@@ -94,7 +94,7 @@ class CoursesYearlyLoadFilter(FilterSet):
     school_year = NumberFilter(field_name='school_year', method='school_year_filter')
 
     def school_year_filter(self, queryset, name, value):
-        return queryset.filter(course__hour_slots_group__school_year__id=value)
+        return queryset.filter(school_year=value)
 
     class Meta:
         model = CoursesYearlyLoad

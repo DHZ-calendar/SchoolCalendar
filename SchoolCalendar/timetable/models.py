@@ -203,11 +203,12 @@ class HourSlot(models.Model):
         """
         :return: hourslots like "Monday, 8:00-9:00 2019/2020"
         """
-        return "{}, {}-{} {}/{}".format(DAYS_OF_WEEK[self.day_of_week][1],
-                                        self.starts_at.strftime("%H:%M"),
-                                        self.ends_at.strftime("%H:%M"),
-                                        str(self.hour_slots_group.school_year.year_start),
-                                        str(self.hour_slots_group.school_year.year_start + 1))
+        return "{}, {}-{} {}/{} ({})".format(DAYS_OF_WEEK[self.day_of_week][1],
+                                             self.starts_at.strftime("%H:%M"),
+                                             self.ends_at.strftime("%H:%M"),
+                                             str(self.hour_slots_group.school_year.year_start),
+                                             str(self.hour_slots_group.school_year.year_start + 1),
+                                             self.hour_slots_group.name)
 
 
 class Course(models.Model):

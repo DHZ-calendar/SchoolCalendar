@@ -521,8 +521,8 @@ class AbsenceBlockCreateForm(BaseFormWithTeacherCheck, Form):
 
         # Get the correct hours slots in the MultipleChoiceField
         self.fields['hour_slots'] = forms.ModelMultipleChoiceField(
-            queryset=HourSlot.objects.filter(school__id=get_school_from_user(self.user).id).order_by(
-                'day_of_week', 'starts_at'),
+            queryset=HourSlot.objects.filter(school=get_school_from_user(self.user).id).order_by(
+                'hour_slots_group__name', 'day_of_week', 'starts_at'),
             help_text=_("Do you want to assign multiple absence blocks?"
                         " Use shift key and the mouse click to select multiple hour slots."),
             label=_('Hour slots')
@@ -540,7 +540,6 @@ class AbsenceBlockCreateForm(BaseFormWithTeacherCheck, Form):
         :return:
         """
 
-        print(self.cleaned_data)
         for hour_slot in self.cleaned_data['hour_slots']:
             # Create an absence block for every hour_slot.
             ab = AbsenceBlock(
