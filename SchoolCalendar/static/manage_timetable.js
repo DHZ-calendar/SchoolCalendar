@@ -191,6 +191,8 @@ async function getTeachers(){
     try{
         data = await $.get(url, data=data);
         for(let tea of data){
+            let btn_bes = "" ? tea.hours_bes > 0 : "disabled";
+            let btn_co_teaching = "" ? tea.hours_co_teaching > 0 : "disabled";
             let html = `
                 <li class="list-group-item list-teachers" data-teacher-id="${tea.id}">
                     <div class="row">
@@ -235,8 +237,8 @@ async function getTeachers(){
                     </div>
                     <div class="row">
                         <button type="button" class="col-6 btn btn-sm cal-event" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false, false)">${_TRANS['assign_lecture']}</button>
-                        <button type="button" class="col-6 btn btn-sm cal-event-bes" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, true, false)">${_TRANS['assign_bes']}</button>
-                        <button type="button" class="col-12 btn btn-sm cal-event-co-teaching mt-1" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false, true)">${_TRANS['assign_co-teaching']}</button>
+                        <button type="button" class="col-6 btn btn-sm cal-event-bes" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, true, false)" ${btn_bes}>${_TRANS['assign_bes']}</button>
+                        <button type="button" class="col-12 btn btn-sm cal-event-co-teaching mt-1" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false, true)" ${btn_co_teaching}>${_TRANS['assign_co-teaching']}</button>
                     </div>
                 </li>`;
             $('#teachers_list').append(html);
