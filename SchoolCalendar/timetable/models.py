@@ -225,6 +225,9 @@ class Course(models.Model):
 
     objects = QueryablePropertiesManager()
 
+    class Meta:
+        unique_together = ('year', 'section', 'hour_slots_group',)
+
     def __str__(self):
         """
         :return: classes as 1 A, 2 Bord and so on (according to what year and section are like)
