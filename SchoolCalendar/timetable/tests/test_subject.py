@@ -18,7 +18,7 @@ class SubjectTestCase(BaseTestCase):
         form_data = {
             'name': 'Mathematics',
             'school': self.s1,
-
+            'color': '#000000'
         }
         f = SubjectForm(user=self.a1, data=form_data)
         f.full_clean()
@@ -32,7 +32,7 @@ class SubjectTestCase(BaseTestCase):
         form_data = {
             'name': 'Mathematics',
             'school': self.s1,
-
+            'color': '#000000'
         }
         # But admin of school 1
         f = SubjectForm(user=self.a2, data=form_data)
