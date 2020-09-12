@@ -32,11 +32,20 @@ class TeacherViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, Li
 
 
 class TeacherSummaryViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
-    queryset = Teacher.objects.all()
     serializer_class = TeacherSummarySerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filter_backends = [OrderingFilter, QuerysetFromSameSchool]
     ordering = ['last_name', 'first_name']
+
+    def get_queryset(self):
+        """
+        :return: only the teachers of the passed year, if given
+        """
+        teachers_teaching_in_the_year = HoursPerTeacherInClass.objects.none()
+        school_year = self.request.query_params.get('school_year')
+        if school_year:
+            teachers_teaching_in_the_year = HoursPerTeacherInClass.objects.filter(school_year=school_year).values('teacher')
+        return Teacher.objects.filter(id__in=teachers_teaching_in_the_year)
 
 
 class TeachersYearlyLoadViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
