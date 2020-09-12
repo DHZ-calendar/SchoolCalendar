@@ -113,7 +113,7 @@ class BaseFormWithCourseCheck(BaseFormWithUser):
         super(BaseFormWithCourseCheck, self).__init__(user, *args, **kwargs)
 
         self.fields['course'].queryset = Course.objects.filter(hour_slots_group__school__id=get_school_from_user(user).id) \
-            .order_by('year', 'section')
+            .order_by('hour_slots_group__school_year', 'year', 'section')
 
     def clean_course(self):
         """
