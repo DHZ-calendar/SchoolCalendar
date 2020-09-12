@@ -1,3 +1,4 @@
+from colorfield.fields import ColorField
 from django.db import models
 from django.contrib.auth.models import User, UserManager, AbstractUser
 from django.db.models import Q
@@ -305,6 +306,8 @@ class Subject(models.Model):
     """
     name = models.CharField(max_length=256, blank=False, null=False, verbose_name=_("name"))
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("school"))
+
+    color = ColorField(default='#20B2AA', null=False, blank=False, verbose_name=_("color"))
 
     def __str__(self):
         return self.name

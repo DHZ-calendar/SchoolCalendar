@@ -353,7 +353,7 @@ class CoursesYearlyLoadSerializer(ModelSerializer):
 class SubjectSerializer(ModelSerializer):
     class Meta:
         model = Subject
-        fields = ['id', 'name', 'school']
+        fields = ['id', 'name', 'school', 'color']
 
 
 class HolidaySerializer(AbstractTimePeriodSerializer):

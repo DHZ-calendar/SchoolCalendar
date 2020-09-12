@@ -634,7 +634,7 @@ class SubjectForm(BaseFormWithSchoolCheck):
 
     class Meta:
         model = Subject
-        fields = ['name', 'school']
+        fields = ['name', 'school', 'color']
 
 
 class TeachersYearlyLoadForm(BaseFormWithTeacherCheck):

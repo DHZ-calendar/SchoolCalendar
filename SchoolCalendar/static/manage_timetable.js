@@ -318,6 +318,9 @@ async function getAssignmentsGeneric(url, startDate, endDate, showTeacher=true){
             else if(assign.substitution){
                 customEvent.htmlElement.addClass('cal-event-substitution');
             }
+            else{
+                customEvent.htmlElement.css('background-color', assign.subject.color);
+            }
 
             let lbl_room = '';
             if (assign.room)

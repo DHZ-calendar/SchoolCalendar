@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'durationwidget',
+    'colorfield',
     'timetable'
 ]
 
