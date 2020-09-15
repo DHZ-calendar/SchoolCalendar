@@ -67,11 +67,19 @@ class CoursesYearlyLoadViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSe
 
 
 class CourseSummaryViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, ListModelMixin, GenericViewSet):
-    queryset = Course.objects.all()
     serializer_class = CourseSummarySerializer
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
     filter_backends = [OrderingFilter, QuerysetFromSameSchool]
     ordering = ['year', 'section']
+
+    def get_queryset(self):
+        """
+        :return: only the courses of the desired year, if given
+        """
+        school_year = self.request.query_params.get('school_year')
+        if school_year:
+            return Course.objects.filter(school_year=school_year)
+        return Course.objects.all()
 
 
 class AbsenceBlockViewSet(ListModelMixin, GenericViewSet):
