@@ -191,8 +191,8 @@ async function getTeachers(){
     try{
         data = await $.get(url, data=data);
         for(let tea of data){
-            let btn_bes = "" ? tea.hours_bes > 0 : "disabled";
-            let btn_co_teaching = "" ? tea.hours_co_teaching > 0 : "disabled";
+            let btn_bes = (tea.hours_bes > 0) ? "" : "disabled";
+            let btn_co_teaching = (tea.hours_co_teaching > 0) ? "" : "disabled";
             let html = `
                 <li class="list-group-item list-teachers" data-teacher-id="${tea.id}">
                     <div class="row">
