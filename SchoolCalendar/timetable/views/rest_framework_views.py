@@ -196,22 +196,31 @@ class AssignmentViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin,
 
     def destroy(self, request, *args, **kwargs):
         """
-        If the hour that we are deleting is a substitution, then we need to mark the substituted hour
-        as not absent anymore.
+        If the assignment that we are deleting is a substitution, then we need to mark the substituted assignments
+        as not absent anymore (which means that they still need to be substituted using the Substitute Teacher
+        feature).
+        It applies only if there are no other substitutions in such time slot, for the given course.
+        For instance, if we have 2 substitution assignments and we are deleting one, then we can still consider the
+        substituted assignments as properly handled.
+        Actually, there should be no need for handling multiple substitutions,
+        since we can have at most one at the moment, but for future possible improvements we will be more general.
         """
         instance = self.get_object()
         if instance.substitution or instance.free_substitution:
-            assignments_in_same_hour_slot = Assignment.objects.filter(
+            # If we are deleting a substitution
+            assignments_same_hour = Assignment.objects.filter(
                 course=instance.course,
                 date=instance.date,
                 hour_start=instance.hour_start,
-                hour_end=instance.hour_end).exclude(
-                    id=instance.id
-            ).exclude(substitution=True, free_substitution=True)
-            for a in assignments_in_same_hour_slot:
-                # Set the absent to False
-                a.absent = False
-                a.save()
+                hour_end=instance.hour_end).exclude(id=instance.id)
+            if not assignments_same_hour.filter(
+                    substitution=True, free_substitution=True).exists():
+                # If we have no other substitution in the same hour slot
+                for a in assignments_same_hour.exclude(
+                        substitution=True, free_substitution=True):
+                    # Set the absent to False for all other assignments.
+                    a.absent = False
+                    a.save()
         return super(AssignmentViewSet, self).destroy(request, *args, **kwargs)
 
 
