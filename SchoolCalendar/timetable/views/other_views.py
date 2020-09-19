@@ -793,7 +793,7 @@ class TimetableGeneralPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMix
         styles = getSampleStyleSheet()
         styles.add(ParagraphStyle(name='title_style', fontName="Helvetica-Bold", fontSize=10, alignment=TA_CENTER))
         styles.add(ParagraphStyle(name='text_bold', fontName="Helvetica-Bold", fontSize=7, alignment=TA_CENTER))
-        styles.add(ParagraphStyle(name='text_small', fontName="Helvetica", fontSize=4, alignment=TA_CENTER,
+        styles.add(ParagraphStyle(name='text_small', fontName="Helvetica", fontSize=3, alignment=TA_CENTER,
                                   borderPadding=0, leading=0))
         title_style = styles['title_style']
 
@@ -866,7 +866,7 @@ class TimetableGeneralPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMix
             spans.append(('SPAN', (start, 0), (end, 0)), )
 
         data = [headers] + [days] + table
-        t = Table(data, colWidths=[None] + [6 * mm] * (len(headers) - 2))
+        t = Table(data, colWidths=[None] + [4.5 * mm] * (len(headers) - 2))
 
         t.setStyle(TableStyle(
             spans +
