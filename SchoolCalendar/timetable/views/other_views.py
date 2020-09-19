@@ -866,7 +866,7 @@ class TimetableGeneralPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMix
             spans.append(('SPAN', (start, 0), (end, 0)), )
 
         data = [headers] + [days] + table
-        t = Table(data, colWidths=[None] + [4.5 * mm] * (len(headers) - 2))
+        t = Table(data, colWidths=[None] + [5 * mm] * (len(headers) - 2))
 
         t.setStyle(TableStyle(
             spans +
