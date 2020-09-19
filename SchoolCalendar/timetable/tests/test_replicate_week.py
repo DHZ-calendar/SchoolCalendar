@@ -40,7 +40,7 @@ class ReplicateWeekTestCase(BaseTestCase):
         self.c2.save()
         self.c3.save()
         # Create some rooms
-        self.r1 = Room(name='lab1', capacity=2, school=self.s1)   # The room has capacity 2.
+        self.r1 = Room(name='lab1', capacity=2, school=self.s1)  # The room has capacity 2.
         self.r1.save()
         # Create some subjects
         self.sub1 = Subject(name='Maths', school=self.s1)
@@ -97,7 +97,7 @@ class ReplicateWeekTestCase(BaseTestCase):
                             starts_at=time(hour=9, minute=0),
                             ends_at=time(hour=10, minute=0),
                             day_of_week=0,
-                            legal_duration=timedelta(hours=1,minutes=0),
+                            legal_duration=timedelta(hours=1, minutes=0),
                             hour_slots_group=self.hsg1)
         self.hs1.save()
 
@@ -137,7 +137,7 @@ class ReplicateWeekTestCase(BaseTestCase):
         Try to replicate one week which should be with a teacher conflict.
         """
         ass2 = Assignment(teacher=self.t1,
-                          course=self.c2,    # In course 2
+                          course=self.c2,  # In course 2
                           subject=self.sub1,
                           room=self.r1,
                           date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
@@ -162,7 +162,7 @@ class ReplicateWeekTestCase(BaseTestCase):
         Try to replicate one week which should be with a course conflict.
         """
         ass2 = Assignment(teacher=self.t2,
-                          course=self.c1,    # In course 1, hence a course conflict
+                          course=self.c1,  # In course 1, hence a course conflict
                           subject=self.sub1,
                           room=self.r1,
                           date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
@@ -187,7 +187,7 @@ class ReplicateWeekTestCase(BaseTestCase):
         Try to replicate one week where a room is filled with 2 courses, but the room has capacity 2.
         """
         ass2 = Assignment(teacher=self.t2,
-                          course=self.c2,    # In course 1, hence a course conflict
+                          course=self.c2,  # In course 1, hence a course conflict
                           subject=self.sub2,
                           room=self.r1,
                           date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
@@ -214,7 +214,7 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass2 = Assignment(teacher=self.t2,
                           course=self.c2,
                           subject=self.sub2,
-                          room=self.r1,            # Room 1 is already filled with 2 courses.
+                          room=self.r1,  # Room 1 is already filled with 2 courses.
                           date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
                           hour_start=time(hour=9, minute=0),
                           hour_end=time(hour=10, minute=0),
@@ -227,7 +227,7 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass3 = Assignment(teacher=self.t3,
                           course=self.c3,
                           subject=self.sub3,
-                          room=self.r1,           # room 1 is filled with 2 courses already
+                          room=self.r1,  # room 1 is filled with 2 courses already
                           date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
                           hour_start=time(hour=9, minute=0),
                           hour_end=time(hour=10, minute=0),
@@ -242,7 +242,7 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass4 = Assignment(teacher=self.t3,
                           course=self.c3,
                           subject=self.sub3,
-                          room=self.r1,           # room 1 is filled with 2 courses already
+                          room=self.r1,  # room 1 is filled with 2 courses already
                           date=datetime(year=2020, month=5, day=18),  # Monday 18/5/2020
                           hour_start=time(hour=9, minute=0),
                           hour_end=time(hour=10, minute=0),
@@ -308,7 +308,7 @@ class ReplicateWeekTestCase(BaseTestCase):
         Room capacity should count only the courses which are concurrent, not the number of assignments
         (since there could be multiple assignments for the same course).
         """
-        ass2 = Assignment(teacher=self.t2,   # Theacher 2 in course 2
+        ass2 = Assignment(teacher=self.t2,  # Theacher 2 in course 2
                           course=self.c2,
                           subject=self.sub2,
                           room=self.r1,
@@ -321,7 +321,7 @@ class ReplicateWeekTestCase(BaseTestCase):
                           absent=False,
                           free_substitution=False)
         ass2.save()
-        ass3 = Assignment(teacher=self.t3,    # Teacher 3 in course 2.
+        ass3 = Assignment(teacher=self.t3,  # Teacher 3 in course 2.
                           course=self.c2,
                           subject=self.sub2,
                           room=self.r1,
@@ -351,7 +351,7 @@ class ReplicateWeekTestCase(BaseTestCase):
         Hence, no room conflict should be raised.
         Still, there should be a course conflict!
         """
-        ass2 = Assignment(teacher=self.t2,   # Theacher 2 in course 2
+        ass2 = Assignment(teacher=self.t2,  # Theacher 2 in course 2
                           course=self.c2,
                           subject=self.sub2,
                           room=self.r1,
@@ -364,7 +364,7 @@ class ReplicateWeekTestCase(BaseTestCase):
                           absent=False,
                           free_substitution=False)
         ass2.save()
-        ass3 = Assignment(teacher=self.t3,    # Teacher 3 in course 2.
+        ass3 = Assignment(teacher=self.t3,  # Teacher 3 in course 2.
                           course=self.c2,
                           subject=self.sub2,
                           room=self.r1,
@@ -416,7 +416,7 @@ class ReplicateWeekTestCase(BaseTestCase):
                                       course=self.c1,
                                       subject=self.sub1,
                                       room=self.r1,
-                                      date=start_date + timedelta(days=day) + timedelta(days=7*i),
+                                      date=start_date + timedelta(days=day) + timedelta(days=7 * i),
                                       hour_start=time(hour=hour, minute=0),
                                       hour_end=time(hour=hour + 1, minute=0),
                                       bes=False,
@@ -441,7 +441,7 @@ class ReplicateWeekTestCase(BaseTestCase):
                 ass1.save()
                 assignments_to_check.append(ass1.id)
 
-        print(len(assignments))   # Make the assignments in advance.
+        print(len(assignments))  # Make the assignments in advance.
         print(len(assignments_to_check))
         start = datetime.now()
         response = self.c.post('/timetable/check_week_replication/2020-05-04/2020-05-24',
@@ -450,7 +450,7 @@ class ReplicateWeekTestCase(BaseTestCase):
         print(len(json_res['teacher_conflicts']))
         end = datetime.now()
         print(start, end)
-        self.assertLessEqual((end - start).seconds, 3)     # Just a good constant, so that github can run it :)
+        self.assertLessEqual((end - start).seconds, 3)  # Just a good constant, so that github can run it :)
         for el in assignments:
             el.delete()
         Assignment.objects.filter(id__in=assignments_to_check).delete()
@@ -487,7 +487,7 @@ class ReplicateWeekTestCase(BaseTestCase):
                           substitution=False,
                           absent=False,
                           free_substitution=False)
-        ass3 = Assignment(teacher=self.t1,         # Replicated course. It should not be considered as a conflict.
+        ass3 = Assignment(teacher=self.t1,  # Replicated course. It should not be considered as a conflict.
                           course=self.c1,
                           subject=self.sub1,
                           room=self.r1,
@@ -542,7 +542,7 @@ class ReplicateWeekTestCase(BaseTestCase):
                           substitution=False,
                           absent=False,
                           free_substitution=False)
-        ass3 = Assignment(teacher=self.t1,         # Replicated course. It should not be considered as a conflict.
+        ass3 = Assignment(teacher=self.t1,  # Replicated course. It should not be considered as a conflict.
                           course=self.c1,
                           subject=self.sub1,
                           room=self.r1,
@@ -558,8 +558,8 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass2.save()
         ass3.save()
         response = self.c.post('/timetable/replicate_week/add/{school_year}/{course}/2020-09-21/2020-09-27'.format(
-                school_year=self.school_year_2020.id,
-                course=self.c1.pk),
+            school_year=self.school_year_2020.id,
+            course=self.c1.pk),
             {'assignments[]': [ass1.id, ass2.id]})
         # Assert that no conflict is raised, although there already is the copy of course 1 in week 21/9 - 27/9
         self.assertEqual(response.status_code, 201)
@@ -580,3 +580,116 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass1.delete()
         ass2.delete()
         ass3.delete()
+
+    def test_week_replication_without_substitutions(self):
+        """
+
+        """
+        ass1 = Assignment(teacher=self.t1,
+                          course=self.c1,
+                          subject=self.sub1,
+                          room=self.r1,
+                          date=datetime(day=14, month=9, year=2020),
+                          hour_start=time(hour=7, minute=55),
+                          hour_end=time(hour=8, minute=45),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=True,
+                          free_substitution=False)
+        ass2 = Assignment(teacher=self.t2,
+                          course=self.c1,
+                          subject=self.sub1,
+                          room=self.r1,
+                          date=datetime(day=14, month=9, year=2020),
+                          hour_start=time(hour=7, minute=55),
+                          hour_end=time(hour=8, minute=45),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=True,
+                          absent=False,
+                          free_substitution=False)
+        ass1.save()
+        ass2.save()
+        response = self.c.post('/timetable/replicate_week/add/{school_year}/{course}/2020-09-21/2020-09-27'.format(
+            school_year=self.school_year_2020.id,
+            course=self.c1.pk),
+            {'assignments[]': [ass1.id, ass2.id],
+             'without_substitutions': 'true'})
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(Assignment.objects.filter(teacher=self.t1,
+                                                  course=self.c1,
+                                                  subject=self.sub1,
+                                                  room=self.r1,
+                                                  date=datetime(day=21, month=9, year=2020),
+                                                  hour_start=time(hour=7, minute=55),
+                                                  hour_end=time(hour=8, minute=45),
+                                                  absent=False,
+                                                  substitution=False).exists())
+        self.assertTrue(not Assignment.objects.filter(teacher=self.t2,
+                                                      course=self.c1,
+                                                      subject=self.sub1,
+                                                      room=self.r1,
+                                                      date=datetime(day=21, month=9, year=2020),
+                                                      hour_start=time(hour=7, minute=55),
+                                                      hour_end=time(hour=8, minute=45),
+                                                      substitution=True).exists())
+        ass1.delete()
+        ass2.delete()
+
+    def test_week_replication_with_substitutions(self):
+        """
+
+        """
+        ass1 = Assignment(teacher=self.t1,
+                          course=self.c1,
+                          subject=self.sub1,
+                          room=self.r1,
+                          date=datetime(day=14, month=9, year=2020),
+                          hour_start=time(hour=7, minute=55),
+                          hour_end=time(hour=8, minute=45),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=True,
+                          free_substitution=False)
+        ass2 = Assignment(teacher=self.t2,
+                          course=self.c1,
+                          subject=self.sub1,
+                          room=self.r1,
+                          date=datetime(day=14, month=9, year=2020),
+                          hour_start=time(hour=7, minute=55),
+                          hour_end=time(hour=8, minute=45),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=True,
+                          absent=False,
+                          free_substitution=False)
+        ass1.save()
+        ass2.save()
+        response = self.c.post('/timetable/replicate_week/add/{school_year}/{course}/2020-09-21/2020-09-27'.format(
+            school_year=self.school_year_2020.id,
+            course=self.c1.pk),
+            {'assignments[]': [ass1.id, ass2.id],
+             'without_substitutions': 'false'})
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(Assignment.objects.filter(teacher=self.t1,
+                                                  course=self.c1,
+                                                  subject=self.sub1,
+                                                  room=self.r1,
+                                                  date=datetime(day=21, month=9, year=2020),
+                                                  hour_start=time(hour=7, minute=55),
+                                                  hour_end=time(hour=8, minute=45),
+                                                  absent=True,
+                                                  substitution=False).exists())
+        self.assertTrue(Assignment.objects.filter(teacher=self.t2,
+                                                  course=self.c1,
+                                                  subject=self.sub1,
+                                                  room=self.r1,
+                                                  date=datetime(day=21, month=9, year=2020),
+                                                  hour_start=time(hour=7, minute=55),
+                                                  hour_end=time(hour=8, minute=45),
+                                                  absent=False,
+                                                  substitution=True).exists())
+        ass1.delete()
+        ass2.delete()
