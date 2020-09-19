@@ -194,6 +194,26 @@ class AssignmentViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin,
     filterset_class = AssignmentFilter
     ordering = ['teacher__last_name', 'teacher__first_name', 'course__year', 'course__section', 'hour_start']
 
+    def destroy(self, request, *args, **kwargs):
+        """
+        If the hour that we are deleting is a substitution, then we need to mark the substituted hour
+        as not absent anymore.
+        """
+        instance = self.get_object()
+        if instance.substitution or instance.free_substitution:
+            assignments_in_same_hour_slot = Assignment.objects.filter(
+                course=instance.course,
+                date=instance.date,
+                hour_start=instance.hour_start,
+                hour_end=instance.hour_end).exclude(
+                    id=instance.id
+            ).exclude(substitution=True, free_substitution=True)
+            for a in assignments_in_same_hour_slot:
+                # Set the absent to False
+                a.absent = False
+                a.save()
+        return super(AssignmentViewSet, self).destroy(request, *args, **kwargs)
+
 
 class TeacherAssignmentsViewSet(UserPassesTestMixin, ListModelMixin, GenericViewSet):
     queryset = Assignment.objects.all()
