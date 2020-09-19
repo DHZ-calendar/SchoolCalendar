@@ -149,6 +149,13 @@
 
                 {% trans 'Date end' %}:
                 <input type="text" id="date_end" class="form-control datepicker" data-date-format='dd/mm/yyyy' />
+
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="check_without_substitutions">
+                    <label class="custom-control-label" for="check_without_substitutions">
+                        {% trans 'Replicate without substitutions' %}
+                    </label>
+                </div>
                 <hr/>
                 <div id="replicateResult">
 

@@ -669,9 +669,9 @@ async function replicateWeek(){
         .replace("9999-99-99", formatDate(endDate));
     let data = {
         csrfmiddlewaretoken: Cookies.get('csrftoken'),
-        assignments: []
+        assignments: [],
+        without_substitutions: $('#check_without_substitutions').prop('checked')
     }
-
     for (let block of Object.keys(timetable.blocks)){
         for(let event of timetable.getBlock(block).events){
             data.assignments.push(event.id);

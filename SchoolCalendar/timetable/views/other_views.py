@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
@@ -196,6 +197,7 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
         :return:
         """
         assignments = self.request.POST.getlist('assignments[]')
+        without_substitutions = json.loads(self.request.POST.get('without_substitutions', 'false'))
         try:
             from_date = datetime.datetime.strptime(kwargs.get('from'), '%Y-%m-%d').date()
             to_date = datetime.datetime.strptime(kwargs.get('to'), '%Y-%m-%d').date()
@@ -211,6 +213,10 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
         try:
             # check if there are conflicts
             assignments_qs = Assignment.objects.filter(id__in=assignments)
+
+            if without_substitutions:  # the user doesn't want to replicate substitutions
+                assignments_qs = assignments_qs.exclude(substitution=True)
+
             for a in assignments_qs:
 
                 # There can't be conflicts among the newly created assignments and the teaching hours of the same teacher!
@@ -289,7 +295,7 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
                             bes=a.bes,
                             co_teaching=a.co_teaching,
                             substitution=a.substitution,
-                            absent=a.absent,
+                            absent=(False if without_substitutions else a.absent),
                             date=d
                         )
                         assignments_list.append(new_a)

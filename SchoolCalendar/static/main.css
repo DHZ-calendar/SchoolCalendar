@@ -22,7 +22,7 @@
     background-color: #3594e8;
 }
 .cal-event-absent {
-    background-color: #cda7eb;
+    background-color: red;
 }
 .cal-event-substitution {
     background-color: #bafff6;
