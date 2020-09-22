@@ -89,6 +89,7 @@
         let startDate = moment($('#date_start').val(), "DD/MM/YYYY").toDate();
         let endDate = moment($('#date_end').val(), "DD/MM/YYYY").toDate();
         let data = {
+            school_year: $('#school_year').val(),
             course: row.id,
             start_date: formatDate(startDate),
             end_date: formatDate(endDate)
