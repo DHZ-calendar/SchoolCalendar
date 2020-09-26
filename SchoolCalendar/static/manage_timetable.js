@@ -304,7 +304,8 @@ async function getAssignmentsGeneric(url, startDate, endDate, showTeacher=true){
             let clickEvent = (event) => {
                 alert(subject + " - " + teacher + " - " + course);
             };
-            timetable.addEvent(customEvent, blockId, clickEvent, deleteAssignment);
+            let deleteEvent = showTeacher ? deleteAssignment : null;
+            timetable.addEvent(customEvent, blockId, clickEvent, deleteEvent);
 
             if(assign.bes){
                 customEvent.htmlElement.addClass('cal-event-bes');
