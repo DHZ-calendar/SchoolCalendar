@@ -835,7 +835,7 @@ class TimetableGeneralPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMix
                         hour['hour_end'] == assign.hour_end:
                     break
                 i += 1
-            column = assign.date.weekday() * i + 1
+            column = assign.date.weekday() * len(hours) + i + 1
 
             table[-1][column] = Paragraph(str(assign.course.year) + ' ' + assign.course.section, styles['text_small'])
 
