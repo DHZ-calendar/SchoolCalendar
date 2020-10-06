@@ -21,9 +21,11 @@ from timetable.views.rest_framework_views import TeacherViewSet, \
 from timetable.views.other_views import TimetableView, SubstituteTeacherView, TeacherTimetableView, \
     LoggedUserRedirectView, TeacherSummaryView, TeacherPDFReportView, SendInvitationTeacherEmailView, \
     SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView, \
-    TeacherSubstitutionView, SubstituteTeacherApiView, TimetableReportView, TimetableTeacherPDFReportView, \
-    TimetableCoursePDFReportView, TimetableGeneralPDFReportView, CourseSummaryView, RoomTimetableView, \
-    SendTeacherSubstitutionEmailView, DownloadTeacherSubstitutionTicketView, TimetableRoomPDFReportView
+    TeacherSubstitutionView, SubstituteTeacherApiView, TimetableReportView, \
+    CourseSummaryView, RoomTimetableView, \
+    SendTeacherSubstitutionEmailView, DownloadTeacherSubstitutionTicketView
+from timetable.views.csv_views import TimetableTeacherCSVReportViewSet, TimetableCourseCSVReportViewSet, \
+                                      TimetableRoomCSVReportViewSet, TimetableGeneralCSVReportViewSet
 
 from rest_framework.routers import DefaultRouter
 
@@ -54,6 +56,20 @@ router.register(r'courses_summary/?(school_year=[0-9]+)?(start_date=\d\d\d\d-\d\
 router.register(r'teachers_yearly_loads', TeachersYearlyLoadViewSet, basename='teachers_yearly_load')
 router.register(r'courses_yearly_loads', CoursesYearlyLoadViewSet, basename='courses_yearly_load')
 
+# CSV reports
+router.register(r'timetable_teacher_csv_report_view/(?P<school_year_pk>[0-9]+)/(?P<teacher_pk>\d+)/'
+                r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)', TimetableTeacherCSVReportViewSet,
+                basename='timetable_teacher_csv_report')
+router.register(r'timetable_course_csv_report_view/(?P<school_year_pk>[0-9]+)/(?P<course_pk>\d+)/'
+                r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)', TimetableCourseCSVReportViewSet,
+                basename='timetable_course_csv_report')
+router.register(r'timetable_course_csv_report_view/(?P<school_year_pk>[0-9]+)/(?P<room_pk>\d+)/'
+                r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)', TimetableRoomCSVReportViewSet,
+                basename='timetable_room_csv_report')
+router.register(r'timetable_general_csv_report_view/(?P<school_year_pk>[0-9]+)'
+                r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)', TimetableGeneralCSVReportViewSet,
+                basename='timetable_general_csv_report')
+
 urlpatterns = [
     path('', LoggedUserRedirectView.as_view(), name='user_redirect-view'),
     path('user_guide', TemplateView.as_view(template_name='timetable/user_guide.html'), name='user_guide'),
@@ -65,17 +81,6 @@ urlpatterns = [
     path('course_summary_view', CourseSummaryView.as_view(), name='course_summary-view'),
     path('teacher_pdf_report_view', TeacherPDFReportView.as_view(), name='teacher_pdf_report-view'),
     path('timetable_report_view', TimetableReportView.as_view(), name='timetable_report-view'),
-    re_path(r'timetable_teacher_pdf_report_view/(?P<school_year_pk>[0-9]+)/(?P<teacher_pk>\d+)/'
-            r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)',
-            TimetableTeacherPDFReportView.as_view(), name='timetable_teacher_pdf_report-view'),
-    re_path(r'timetable_course_pdf_report_view/(?P<school_year_pk>[0-9]+)/(?P<course_pk>\d+)/'
-            r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)',
-            TimetableCoursePDFReportView.as_view(), name='timetable_course_pdf_report-view'),
-    re_path(r'timetable_room_pdf_report_view/(?P<school_year_pk>[0-9]+)/(?P<room_pk>\d+)/'
-            r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)',
-            TimetableRoomPDFReportView.as_view(), name='timetable_room_pdf_report-view'),
-    re_path(r'timetable_general_pdf_report_view/(?P<school_year_pk>[0-9]+)/(?P<monday_date>\d\d\d\d-\d\d-\d\d)',
-            TimetableGeneralPDFReportView.as_view(), name='timetable_general_pdf_report-view'),
     path('substitution_pdf_ticket/<assign_pk>', DownloadTeacherSubstitutionTicketView.as_view(),
          name='substitution_pdf_ticket-view'),
     path('substitution_teacher_email/<assign_pk>', SendTeacherSubstitutionEmailView.as_view(),
