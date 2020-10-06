@@ -258,20 +258,19 @@ class TimetableGeneralCSVReportViewSet(GenericCSVViewSet):
 
     def get_renderer_context(self):
         context = super().get_renderer_context()
-        school_year = self.kwargs.get('school_year_pk')
-        school = utils.get_school_from_user(self.request.user)
-        hour_slots = HourSlot.objects.filter(school=school, school_year=school_year)
-        dow_with_hour_slots = [d + str(i) for d in days_of_week for i in range(len(hour_slots))]
-
-        self.serializer_class.Meta.fields += tuple(dow_with_hour_slots)
         context['header'] = self.serializer_class.Meta.fields
-
         context['labels'] = {
             'teacher': _('Teacher')
         }
+
         for d in days_of_week:
-            for i in range(len(hour_slots)):
-                txt = str(i+1) if i > 0 else _(d) + " 1"
+            start = True
+            for i in range(len(self.hours_list)):
+                if start:
+                    txt = _(d) + " 1"
+                    start = False
+                else:
+                    txt = str(i + 1)
                 context['labels'].update({d + str(i): txt})
         return context
 
@@ -301,6 +300,7 @@ class TimetableGeneralCSVReportViewSet(GenericCSVViewSet):
         hours_assign = assignments.order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
 
         hours_list = [h for h in hours_hour_slots]
+        self.hours_list = hours_list
 
         for h in hours_assign:
             if h not in hours_list:
@@ -309,9 +309,9 @@ class TimetableGeneralCSVReportViewSet(GenericCSVViewSet):
         nr_teachers = assignments.values('teacher__id').distinct()
         queryset = [{} for i in nr_teachers]
 
-        dow_with_hour_slots = [d + str(i) for d in days_of_week for i in range(len(hour_slots))]
+        self.dow_with_hour_slots = [d + str(i) for d in days_of_week for i in range(len(hours_list))]
         for i in queryset:
-            i.update({j: '' for j in dow_with_hour_slots})
+            i.update({j: '' for j in self.dow_with_hour_slots})
 
         teacher_id, teacher_idx = None, -1
         for assign in assignments:
@@ -329,5 +329,5 @@ class TimetableGeneralCSVReportViewSet(GenericCSVViewSet):
             field = days_of_week[assign.date.weekday()] + str(hs_idx)
             queryset[teacher_idx][field] = "{} {}".format(str(assign.course.year), assign.course.section)
 
-        serializer = self.serializer_class(queryset, dow_with_hour_slots=dow_with_hour_slots, many=True)
+        serializer = self.serializer_class(queryset, dow_with_hour_slots=self.dow_with_hour_slots, many=True)
         return Response(serializer.data)
