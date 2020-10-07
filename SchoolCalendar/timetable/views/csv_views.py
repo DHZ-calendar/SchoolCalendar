@@ -1,4 +1,5 @@
 import csv
+import pandas as pd
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -9,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 import datetime
 
+from rest_pandas import PandasView, PandasSimpleView, PandasExcelRenderer
 from timetable import utils
 from timetable.permissions import SchoolAdminCanWriteDelete
 from timetable.models import HourSlot, Assignment, Teacher, Course, Room
@@ -178,17 +180,14 @@ class TimetableCourseCSVReportViewSet(WeekTimetableCSVViewSet):
         return Response(serializer.data)
 
 
-class TimetableRoomCSVReportViewSet(WeekTimetableCSVViewSet):
-    serializer_class = WeekTimetableCSVSerializer
-    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
-    lookup_url_kwarg = ['room_pk', 'school_year_pk', 'monday_date']
+class TimetableRoomCSVReportViewSet(PandasSimpleView):
+    renderer_classes = [PandasExcelRenderer]
+    queryset = Teacher.objects.none()  # needed to avoid throwing errors
 
-    def get_filename(self):
+    def get_pandas_filename(self, request, format):
         return str(self.room) + " - " + self.monday_date.strftime("%d-%m-%Y")
 
-    def list(self, request, **kwargs):
-        """
-        """
+    def get_data(self, request, *args, **kwargs):
         try:
             school_year = kwargs.get('school_year_pk')
             room_pk = self.kwargs.get('room_pk')
@@ -244,8 +243,10 @@ class TimetableRoomCSVReportViewSet(WeekTimetableCSVViewSet):
                     hour[day_of_week] += assignment_text
                     break
 
-        serializer = self.serializer_class(queryset, many=True)
-        return Response(serializer.data)
+        # TODO: remove row index
+        # TODO: format hours with hh:mm
+        # TODO: add correct labels for column
+        return pd.DataFrame(queryset)
 
 
 class TimetableGeneralCSVReportViewSet(GenericCSVViewSet):

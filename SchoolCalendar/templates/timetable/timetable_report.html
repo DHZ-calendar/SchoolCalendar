@@ -209,7 +209,7 @@
         date = date.day(1).format('YYYY-MM-DD');
         let school_year = $('#school_year').val();
         let room = $('#rooms').val();
-        let url = "{% url 'timetable_room_csv_report-list' 1234 9999 '0000-00-00' %}"
+        let url = "{% url 'timetable_room_csv_report' 1234 9999 '0000-00-00' %}"
             .replace('1234', school_year)
             .replace('9999', room)
             .replace('0000-00-00', date);
