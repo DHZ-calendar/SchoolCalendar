@@ -19,6 +19,17 @@ from timetable.csv_serializers import WeekTimetableCSVSerializer, GeneralTimetab
 
 days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
+labels = {
+            'hour_start': _('Hour start'),
+            'hour_end': _('Hour end'),
+            'Monday': _('Monday'),
+            'Tuesday': _('Tuesday'),
+            'Wednesday': _('Wednesday'),
+            'Thursday': _('Thursday'),
+            'Friday': _('Friday'),
+            'Saturday': _('Saturday')
+        }
+
 
 class GenericCSVViewSet(ViewSet):
     renderer_classes = [CSVRenderer]
@@ -253,11 +264,15 @@ class TimetableRoomCSVReportViewSet(PandasSimpleView):
                     hour[day_of_week] += assignment_text
                     break
 
-        # TODO: add correct labels for column
         df = pd.DataFrame(queryset)
+        # Set the hour format to hh:mm
         df['hour_start'] = df['hour_start'].apply(lambda x: x.strftime('%H:%M'))
         df['hour_end'] = df['hour_end'].apply(lambda x: x.strftime('%H:%M'))
+        # Set the index for the df to hour_start and hour_end, so that we can drop the counter of rows.
         df.set_index(['hour_start', 'hour_end'], inplace=True)
+        # Rename both the index and the columns with reasonable human-readable names.
+        df.rename(labels, inplace=True)
+        df.index.rename(["".join(labels['hour_start']), "".join(labels['hour_end'])], inplace=True)
 
         return df
 
