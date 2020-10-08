@@ -10,16 +10,16 @@ class WeekTimetableCSVSerializer(Serializer):
 
     hour_start = DateField(format="%H:%M")
     hour_end = DateField(format="%H:%M")
-    monday = CharField()
-    tuesday = CharField()
-    wednesday = CharField()
-    thursday = CharField()
-    friday = CharField()
-    saturday = CharField()
+    Monday = CharField()
+    Tuesday = CharField()
+    Wednesday = CharField()
+    Thursday = CharField()
+    Friday = CharField()
+    Saturday = CharField()
 
     class Meta(object):
-        fields = ('hour_start', 'hour_end', 'monday', 'tuesday', 'wednesday',
-                  'thursday', 'friday', 'saturday')  # used to set the order of the fields
+        fields = ('hour_start', 'hour_end', 'Monday', 'Tuesday', 'Wednesday',
+                  'Thursday', 'Friday', 'Saturday')  # used to set the order of the fields
 
 
 class GeneralTimetableCSVSerializer(Serializer):
