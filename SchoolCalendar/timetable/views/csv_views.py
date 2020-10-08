@@ -17,7 +17,7 @@ from timetable.models import HourSlot, Assignment, Teacher, Course, Room
 
 from timetable.csv_serializers import WeekTimetableCSVSerializer, GeneralTimetableCSVSerializer
 
-days_of_week = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 
 class GenericCSVViewSet(ViewSet):
@@ -39,12 +39,12 @@ class WeekTimetableCSVViewSet(GenericCSVViewSet):
         context['labels'] = {
             'hour_start': _('Hour start'),
             'hour_end': _('Hour end'),
-            'monday': _('Monday'),
-            'tuesday': _('Tuesday'),
-            'wednesday': _('Wednesday'),
-            'thursday': _('Thursday'),
-            'friday': _('Friday'),
-            'saturday': _('Saturday')
+            'Monday': _('Monday'),
+            'Tuesday': _('Tuesday'),
+            'Wednesday': _('Wednesday'),
+            'Thursday': _('Thursday'),
+            'Friday': _('Friday'),
+            'Saturday': _('Saturday')
         }
         return context
 
@@ -199,6 +199,11 @@ class TimetableRoomCSVReportViewSet(PandasSimpleView):
 
         self.room = Room.objects.get(pk=room_pk)
         self.monday_date = monday_date
+        if self.monday_date.weekday() != 0:   # Monday is the weekday 0
+            # Set the Monday date to the smaller closest Monday.
+            # Correct accordingly the end_date.
+            self.monday_date -= datetime.timedelta(days=self.monday_date.weekday())
+            end_date = self.monday_date + datetime.timedelta(days=6)
 
         hour_slots = HourSlot.objects.filter(school=school, school_year=school_year)
         hours_hour_slots = hour_slots.extra(
@@ -209,12 +214,16 @@ class TimetableRoomCSVReportViewSet(PandasSimpleView):
         ).order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
         assignments = Assignment.objects.filter(school=school, course__school_year=school_year, room=room_pk,
                                                 date__gte=monday_date, date__lte=end_date)
+
+        # In case we have special hours slots: take the assignments of the current week, and check that
+        # all the related hour_slots appear in hours_list
         hours_assign = assignments.order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
 
         hours_list = [h for h in hours_hour_slots]
 
         for h in hours_assign:
             if h not in hours_list:
+                # Add special hour slots.
                 hours_list.append(h)
 
         queryset = sorted(hours_list, key=lambda x: (x['hour_start'], x['hour_end']))
@@ -239,7 +248,8 @@ class TimetableRoomCSVReportViewSet(PandasSimpleView):
                                                               str(assign.course.year), str(assign.course.section))
 
                     if hour[day_of_week] != '':
-                        hour[day_of_week] += "\n\n"
+                        # In case we already have more than one lecture, add a newline.
+                        hour[day_of_week] += "\n"
                     hour[day_of_week] += assignment_text
                     break
 
