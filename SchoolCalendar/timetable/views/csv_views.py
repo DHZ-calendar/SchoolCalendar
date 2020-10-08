@@ -192,8 +192,8 @@ class TimetableCourseCSVReportViewSet(WeekTimetableCSVViewSet):
 
 
 class TimetableRoomCSVReportViewSet(PandasSimpleView):
-    renderer_classes = [PandasExcelRenderer]
     queryset = Teacher.objects.none()  # needed to avoid throwing errors
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]    # In the meantime only school admin.
 
     def get_pandas_filename(self, request, format):
         return str(self.room) + " - " + self.monday_date.strftime("%d-%m-%Y")
