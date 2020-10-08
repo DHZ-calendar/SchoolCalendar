@@ -253,10 +253,13 @@ class TimetableRoomCSVReportViewSet(PandasSimpleView):
                     hour[day_of_week] += assignment_text
                     break
 
-        # TODO: remove row index
-        # TODO: format hours with hh:mm
         # TODO: add correct labels for column
-        return pd.DataFrame(queryset)
+        df = pd.DataFrame(queryset)
+        df['hour_start'] = df['hour_start'].apply(lambda x: x.strftime('%H:%M'))
+        df['hour_end'] = df['hour_end'].apply(lambda x: x.strftime('%H:%M'))
+        df.set_index(['hour_start', 'hour_end'], inplace=True)
+
+        return df
 
 
 class TimetableGeneralCSVReportViewSet(GenericCSVViewSet):
