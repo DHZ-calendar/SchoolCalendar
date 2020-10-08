@@ -120,15 +120,15 @@ class TimetableTeacherCSVReportViewSet(WeekTimetableCSVViewSet):
         return Response(serializer.data)
 
 
-class TimetableCourseCSVReportViewSet(WeekTimetableCSVViewSet):
-    serializer_class = WeekTimetableCSVSerializer
-    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
-    lookup_url_kwarg = ['course_pk', 'school_year_pk', 'monday_date']
+class TimetableCourseCSVReportViewSet(PandasSimpleView):
+    queryset = Teacher.objects.none()  # needed to avoid throwing errors
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]  # In the meantime only school admin.
+    renderer_classes = [PandasExcelRenderer]
 
-    def get_filename(self):
+    def get_pandas_filename(self, request, format):
         return str(self.course) + " - " + self.monday_date.strftime("%d-%m-%Y")
 
-    def list(self, request, **kwargs):
+    def get_data(self, request, *args, **kwargs):
         """
         """
         try:
@@ -183,12 +183,21 @@ class TimetableCourseCSVReportViewSet(WeekTimetableCSVViewSet):
                         assignment_text += " (" + assign.room.name + ")"
 
                     if hour[day_of_week] != '':
-                        hour[day_of_week] += "\n\n"
+                        hour[day_of_week] += "\n"
                     hour[day_of_week] += assignment_text
                     break
 
-        serializer = self.serializer_class(queryset, many=True)
-        return Response(serializer.data)
+        df = pd.DataFrame(queryset)
+        # Set the hour format to hh:mm
+        df['hour_start'] = df['hour_start'].apply(lambda x: x.strftime('%H:%M'))
+        df['hour_end'] = df['hour_end'].apply(lambda x: x.strftime('%H:%M'))
+        # Set the index for the df to hour_start and hour_end, so that we can drop the counter of rows.
+        df.set_index(['hour_start', 'hour_end'], inplace=True)
+        # Rename both the index and the columns with reasonable human-readable names.
+        df.rename(labels, inplace=True)
+        df.index.rename(["".join(labels['hour_start']), "".join(labels['hour_end'])], inplace=True)
+
+        return df
 
 
 class TimetableRoomCSVReportViewSet(PandasSimpleView):

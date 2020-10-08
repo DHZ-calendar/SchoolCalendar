@@ -61,9 +61,6 @@ router.register(r'courses_yearly_loads', CoursesYearlyLoadViewSet, basename='cou
 router.register(r'timetable_teacher_csv_report_view/(?P<school_year_pk>[0-9]+)/(?P<teacher_pk>\d+)/'
                 r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)', TimetableTeacherCSVReportViewSet,
                 basename='timetable_teacher_csv_report')
-router.register(r'timetable_course_csv_report_view/(?P<school_year_pk>[0-9]+)/(?P<course_pk>\d+)/'
-                r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)', TimetableCourseCSVReportViewSet,
-                basename='timetable_course_csv_report')
 router.register(r'timetable_general_csv_report_view/(?P<school_year_pk>[0-9]+)'
                 r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)', TimetableGeneralCSVReportViewSet,
                 basename='timetable_general_csv_report')
@@ -72,6 +69,9 @@ urlpatterns = [
     url(r'timetable_room_csv_report_view/(?P<school_year_pk>[0-9]+)/(?P<room_pk>\d+)/'
         r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)', TimetableRoomCSVReportViewSet.as_view(),
         name='timetable_room_csv_report'),
+    url(r'timetable_course_csv_report_view/(?P<school_year_pk>[0-9]+)/(?P<course_pk>\d+)/'
+        r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)', TimetableCourseCSVReportViewSet.as_view(),
+        name='timetable_course_csv_report'),
     path('', LoggedUserRedirectView.as_view(), name='user_redirect-view'),
     path('user_guide', TemplateView.as_view(template_name='timetable/user_guide.html'), name='user_guide'),
     path('admin_school', TimetableView.as_view(), name='timetable-view'),
