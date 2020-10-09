@@ -2,17 +2,12 @@ import pandas as pd
 import datetime
 
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.viewsets import ViewSet
-from rest_framework_csv.renderers import CSVRenderer
 from django.utils.translation import gettext_lazy as _
 
 from rest_pandas import PandasSimpleView, PandasExcelRenderer
 from timetable import utils
 from timetable.permissions import SchoolAdminCanWriteDelete
 from timetable.models import HourSlot, Assignment, Teacher, Course, Room
-
-from timetable.csv_serializers import WeekTimetableCSVSerializer, GeneralTimetableCSVSerializer
 
 days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -26,19 +21,6 @@ labels = {
             'Friday': _('Friday'),
             'Saturday': _('Saturday')
         }
-
-
-class GenericCSVViewSet(ViewSet):
-    renderer_classes = [CSVRenderer]
-
-    def get_renderer_context(self):
-        context = super().get_renderer_context()
-        context['header'] = self.serializer_class.Meta.fields
-        return context
-
-    def finalize_response(self, request, response, *args, **kwargs):
-        response['Content-Disposition'] = 'attachment; filename="{}.csv"'.format(self.get_filename())
-        return super().finalize_response(request, response, *args, **kwargs)
 
 
 class TimetableTeacherCSVReportViewSet(PandasSimpleView):
@@ -277,33 +259,15 @@ class TimetableRoomCSVReportViewSet(PandasSimpleView):
         return df
 
 
-class TimetableGeneralCSVReportViewSet(GenericCSVViewSet):
-    serializer_class = GeneralTimetableCSVSerializer
-    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
-    lookup_url_kwarg = ['school_year_pk', 'monday_date']
+class TimetableGeneralCSVReportViewSet(PandasSimpleView):
+    renderer_classes = [PandasExcelRenderer]
+    queryset = Teacher.objects.none()  # needed to avoid throwing errors
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]    # In the meantime only school admin.
 
-    def get_filename(self):
+    def get_pandas_filename(self, request, format):
         return _("General") + " - " + self.monday_date.strftime("%d-%m-%Y")
 
-    def get_renderer_context(self):
-        context = super().get_renderer_context()
-        context['header'] = self.serializer_class.Meta.fields
-        context['labels'] = {
-            'teacher': _('Teacher')
-        }
-
-        for d in days_of_week:
-            start = True
-            for i in range(len(self.hours_list)):
-                if start:
-                    txt = _(d) + " 1"
-                    start = False
-                else:
-                    txt = str(i + 1)
-                context['labels'].update({d + str(i): txt})
-        return context
-
-    def list(self, request, **kwargs):
+    def get_data(self, request, *args, **kwargs):
         """
         """
         try:
@@ -329,7 +293,6 @@ class TimetableGeneralCSVReportViewSet(GenericCSVViewSet):
         hours_assign = assignments.order_by('hour_start', 'hour_end').values('hour_start', 'hour_end').distinct()
 
         hours_list = [h for h in hours_hour_slots]
-        self.hours_list = hours_list
 
         for h in hours_assign:
             if h not in hours_list:
@@ -338,9 +301,9 @@ class TimetableGeneralCSVReportViewSet(GenericCSVViewSet):
         nr_teachers = assignments.values('teacher__id').distinct()
         queryset = [{} for i in nr_teachers]
 
-        self.dow_with_hour_slots = [d + str(i) for d in days_of_week for i in range(len(hours_list))]
+        dow_with_hour_slots = [d + "_" + str(i) for d in days_of_week for i in range(len(hours_list))]
         for i in queryset:
-            i.update({j: '' for j in self.dow_with_hour_slots})
+            i.update({j: '' for j in dow_with_hour_slots})
 
         teacher_id, teacher_idx = None, -1
         for assign in assignments:
@@ -355,8 +318,21 @@ class TimetableGeneralCSVReportViewSet(GenericCSVViewSet):
             }
             hs_idx = hours_list.index(hs)
 
-            field = days_of_week[assign.date.weekday()] + str(hs_idx)
+            field = days_of_week[assign.date.weekday()] + "_" +  str(hs_idx)
             queryset[teacher_idx][field] = "{} {}".format(str(assign.course.year), assign.course.section)
 
-        serializer = self.serializer_class(queryset, dow_with_hour_slots=self.dow_with_hour_slots, many=True)
-        return Response(serializer.data)
+        df = pd.DataFrame(queryset)
+        # Set the index for the df to teacher, so that we can drop the counter of rows.
+        df.set_index(['teacher'], inplace=True)
+        # Create subcolumns, so that the dow will be the super column of the hours
+        df.columns = pd.MultiIndex.from_tuples([c.split('_') for c in df.columns])
+        # Rename both the index and the columns with reasonable human-readable names.
+        general_labels = {
+            'teacher': _('Teacher')
+        }
+        general_labels.update(labels)
+        for i in range(len(hours_list)):
+            general_labels.update({str(i): str(i + 1)})
+        df.rename(columns=general_labels, inplace=True)
+
+        return df

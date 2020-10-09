@@ -57,9 +57,6 @@ router.register(r'courses_summary/?(school_year=[0-9]+)?(start_date=\d\d\d\d-\d\
 router.register(r'teachers_yearly_loads', TeachersYearlyLoadViewSet, basename='teachers_yearly_load')
 router.register(r'courses_yearly_loads', CoursesYearlyLoadViewSet, basename='courses_yearly_load')
 
-router.register(r'timetable_general_csv_report_view/(?P<school_year_pk>[0-9]+)'
-                r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)', TimetableGeneralCSVReportViewSet,
-                basename='timetable_general_csv_report')
 
 urlpatterns = [
     # Excel reports
@@ -72,6 +69,9 @@ urlpatterns = [
     url(r'timetable_teacher_csv_report_view/(?P<school_year_pk>[0-9]+)/(?P<teacher_pk>\d+)/'
         r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)', TimetableTeacherCSVReportViewSet.as_view(),
         name='timetable_teacher_csv_report'),
+    url(r'timetable_general_csv_report_view/(?P<school_year_pk>[0-9]+)'
+        r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)', TimetableGeneralCSVReportViewSet.as_view(),
+        name='timetable_general_csv_report'),
 
     path('', LoggedUserRedirectView.as_view(), name='user_redirect-view'),
     path('user_guide', TemplateView.as_view(template_name='timetable/user_guide.html'), name='user_guide'),
