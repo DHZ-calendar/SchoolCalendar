@@ -1,16 +1,13 @@
-import csv
 import pandas as pd
+import datetime
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-from rest_framework.serializers import CharField
 from rest_framework_csv.renderers import CSVRenderer
 from django.utils.translation import gettext_lazy as _
 
-import datetime
-
-from rest_pandas import PandasView, PandasSimpleView, PandasExcelRenderer
+from rest_pandas import PandasSimpleView, PandasExcelRenderer
 from timetable import utils
 from timetable.permissions import SchoolAdminCanWriteDelete
 from timetable.models import HourSlot, Assignment, Teacher, Course, Room
@@ -44,31 +41,15 @@ class GenericCSVViewSet(ViewSet):
         return super().finalize_response(request, response, *args, **kwargs)
 
 
-class WeekTimetableCSVViewSet(GenericCSVViewSet):
-    def get_renderer_context(self):
-        context = super().get_renderer_context()
-        context['labels'] = {
-            'hour_start': _('Hour start'),
-            'hour_end': _('Hour end'),
-            'Monday': _('Monday'),
-            'Tuesday': _('Tuesday'),
-            'Wednesday': _('Wednesday'),
-            'Thursday': _('Thursday'),
-            'Friday': _('Friday'),
-            'Saturday': _('Saturday')
-        }
-        return context
+class TimetableTeacherCSVReportViewSet(PandasSimpleView):
+    queryset = Teacher.objects.none()  # needed to avoid throwing errors
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]  # In the meantime only school admin.
+    renderer_classes = [PandasExcelRenderer]
 
-
-class TimetableTeacherCSVReportViewSet(WeekTimetableCSVViewSet):
-    serializer_class = WeekTimetableCSVSerializer
-    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]
-    lookup_url_kwarg = ['teacher_pk', 'school_year_pk', 'monday_date']
-
-    def get_filename(self):
+    def get_pandas_filename(self, request, format):
         return str(self.teacher) + " - " + self.monday_date.strftime("%d-%m-%Y")
 
-    def list(self, request, **kwargs):
+    def get_data(self, request, *args, **kwargs):
         """
         """
         try:
@@ -116,8 +97,17 @@ class TimetableTeacherCSVReportViewSet(WeekTimetableCSVViewSet):
                                                             str(assign.course.year), str(assign.course.section))
                     break
 
-        serializer = self.serializer_class(queryset, many=True)
-        return Response(serializer.data)
+        df = pd.DataFrame(queryset)
+        # Set the hour format to hh:mm
+        df['hour_start'] = df['hour_start'].apply(lambda x: x.strftime('%H:%M'))
+        df['hour_end'] = df['hour_end'].apply(lambda x: x.strftime('%H:%M'))
+        # Set the index for the df to hour_start and hour_end, so that we can drop the counter of rows.
+        df.set_index(['hour_start', 'hour_end'], inplace=True)
+        # Rename both the index and the columns with reasonable human-readable names.
+        df.rename(labels, inplace=True)
+        df.index.rename(["".join(labels['hour_start']), "".join(labels['hour_end'])], inplace=True)
+
+        return df
 
 
 class TimetableCourseCSVReportViewSet(PandasSimpleView):

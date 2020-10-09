@@ -54,7 +54,7 @@
         </div>
         <div class="col text-center">
             <a href="#" class="btn btn-danger" role="button" aria-pressed="true" onclick="getGeneralLink()">
-                {% trans 'Download CSV' %}
+                {% trans 'Download Excel' %}
                 <svg class="bi bi-download" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                   <path fill-rule="evenodd" d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"/>
                   <path fill-rule="evenodd" d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"/>
@@ -66,7 +66,7 @@
     <div class="row mt-2">
         <div class="col text-center">
             <a href="#" class="btn btn-danger" role="button" aria-pressed="true" onclick="getTeacherLink()">
-                {% trans 'Download CSV' %}
+                {% trans 'Download Excel' %}
                 <svg class="bi bi-download" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                   <path fill-rule="evenodd" d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"/>
                   <path fill-rule="evenodd" d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"/>
@@ -76,7 +76,7 @@
         </div>
         <div class="col text-center">
             <a href="#" class="btn btn-danger" role="button" aria-pressed="true" onclick="getCourseLink()">
-                {% trans 'Download CSV' %}
+                {% trans 'Download Excel' %}
                 <svg class="bi bi-download" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                   <path fill-rule="evenodd" d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"/>
                   <path fill-rule="evenodd" d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"/>
@@ -86,7 +86,7 @@
         </div>
         <div class="col text-center">
             <a href="#" class="btn btn-danger" role="button" aria-pressed="true" onclick="getRoomLink()">
-                {% trans 'Download CSV' %}
+                {% trans 'Download Excel' %}
                 <svg class="bi bi-download" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                   <path fill-rule="evenodd" d="M.5 8a.5.5 0 0 1 .5.5V12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8.5a.5.5 0 0 1 1 0V12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8.5A.5.5 0 0 1 .5 8z"/>
                   <path fill-rule="evenodd" d="M5 7.5a.5.5 0 0 1 .707 0L8 9.793 10.293 7.5a.5.5 0 1 1 .707.707l-2.646 2.647a.5.5 0 0 1-.708 0L5 8.207A.5.5 0 0 1 5 7.5z"/>
@@ -173,7 +173,7 @@
         date = date.day(1).format('YYYY-MM-DD');
         let school_year = $('#school_year').val();
         let teacher = $('#teachers').val();
-        let url = "{% url 'timetable_teacher_csv_report-list' 1234 9999 '0000-00-00' %}"
+        let url = "{% url 'timetable_teacher_csv_report' 1234 9999 '0000-00-00' %}"
             .replace('1234', school_year)
             .replace('9999', teacher)
             .replace('0000-00-00', date);
