@@ -259,8 +259,13 @@ class TimetableRoomCSVReportViewSet(PandasSimpleView):
         return df
 
 
+class GeneralTimetablePandasExcelRenderer(PandasExcelRenderer):
+    def get_pandas_kwargs(self, data, renderer_context):
+        return {'index_label': _('Teacher')}  # Here we set the label of the teacher column
+
+
 class TimetableGeneralCSVReportViewSet(PandasSimpleView):
-    renderer_classes = [PandasExcelRenderer]
+    renderer_classes = [GeneralTimetablePandasExcelRenderer]
     queryset = Teacher.objects.none()  # needed to avoid throwing errors
     permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]    # In the meantime only school admin.
 
