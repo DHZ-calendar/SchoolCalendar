@@ -521,7 +521,7 @@ async function chooseAssignmentRoom(teaId, teacherId, subjId, schoolId, block, b
     $('#btn-room-add-assignment').unbind("click");
     //attach click event to the confirmation button
     $('#btn-room-add-assignment').click(() => {
-        addAssignment(teaId, teacherId, subjId, schoolId, block, bes, co_teaching)
+        addAssignment(teaId, teacherId, subjId, schoolId, block, bes, co_teaching);
     });
 
     //show the modal
