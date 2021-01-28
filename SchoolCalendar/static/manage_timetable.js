@@ -196,7 +196,7 @@ async function getTeachers(){
             let html = `
                 <li class="list-group-item list-teachers" data-teacher-id="${tea.id}">
                     <div class="row">
-                        <div class="col-10">
+                        <div class="col-10 teacher-search-field">
                             <b>${tea.teacher.last_name} ${tea.teacher.first_name}</b> - ${tea.subject.name}
                         </div>
                         <div class="col-2 p-0">

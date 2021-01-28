@@ -92,6 +92,8 @@
         </div>
         <div class="col-2 col-teacher-list">
             {% trans 'List of teachers:' %}
+            <input type="text" class="form-control" id="teacher-filter-text" onkeyup="filterTeachers()" placeholder="{% trans 'Filter teachers...' %}">
+            <br/>
             <ul class="list-group" id="teachers_list">                                
             </ul>
         </div>
@@ -243,6 +245,23 @@
             }
         });
     });
+
+    function filterTeachers() {
+        let filter = $('#teacher-filter-text').val().toUpperCase();
+        let rows = $('#teachers_list .list-teachers');
+
+        // Loop through all list items, and hide those who don't match the search query
+        for (i = 0; i < rows.length; i++) {
+            let row = $(rows[i]);
+            let text = row.find('.teacher-search-field').text().toUpperCase();
+
+            if (text.indexOf(filter) > -1) {
+                row.show();
+            } else {
+                row.hide();
+            }
+        }
+    }
 
     _TRANS = {
         'extra_block_title': "{% trans 'Extra lecture' %}",
