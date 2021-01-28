@@ -537,7 +537,8 @@ class AssignmentSerializer(ModelSerializer):
     conflicting_hour_slots = SerializerMethodField(read_only=True)
     course_id = PrimaryKeyRelatedField(write_only=True, queryset=Course.objects.all(), source='course')
     course = CourseSerializer(read_only=True)
-    room_id = PrimaryKeyRelatedField(write_only=True, required=False, queryset=Room.objects.all(), source='room')
+    room_id = PrimaryKeyRelatedField(write_only=True, required=False, queryset=Room.objects.all(), source='room',
+                                     allow_null=True)
     room = RoomSerializer(read_only=True)
     eventual_substitute = SerializerMethodField(read_only=True)
 
@@ -606,10 +607,12 @@ class AssignmentSerializer(ModelSerializer):
         :param attrs: the values to validate
         :return: attrs or raises ValidationError
         """
-        if attrs['hour_start'] > attrs['hour_end']:
-            raise ValidationError(_('The start hour field can\'t be greater than the end hour'))
-        if attrs['bes'] and attrs['co_teaching']:
-            raise ValidationError(_("The assignment can only be BES or co-teaching, but not both."))
+        if not self.partial:
+            # Checks only if we are creating or entirely updating an assignment, not when patching an existing one
+            if attrs['hour_start'] > attrs['hour_end']:
+                raise ValidationError(_('The start hour field can\'t be greater than the end hour'))
+            if attrs['bes'] and attrs['co_teaching']:
+                raise ValidationError(_("The assignment can only be BES or co-teaching, but not both."))
         return attrs
 
     def validate_subject_id(self, value):

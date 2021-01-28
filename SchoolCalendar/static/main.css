@@ -8,6 +8,10 @@
     margin-bottom: 15px;
 }
 
+.cal-event {
+    cursor: pointer;
+}
+
 .cal-block-absence {
     background-color: darkgray;
 }
@@ -54,6 +58,14 @@ li.conflicts-content{
     width: 100%;
     text-align: center;
     border-radius: 4px;
+}
+
+/* to change color of cross and tick icons */
+.fa-times {
+    color: red;
+}
+.fa-check {
+    color: green;
 }
 
 /* to fix glyphicon missing */

@@ -177,7 +177,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalLabel">{% trans 'Assign a room' %}</h5>
+                <h5 class="modal-title">{% trans 'Assign a room' %}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -190,6 +190,75 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans 'Close' %}</button>
                 <button type="button" id="btn-room-add-assignment" class="btn btn-info">{% trans 'Add lecture' %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal lecture info/edit -->
+<div class="modal fade" id="modalLecture" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans 'Edit the lecture' %}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body row">
+                <div class="col-6"><b>{% trans 'Date' %}:</b></div>
+                <div class="col-6">
+                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                    <span id="modal-lecture-date"></span>
+                </div>
+
+                <div class="col-6"><b>{% trans 'Hours' %}:</b></div>
+                <div class="col-6">
+                    <i class="fa fa-clock-o" aria-hidden="true"></i>
+                    <span id="modal-lecture-hours"></span>
+                </div>
+
+                <div class="col-6"><b>{% trans 'Course' %}:</b></div>
+                <div class="col-6">
+                    <i class="fa fa-briefcase" aria-hidden="true"></i>
+                    <span id="modal-lecture-course"></span>
+                </div>
+
+                <div class="col-6"><b>{% trans 'Teacher' %}:</b></div>
+                <div class="col-6">
+                    <i class="fa fa-user" aria-hidden="true"></i>
+                    <span id="modal-lecture-teacher"></span>
+                </div>
+
+                <div class="col-6"><b>{% trans 'Subject' %}:</b></div>
+                <div class="col-6">
+                    <i class="fa fa-book" aria-hidden="true"></i>
+                    <span id="modal-lecture-subject"></span>
+                </div>
+
+                <div class="col-6"><b>{% trans 'Room' %}:</b></div>
+                <div class="col-6">
+                    <select class="custom-select" id="modal-lecture-room"></select>
+                </div>
+
+                <div class="col-6"><b>{% trans 'B.E.S.' %}:</b></div>
+                <div class="col-6"><span id="modal-lecture-bes"></span></div>
+
+                <div class="col-6"><b>{% trans 'Co-teaching' %}:</b></div>
+                <div class="col-6"><span id="modal-lecture-coteaching"></span></div>
+
+                <div class="col-6"><b>{% trans 'Absent' %}:</b></div>
+                <div class="col-6"><span id="modal-lecture-absent"></span></div>
+
+                <div class="col-6"><b>{% trans 'Substitution' %}:</b></div>
+                <div class="col-6"><span id="modal-lecture-substitution"></span></div>
+
+                <div class="col-6"><b>{% trans 'Not counted substitution' %}:</b></div>
+                <div class="col-6"><span id="modal-lecture-free-substitution"></span></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans 'Close' %}</button>
+                <button type="button" id="btn-modal-lecture-save" class="btn btn-info">{% trans 'Save changes' %}</button>
             </div>
         </div>
     </div>

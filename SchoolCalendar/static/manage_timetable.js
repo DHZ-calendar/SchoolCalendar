@@ -271,6 +271,34 @@ async function refreshTeachers(){
     }
 }
 
+async function updateAssignmentRoom(assignId, roomId) {
+    let url = _URL['assignments'] + assignId + '/';
+
+    let data = {
+        room_id: roomId
+    };
+    try {
+        let res = await $.ajax({
+            url: url,
+            type: 'PATCH',
+            data: JSON.stringify(data),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("X-CSRFToken", Cookies.get("csrftoken"));
+            }
+        });
+        await loadData(true, false);
+        await refreshTeachers();
+
+        $('#modalLecture').modal('hide');
+    }
+    catch(e){
+        console.log("Error while updating the room");
+        console.error(e);
+    }
+}
+
 async function getAssignmentsGeneric(url, startDate, endDate, showTeacher=true){
     let data = {
         'school_year': $('#school_year').val(),
@@ -301,8 +329,35 @@ async function getAssignmentsGeneric(url, startDate, endDate, showTeacher=true){
                     <path fill-rule="evenodd" d="M2 1a1 1 0 0 0-1 1v4.586a1 1 0 0 0 .293.707l7 7a1 1 0 0 0 1.414 0l4.586-4.586a1 1 0 0 0 0-1.414l-7-7A1 1 0 0 0 6.586 1H2zm4 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
                 </svg> ` + subject;
             let customEvent = new Event(assign.id, teacherLbl, subject);
-            let clickEvent = (event) => {
-                alert(subject + " - " + teacher + " - " + course);
+            let clickEvent = async (event) => {
+                $('#modal-lecture-date').text(assign.date);
+                $('#modal-lecture-hours').text(`${assign.hour_start} - ${assign.hour_end}`);
+                $('#modal-lecture-course').text(course);
+                $('#modal-lecture-teacher').text(teacher);
+                $('#modal-lecture-subject').text(assign.subject.name);
+                $('#modal-lecture-bes').html(`<i class="fa ${assign.bes ? 'fa-check' : 'fa-times'}"></i>`);
+                $('#modal-lecture-coteaching').html(`<i class="fa ${assign.co_teaching ? 'fa-check' : 'fa-times'}"></i>`);
+                $('#modal-lecture-absent').html(`<i class="fa ${assign.absent ? 'fa-check' : 'fa-times'}"></i>`);
+                $('#modal-lecture-substitution').html(`<i class="fa ${assign.substitution ? 'fa-check' : 'fa-times'}"></i>`);
+                $('#modal-lecture-free-substitution').html(`<i class="fa ${assign.free_substitution ? 'fa-check' : 'fa-times'}"></i>`);
+
+                let roomSelect = $('#modal-lecture-room');
+                let schoolId = assign.subject.school;
+                let rooms = await addAvailableRoomsToSelect(roomSelect, schoolId, assign.date, assign.hour_start, assign.hour_end);
+
+                if(assign.room) {
+                    roomSelect.val(assign.room.id);
+                }
+                roomSelect.prop('disabled', !showTeacher);
+
+                $('#btn-modal-lecture-save').unbind("click");
+                //attach click event to the confirmation button
+                $('#btn-modal-lecture-save').click(() => {
+                    let roomSelect = $('#modal-lecture-room');
+                    updateAssignmentRoom(assign.id, roomSelect.val());
+                });
+
+                $('#modalLecture').modal('show');
             };
             let deleteEvent = showTeacher ? deleteAssignment : null;
             timetable.addEvent(customEvent, blockId, clickEvent, deleteEvent);
@@ -496,27 +551,35 @@ async function setLockedBlocksAbsenceTeacher(teacherId){
     }
 }
 
-async function chooseAssignmentRoom(teaId, teacherId, subjId, schoolId, block, bes, co_teaching){
+async function addAvailableRoomsToSelect(roomSelect, schoolId, date, hour_start, hour_end) {
     //get free rooms without conflicts
     let url = _URL['room'];
-    let date = moment(currentDate).add(block.day, 'days').format('YYYY-MM-DD');
     let data = {
         school_year: $('#school_year').val(),
         school: schoolId,
         date: date,
         course: $('#course_section').val(),
-        hour_start: block.startTime.hours + ':' + block.startTime.min,
-        hour_end: block.endTime.hours + ':' + block.endTime.min
+        hour_start: hour_start.substring(0, 5),
+        hour_end: hour_end.substring(0, 5)
     };
     let rooms = await $.get(url, data=data);
-    $('#roomSelect').html(`
+    roomSelect.html(`
         <option value="">${_TRANS['no_room']}</option>
     `);
     for(let room of rooms){
-        $('#roomSelect').append(`
+        roomSelect.append(`
             <option value="${room.id}">${room.name}</option>
         `);
     }
+
+    return rooms;
+}
+async function chooseAssignmentRoom(teaId, teacherId, subjId, schoolId, block, bes, co_teaching){
+    let roomSelect = $('#roomSelect');
+    let date = moment(currentDate).add(block.day, 'days').format('YYYY-MM-DD');
+    let hour_start = block.startTime.hours + ':' + block.startTime.min;
+    let hour_end = block.endTime.hours + ':' + block.endTime.min;
+    await addAvailableRoomsToSelect(roomSelect, schoolId, date, hour_start, hour_end);
 
     $('#btn-room-add-assignment').unbind("click");
     //attach click event to the confirmation button
