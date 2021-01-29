@@ -166,7 +166,7 @@ class AssignmentFilter(FilterSet):
 
     class Meta:
         model = Assignment
-        fields = ['school_year', 'course', 'from_date', 'to_date']
+        fields = ['school_year', 'course', 'teacher', 'from_date', 'to_date']
 
 
 class RoomFilter(FilterSet):

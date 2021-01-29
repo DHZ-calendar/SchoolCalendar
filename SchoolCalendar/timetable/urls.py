@@ -18,12 +18,12 @@ from timetable.views.rest_framework_views import TeacherViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
     AbsenceBlocksPerTeacherViewSet, TeacherTimetableViewSet, AbsenceBlockViewSet, \
     SubjectViewSet, RoomViewSet, TeacherSummaryViewSet, CourseSummaryViewSet, TeachersYearlyLoadViewSet, \
-    CoursesYearlyLoadViewSet, RoomTimetableViewSet, HourSlotsGroupViewSet
+    CoursesYearlyLoadViewSet, RoomTimetableViewSet, HourSlotsGroupViewSet, SubstitutionAssignmentsViewSet
 from timetable.views.other_views import TimetableView, SubstituteTeacherView, TeacherTimetableView, \
     LoggedUserRedirectView, TeacherSummaryView, TeacherPDFReportView, SendInvitationTeacherEmailView, \
     SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView, \
     TeacherSubstitutionView, SubstituteTeacherApiView, TimetableReportView, \
-    CourseSummaryView, RoomTimetableView, \
+    CourseSummaryView, RoomTimetableView, SubstitutionSummaryView, \
     SendTeacherSubstitutionEmailView, DownloadTeacherSubstitutionTicketView
 from timetable.views.csv_views import TimetableTeacherCSVReportViewSet, TimetableCourseCSVReportViewSet, \
                                       TimetableRoomCSVReportViewSet, TimetableGeneralCSVReportViewSet
@@ -43,6 +43,7 @@ router.register(r'hour_slots_groups', HourSlotsGroupViewSet, basename='hour_slot
 router.register(r'hour_per_teacher_in_class/?(start_date=\d\d\d\d-\d\d-\d\d)?(end_date=\d\d\d\d-\d\d-\d\d)?',
                 HoursPerTeacherInClassViewSet, basename='hour_per_teacher_in_class')
 router.register(r'assignments', AssignmentViewSet, basename='assignments')
+router.register(r'substitutions', SubstitutionAssignmentsViewSet, basename='substitutions')
 router.register(r'teacher_assignments/(?P<teacher_pk>[0-9]+)/(?P<school_year_pk>[0-9]+)', TeacherAssignmentsViewSet,
                 basename='teacher_assignments')
 router.register(r'teacher_absence_block/(?P<teacher_pk>[0-9]+)/(?P<school_year_pk>[0-9]+)',
@@ -81,6 +82,7 @@ urlpatterns = [
     path('room_view', RoomTimetableView.as_view(), name='room_timetable-view'),
     path('teacher_summary_view', TeacherSummaryView.as_view(), name='teacher_summary-view'),
     path('course_summary_view', CourseSummaryView.as_view(), name='course_summary-view'),
+    path('substitution_summary_view', SubstitutionSummaryView.as_view(), name='substitution_summary-view'),
     path('teacher_pdf_report_view', TeacherPDFReportView.as_view(), name='teacher_pdf_report-view'),
     path('timetable_report_view', TimetableReportView.as_view(), name='timetable_report-view'),
     path('substitution_pdf_ticket/<assign_pk>', DownloadTeacherSubstitutionTicketView.as_view(),

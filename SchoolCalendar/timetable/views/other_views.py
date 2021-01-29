@@ -58,6 +58,10 @@ class CourseSummaryView(LoginRequiredMixin, AdminSchoolPermissionMixin, Template
     template_name = 'timetable/course_summary.html'
 
 
+class SubstitutionSummaryView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateViewWithSchoolYears):
+    template_name = 'timetable/substitution_summary.html'
+
+
 class TeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):
     def get(self, request, *args, **kwargs):
         school = utils.get_school_from_user(self.request.user)

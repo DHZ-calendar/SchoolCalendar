@@ -12,7 +12,7 @@ from timetable.serializers import TeacherSerializer, CourseYearOnlySerializer, C
     HolidaySerializer, StageSerializer, HourSlotSerializer, HoursPerTeacherInClassSerializer, AssignmentSerializer, \
     AbsenceBlockSerializer, TeacherSubstitutionSerializer, SubjectSerializer, ReplicationConflictsSerializer, \
     RoomSerializer, TeacherSummarySerializer, CourseSummarySerializer, TeachersYearlyLoadSerializer, \
-    CoursesYearlyLoadSerializer, HourSlotsGroupSerializer
+    CoursesYearlyLoadSerializer, HourSlotsGroupSerializer, SubstitutionAssignmentSerializer
 from timetable.permissions import SchoolAdminCanWriteDelete, TeacherCanView
 from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
     StageFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
@@ -324,3 +324,12 @@ class RoomTimetableViewSet(ListModelMixin, GenericViewSet):
         room_pk = self.kwargs.get('room_pk')
         assignments = Assignment.objects.filter(room_id=room_pk)
         return assignments
+
+
+class SubstitutionAssignmentsViewSet(ListModelMixin, GenericViewSet):
+    queryset = Assignment.objects.filter(substitution=True)
+    serializer_class = SubstitutionAssignmentSerializer
+    filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool,)
+    filterset_class = AssignmentFilter
+    ordering = ['-date', 'hour_start', 'hour_end', 'teacher__last_name', 'teacher__first_name',
+                'course__year', 'course__section', 'subject__name']

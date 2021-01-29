@@ -1,0 +1,193 @@
+{% extends 'timetable/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'main.css' %}"/>
+
+<link href="https://unpkg.com/bootstrap-table@1.17.1/dist/bootstrap-table.min.css" rel="stylesheet">
+<script src="https://unpkg.com/bootstrap-table@1.17.1/dist/bootstrap-table.min.js"></script>
+
+<script src="https://unpkg.com/bootstrap-table@1.17.1/dist/locale/bootstrap-table-it-IT.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.17.1/dist/locale/bootstrap-table-en-US.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <h3 class="col text-center">{% trans 'Substitutions summary' %}</h3>
+    </div>
+    <div class="row">
+        <div class="col">
+            {% trans 'School year:' %}
+            <select id="school_year" class="form-control form-control-custom" onchange="loadData()">
+                {% for year in school_years %}
+                    <option value="{{ year.id }}">{{ year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col">
+            <select id="teacher" class="form-control form-control-custom" onchange="loadData(true)">
+            </select>
+        </div>
+        <div class="col">
+            <select id="course" class="form-control form-control-custom" onchange="loadData(true)">
+            </select>
+        </div>
+        <div class="col">
+            {% trans 'Date start:' %}
+            <input class="datepicker form-control form-control-custom form-control-sm"
+                   data-date-format='dd/mm/yyyy' type="text" id="date_start" onchange="loadData(true)"></input>
+        </div>
+        <div class="col">
+            {% trans 'Date end:' %}
+            <input class="datepicker form-control form-control-custom form-control-sm"
+                   data-date-format='dd/mm/yyyy' type="text" id="date_end" onchange="loadData(true)"></input>
+        </div>
+    </div>
+    <div class="row p-1">
+        <div class="col">
+            <table id="table" data-toggle="table" data-search="true" data-detail-view="true" data-detail-formatter="detailFormatter">
+                <thead class="table-primary">
+                    <tr>
+                        <th data-field="date" data-sortable="true">{% trans 'Date' %}</th>
+                        <th data-field="hour_start" data-sortable="true">{% trans 'Hour start' %}</th>
+                        <th data-field="hour_end" data-sortable="true">{% trans 'Hour end' %}</th>
+                        <th data-field="course.year" data-sortable="true">{% trans 'Course year' %}</th>
+                        <th data-field="course.section" data-sortable="true">{% trans 'Course section' %}</th>
+                        <th data-field="teacher.full_name" data-sortable="true">{% trans 'Substitution teacher' %}</th>
+                        <th data-field="substituted_teacher.full_name" data-sortable="true">{% trans 'Absent teacher' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+              </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+    $(document).ready(async () => {
+        $('.datepicker').datepicker();
+
+        await loadData();
+    });
+
+    async function loadData(filter=false) {
+        if(!filter) {
+            await loadTeachers();
+            await loadCourses();
+        }
+        await loadSubstitutions();
+    }
+
+    async function loadSubstitutions() {
+        let url = _URL['substitution_summary'];
+        let startDate = moment($('#date_start').val(), "DD/MM/YYYY").toDate();
+        let endDate = moment($('#date_end').val(), "DD/MM/YYYY").toDate();
+        let data = {
+            school_year: $('#school_year').val(),
+            from_date: formatDate(startDate),
+            to_date: formatDate(endDate),
+            teacher: $('#teacher').val(),
+            course: $('#course').val()
+        };
+        try {
+            data = await $.get(url, data=data);
+            $('#table').bootstrapTable('load', data);
+        }
+        catch {}
+    }
+
+    async function loadTeachers(){
+        let url = _URL['teachers'];
+        $('#teacher').empty();
+        $('#teacher').append(`<option value="">{% trans 'All substitution teachers' %}</option>`);
+        let data = {
+            school_year: $('#school_year').val()
+        };
+        try{
+            data = await $.get(url, data=data);
+            for(let el of data){
+                let html = `<option value="${el.id}">${el.last_name} ${el.first_name}</option>`;
+                $('#teacher').append(html);
+            }
+        }
+        catch{
+            console.log("No data");
+        }
+    }
+
+    async function loadCourses(){
+        let url = _URL['courses'];
+        $('#course').empty();
+        $('#course').append(`<option value="">{% trans 'All courses' %}</option>`);
+        let data = {
+            school_year: $('#school_year').val()
+        };
+        try{
+            data = await $.get(url, data=data);
+            for(let el of data){
+                let html = `<option value="${el.id}">${el.year} ${el.section}</option>`;
+                $('#course').append(html);
+            }
+        }
+        catch{
+            console.log("No data");
+        }
+    }
+
+    function get_tick_or_cross(condition){
+        // Return a tick or a cross, depending on the condition.
+        return condition ? "&#10004;" : "&#x2718;";
+    }
+
+    async function detailFormatter(index, row, $detail) {
+        let html = `
+            <div class="container">
+                <div class="row">
+                    <div class="col"><b>{% trans 'Course' %}</b></div>
+                    <div class="col">${row.course.year} ${row.course.section}</div>
+                </div>
+                <div class="row">
+                    <div class="col"><b>{% trans 'Subject' %}</b></div>
+                    <div class="col">${row.subject.name}</div>
+                </div>
+                <div class="row">
+                    <div class="col"><b>{% trans 'Room' %}</b></div>
+                    <div class="col">${row.room ? row.room.name : '-'}</div>
+                </div>
+                <div class="row">
+                    <div class="col"><b>{% trans 'B.E.S.' %}</b></div>
+                    <div class="col">${get_tick_or_cross(row.bes)}</div>
+                </div>
+                <div class="row">
+                    <div class="col"><b>{% trans 'Co-teaching' %}</b></div>
+                    <div class="col">${get_tick_or_cross(row.co_teaching)}</div>
+                </div>
+                <div class="row">
+                    <div class="col"><b>{% trans 'Free substitution (not counted)' %}</b></div>
+                    <div class="col">${get_tick_or_cross(row.free_substitution)}</div>
+                </div>
+            </div>
+            `;
+        $detail.html(html);
+    }
+
+    _URL = {
+        'substitution_summary': "{% url 'substitutions-list' %}",
+        'teachers': "{% url 'teacher-list' %}",
+        'courses': "{% url 'section_only_course-list' %}"
+    };
+
+    function formatDate(date){
+        if(date === undefined || isNaN(date.getTime()))
+            return null;
+
+        let frm = (x) => ("0" + x).slice(-2);
+        return date.getFullYear() + "-" + frm(date.getMonth() + 1) + "-" + frm(date.getDate());
+    }
+{% endblock %}

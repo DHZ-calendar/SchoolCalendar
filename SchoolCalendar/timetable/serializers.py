@@ -66,9 +66,14 @@ class AbstractTimePeriodSerializer(ModelSerializer):
 
 
 class TeacherSerializer(ModelSerializer):
+    full_name = SerializerMethodField(read_only=True)
+
+    def get_full_name(self, obj, *args, **kwargs):
+        return obj.teacher.last_name + ' ' + obj.teacher.first_name
+
     class Meta:
         model = Teacher
-        fields = ['id', 'url', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'school',
+        fields = ['id', 'url', 'first_name', 'last_name', 'full_name', 'username', 'email', 'is_staff', 'school',
                   'in_activity', 'notes']
 
 
@@ -528,7 +533,7 @@ class HoursPerTeacherInClassSerializer(ModelSerializer):
 
 class AssignmentSerializer(ModelSerializer):
     """
-    Serializer for teachers
+    Serializer for assignments
     """
     teacher = TeacherSerializer(read_only=True)
     teacher_id = PrimaryKeyRelatedField(write_only=True, queryset=Teacher.objects.all(), source='teacher')
@@ -826,3 +831,39 @@ class SubstitutionSerializer(Serializer):
 
     def update(self, instance, validated_data):
         pass
+
+
+class SubstitutionAssignmentSerializer(AssignmentSerializer):
+    """
+    Serializer for substitution assignments
+    """
+    substituted_teacher = SerializerMethodField(read_only=True)
+
+    def get_substituted_teacher(self, obj, *args, **kwargs):
+        """
+        Per each substitution Assignment, it returns the corresponding substituted teacher.
+        :param obj: the assignment instance
+        :return:
+        """
+        assign = Assignment.objects.filter(
+            course=obj.course,
+            subject=obj.subject,
+            room=obj.room,
+            date=obj.date,
+            hour_start=obj.hour_start,
+            hour_end=obj.hour_end,
+            bes=obj.bes,
+            co_teaching=obj.co_teaching,
+            substitution=False,
+            absent=True
+        ).first()
+        if assign:  # Free substitutions don't have an absent teacher
+            serializer_context = {'request': self.context.get('request')}
+            serializer = TeacherSerializer(assign.teacher, context=serializer_context)
+            return serializer.data
+        return None
+
+    class Meta:
+        model = Assignment
+        fields = ['id', 'teacher', 'course', 'subject', 'room', 'date', 'hour_start', 'hour_end', 'bes', 'co_teaching',
+                  'substitution', 'absent', 'free_substitution', 'substituted_teacher']
