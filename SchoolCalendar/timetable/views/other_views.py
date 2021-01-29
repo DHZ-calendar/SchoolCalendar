@@ -1,5 +1,6 @@
 import datetime
 import json
+from abc import ABCMeta
 
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
@@ -104,7 +105,82 @@ class TeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View)
         return FileResponse(buffer, as_attachment=True, filename='report.pdf')
 
 
-class CheckWeekReplicationView(UserPassesTestMixin, View):
+class WeekReplicationConflictWrapperView(UserPassesTestMixin, View, metaclass=ABCMeta):
+    """
+    This class is a wrapper for the two views that handle week replication:
+    in particular, only one static method is implemented, which handles the retrival of
+    conflicts for courses, teachers and rooms.
+    """
+    @staticmethod
+    def get_course_teacher_room_conflict(assignments_qs, from_date, to_date):
+        """
+        This method returns, given a queryset of assignments to duplicate, and an interval of dates
+        when to duplicate the assignments, all the conflicts for courses, teachers and rooms.
+        In particular: a conflict for teachers may happen when the same teacher is already teaching in some other
+        courses at any time of replication of the assignment. A course conflict may happen if the course is
+        already busy at any time of the replication of the assignment. A room conflict may happen if its capacity
+        is exceeded. Note that the capacity of the room is not counted simply with the number of assignments in the
+        same hour-slot, but rather for different courses in the same hour-slot (so if 3 teachers are concurrently in the
+        same course in the same room, they are counted as 1).
+        If a copy of the assignment that are replicated is already present in the time interval, then it is not
+        counted as a conflict (it gets simply ignored).
+
+        Args:
+            assignments_qs: queryset of assignments that are going to be relicated
+            from_date: date of beginning of interval
+            to_date: date of end of interval
+        """
+        course_conflicts = Assignment.objects.none()
+        teacher_conflicts = Assignment.objects.none()
+        room_conflicts = Assignment.objects.none()
+
+        for a in assignments_qs:
+
+            # Return all assignments from the same course or teacher that would collide in the future.
+            # excluding the assignment in the url.
+            conflicts = Assignment.objects.filter(school=a.school,
+                                                  school_year=a.school_year,
+                                                  # _week_day returns dates Sun-Sat (1,7), while weekday (Mon, Sun) (0,6)
+                                                  date__week_day=(a.date.weekday() + 2) % 7,
+                                                  hour_start=a.hour_start) \
+                .filter(date__gte=from_date, date__lte=to_date) \
+                .exclude(id=a.pk)
+            # Exclude lectures that are equivalent to the one that we want to replicate, since aren't conflicts
+            # but the same lecture already defined by the user
+            conflicts = conflicts.exclude(course=a.course,
+                                          teacher=a.teacher,
+                                          subject=a.subject,
+                                          hour_start=a.hour_start,
+                                          hour_end=a.hour_end,
+                                          bes=a.bes,
+                                          co_teaching=a.co_teaching,
+                                          absent=a.absent,
+                                          substitution=a.substitution)
+
+            course_conflicts |= conflicts.filter(course=a.course)
+            teacher_conflicts |= conflicts.filter(teacher=a.teacher)
+
+            # Check both that the room is not null, and is the same as the current room!
+            conf_room = conflicts.filter(room__isnull=False, room=a.room, substitution=False)
+            # TODO: This will be super slow!
+            for date in conflicts.values_list('date').distinct():
+                # Select the distinct courses for the same date
+                distinct_course_in_date = conf_room.filter(date=date[0]).values_list('course').distinct()
+                # The format of values_list is a list of tuples, like [(1,), (4,), ]. Hence, flatten it.
+                flatten_list = [item for sublist in distinct_course_in_date for item in sublist]
+                if a.room is not None and \
+                        a.course.id not in flatten_list and \
+                        distinct_course_in_date.count() >= a.room.capacity:
+                    # If there is a room in the current assignment,
+                    # the course is not one of the already present in the course
+                    # and the capacity of the room is filled, then: mark the room conflict.
+                    conf_rooms_in_conflicting_dates = conf_room.filter(date=date[0])
+                    room_conflicts |= conf_rooms_in_conflicting_dates
+
+        return course_conflicts, teacher_conflicts, room_conflicts
+
+
+class CheckWeekReplicationView(WeekReplicationConflictWrapperView):
     def test_func(self):
         assignments = self.request.POST.getlist('assignments[]')
         if not (utils.is_adminschool(self.request.user)):
@@ -119,66 +195,32 @@ class CheckWeekReplicationView(UserPassesTestMixin, View):
         Check conflicts with the assignments of a week if repeated in a specific date range
         """
         assignments = request.POST.getlist('assignments[]')
-        # TODO: this long try catch should be better modularized! (error for date parsing, for serializer wrong etc)
         try:
             from_date = datetime.datetime.strptime(kwargs.get('from'), '%Y-%m-%d').date()
             to_date = datetime.datetime.strptime(kwargs.get('to'), '%Y-%m-%d').date()
-            course_conflicts = Assignment.objects.none()
-            teacher_conflicts = Assignment.objects.none()
-            room_conflicts = Assignment.objects.none()
+        except ValueError:
+            # Wrong format of date: yyyy-mm-dd
+            return HttpResponse(_('Wrong format of date: yyyy-mm-dd'), 400)
+        try:
+            without_substitutions = json.loads(self.request.POST.get('without_substitutions', 'false'))
             assignments_qs = Assignment.objects.filter(id__in=assignments)
-            for a in assignments_qs:
-                # Return all assignments from the same course or teacher that would collide in the future.
-                # excluding the assignment in the url.
-                conflicts = Assignment.objects.filter(school=a.school,
-                                                      school_year=a.school_year,
-                                                      # _week_day returns dates Sun-Sat (1,7), while weekday (Mon, Sun) (0,6)
-                                                      date__week_day=(a.date.weekday() + 2) % 7,
-                                                      hour_start=a.hour_start) \
-                    .filter(date__gte=from_date, date__lte=to_date) \
-                    .exclude(id=a.pk)
-                # Exclude lectures that are equivalent to the one that we want to replicate, since aren't conflicts
-                # but the same lecture already defined by the user
-                conflicts = conflicts.exclude(course=a.course,
-                                              teacher=a.teacher,
-                                              subject=a.subject,
-                                              hour_start=a.hour_start,
-                                              hour_end=a.hour_end,
-                                              bes=a.bes,
-                                              co_teaching=a.co_teaching,
-                                              absent=a.absent,
-                                              substitution=a.substitution)
-
-                course_conflicts |= conflicts.filter(course=a.course)
-                teacher_conflicts |= conflicts.filter(teacher=a.teacher)
-
-                # Check both that the room is not null, and is the same as the current room!
-                conf_room = conflicts.filter(room__isnull=False, room=a.room, substitution=False)
-                # TODO: This will be super slow!
-                for date in conflicts.values_list('date').distinct():
-                    # Select the distinct courses for the same date
-                    distinct_course_in_date = conf_room.filter(date=date[0]).values_list('course').distinct()
-                    # The format of values_list is a list of tuples, like [(1,), (4,), ]. Hence, flatten it.
-                    flatten_list = [item for sublist in distinct_course_in_date for item in sublist]
-                    if a.room is not None and\
-                            a.course.id not in flatten_list and\
-                            distinct_course_in_date.count() >= a.room.capacity:
-                        # If there is a room in the current assignment,
-                        # the course is not one of the already present in the course
-                        # and the capacity of the room is filled, then: mark the room conflict.
-                        conf_rooms_in_conflicting_dates = conf_room.filter(date=date[0])
-                        room_conflicts |= conf_rooms_in_conflicting_dates
-            data = dict(course_conflicts=course_conflicts,
-                        teacher_conflicts=teacher_conflicts,
-                        room_conflicts=room_conflicts)
-            serializer = ReplicationConflictsSerializer(data=data, context={'request': request})
-            serializer.is_valid()     # Not sure it is the right way of doing things
-            return JsonResponse(serializer.data)
         except ObjectDoesNotExist:
             return HttpResponse(_("One of the assignments specified doesn't exist"), 400)
 
+        if without_substitutions:  # the user doesn't want to replicate substitutions
+            assignments_qs = assignments_qs.exclude(substitution=True)
+        course_conflicts, teacher_conflicts, room_conflicts = self.get_course_teacher_room_conflict(
+            assignments_qs, from_date, to_date)
+        data = dict(course_conflicts=course_conflicts,
+                    teacher_conflicts=teacher_conflicts,
+                    room_conflicts=room_conflicts)
+        serializer = ReplicationConflictsSerializer(data=data, context={'request': request})
+        serializer.is_valid()     # Not sure it is the right way of doing things
+        return JsonResponse(serializer.data)
 
-class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
+
+
+class ReplicateWeekAssignmentsView(WeekReplicationConflictWrapperView):
     def test_func(self):
         """
         Returns True only when the user logged is an admin, and it is replicating the assignments that
@@ -221,47 +263,16 @@ class ReplicateWeekAssignmentsView(UserPassesTestMixin, View):
             if without_substitutions:  # the user doesn't want to replicate substitutions
                 assignments_qs = assignments_qs.exclude(substitution=True)
 
-            for a in assignments_qs:
+            # Get the possible conflicts for course, teachers and rooms.
+            course_conflicts, teacher_conflicts, room_conflicts = self.get_course_teacher_room_conflict(
+                assignments_qs, from_date, to_date)
 
-                # There can't be conflicts among the newly created assignments and the teaching hours of the same teacher!
-                # The same is not true for conflicts of the same class.
-                conflicts = Assignment.objects.filter(school=a.school,
-                                                      school_year=a.school_year,
-                                                      hour_start=a.hour_start,
-                                                      hour_end=a.hour_end,
-                                                      date__week_day=((a.date.weekday() + 2) % 7),
-                                                      date__gte=from_date,
-                                                      date__lte=to_date). \
-                    exclude(id=a.id)
-                # Exclude lectures that are equivalent to the one that we want to replicate, since aren't conflicts
-                # but the same lecture already defined by the user
-                conflicts = conflicts.exclude(course=a.course,
-                                              teacher=a.teacher,
-                                              subject=a.subject,
-                                              hour_start=a.hour_start,
-                                              hour_end=a.hour_end,
-                                              bes=a.bes,
-                                              co_teaching=a.co_teaching,
-                                              room=a.room,
-                                              absent=a.absent,
-                                              substitution=a.substitution)
-
-                conflicts = conflicts.filter(Q(teacher=a.teacher) | Q(room__isnull=False, room=a.room))
-
-                conf_room_group_by_date = Assignment.objects.none
-                if a.room is not None:
-                    # Check if there are conflicts on rooms (on the same date!!)
-                    conf_room_group_by_date = conflicts.filter(room__isnull=False, room=a.room).values('date') \
-                        .annotate(count_conflicts=Count('date')) \
-                        .filter(count_conflicts__gte=a.room.capacity) \
-                        .values('date')
-                if conflicts.filter(teacher=a.teacher) or (
-                        a.room is not None and conf_room_group_by_date.count() > 0
-                ):
-                    # There are conflicts!
-                    return JsonResponse(
-                        AssignmentSerializer(conflicts, context={'request': request}, many=True).data,
-                        safe=False, status=400)
+            if len(course_conflicts) > 0 or len(teacher_conflicts) > 0 or len(room_conflicts) > 0:
+                # There are conflicts!
+                return JsonResponse(
+                    AssignmentSerializer((course_conflicts | teacher_conflicts | room_conflicts).distinct(),
+                                         context={'request': request}, many=True).data,
+                    safe=False, status=400)
 
             # delete the assignments of that course in the specified period of time
             school = utils.get_school_from_user(request.user)
