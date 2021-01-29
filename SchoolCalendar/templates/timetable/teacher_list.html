@@ -29,6 +29,7 @@
                     <tr>
                       <th scope="col">{% trans 'Last name' %}</th>
                       <th scope="col">{% trans 'First name' %}</th>
+                      <th scope="col">{% trans 'In activity' %}</th>
                       <th scope="col">{% trans 'Send invite' %}</th>
                       <th scope="col">{% trans 'Edit' %}</th>
                       <th scope="col">{% trans 'Delete' %}</th>
@@ -47,6 +48,11 @@
         await getTeachers();
     });
 
+    function get_tick_or_cross(condition){
+        // Return a tick or a cross, depending on the condition.
+        return condition ? "&#10004;" : "&#x2718;";
+    }
+
     async function getTeachers(){
         let url = _URL['teachers'];
         let data = {
@@ -60,6 +66,7 @@
                     <tr>
                         <td scope="row">${ teacher.last_name }</td>
                         <td scope="row">${ teacher.first_name }</td>
+                        <td scope="row"> ${ get_tick_or_cross(teacher.in_activity) } </td>
                         <td>
                             <button class="btn btn-outline-primary" onclick="sendInvite('${ teacher.id }')">
                                 {% trans 'Send invite' %}

@@ -68,7 +68,8 @@ class AbstractTimePeriodSerializer(ModelSerializer):
 class TeacherSerializer(ModelSerializer):
     class Meta:
         model = Teacher
-        fields = ['id', 'url', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'school', 'notes']
+        fields = ['id', 'url', 'first_name', 'last_name', 'username', 'email', 'is_staff', 'school',
+                  'in_activity', 'notes']
 
 
 class TeacherSummarySerializer(ModelSerializer):

@@ -227,7 +227,7 @@ class TeacherForm(BaseFormWithSchoolCheck):
 
     class Meta:
         model = Teacher
-        fields = ['username', 'first_name', 'last_name', 'email', 'school', 'notes']
+        fields = ['username', 'first_name', 'last_name', 'email', 'school', 'in_activity', 'notes']
 
 
 class TeacherCreationForm(UserCreationFormWithoutPassword, BaseFormWithSchoolCheck):

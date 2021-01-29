@@ -128,6 +128,7 @@ class Teacher(MyUser):
     """
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("school"))
     notes = models.TextField(blank=True, null=True, verbose_name=_("notes"))  # Optional field
+    in_activity = models.BooleanField(default=True, null=False, blank=False, verbose_name=_("in activity"))
 
     def __str__(self):
         return "{} {}".format(self.first_name, self.last_name)
