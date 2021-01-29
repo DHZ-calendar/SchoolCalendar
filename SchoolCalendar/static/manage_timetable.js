@@ -191,57 +191,60 @@ async function getTeachers(){
     try{
         data = await $.get(url, data=data);
         for(let tea of data){
-            let btn_bes = (tea.hours_bes > 0) ? "" : "disabled";
-            let btn_co_teaching = (tea.hours_co_teaching > 0) ? "" : "disabled";
-            let html = `
-                <li class="list-group-item list-teachers" data-teacher-id="${tea.id}">
-                    <div class="row">
-                        <div class="col-10 teacher-search-field">
-                            <b>${tea.teacher.last_name} ${tea.teacher.first_name}</b> - ${tea.subject.name}
+            // Only professors that are in activity should be visualized in the right column.
+            if (tea.teacher.in_activity) {
+                let btn_bes = (tea.hours_bes > 0) ? "" : "disabled";
+                let btn_co_teaching = (tea.hours_co_teaching > 0) ? "" : "disabled";
+                let html = `
+                    <li class="list-group-item list-teachers" data-teacher-id="${tea.id}">
+                        <div class="row">
+                            <div class="col-10 teacher-search-field">
+                                <b>${tea.teacher.last_name} ${tea.teacher.first_name}</b> - ${tea.subject.name}
+                            </div>
+                            <div class="col-2 p-0">
+                                <button class="btn btn-link text-right" style="color: inherit" data-toggle="collapse" data-target="#tea-collapse-${tea.id}" aria-expanded="true" aria-controls="tea-collapse-${tea.id}">
+                                    <svg class="bi bi-caret-down-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                                    </svg>
+                                </button>
+                            </div>                        
                         </div>
-                        <div class="col-2 p-0">
-                            <button class="btn btn-link text-right" style="color: inherit" data-toggle="collapse" data-target="#tea-collapse-${tea.id}" aria-expanded="true" aria-controls="tea-collapse-${tea.id}">
-                                <svg class="bi bi-caret-down-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
-                                </svg>
-                            </button>
-                        </div>                        
-                    </div>
-                     
-                    <div id="tea-collapse-${tea.id}" class="collapse">
-                        <div class="row font-italic">
-                            <span class="col-9">${_TRANS['hours_teaching']}:</span>
-                            <span class="col-3 tea-hours">${tea.hours}</span>
+                         
+                        <div id="tea-collapse-${tea.id}" class="collapse">
+                            <div class="row font-italic">
+                                <span class="col-9">${_TRANS['hours_teaching']}:</span>
+                                <span class="col-3 tea-hours">${tea.hours}</span>
+                            </div>
+                            <div class="row font-italic">
+                                <span class="col-9">${_TRANS['hours_bes']}</span>
+                                <span class="col-3 tea-hours_bes">${tea.hours_bes}</span>
+                            </div>
+                            <div class="row font-italic">
+                                <span class="col-9">${_TRANS['hours_co-teaching']}</span>
+                                <span class="col-3 tea-hours_bes">${tea.hours_co_teaching}</span>
+                            </div>
+                            <hr/>
+                            <div class="row font-italic">
+                                <span class="col-9">${_TRANS['missing_hours']}:</span>
+                                <span class="col-3 tea-missing_hours">${tea.missing_hours}</span>
+                            </div>
+                            <div class="row font-italic">
+                                <span class="col-9">${_TRANS['hours_bes']}</span>
+                                <span class="col-3 tea-missing_bes">${tea.missing_hours_bes}</span>
+                            </div>
+                            <div class="row font-italic">
+                                <span class="col-9">${_TRANS['hours_co-teaching']}</span>
+                                <span class="col-3 tea-missing_bes">${tea.missing_hours_co_teaching}</span>
+                            </div>
                         </div>
-                        <div class="row font-italic">
-                            <span class="col-9">${_TRANS['hours_bes']}</span>
-                            <span class="col-3 tea-hours_bes">${tea.hours_bes}</span>
+                        <div class="row">
+                            <button type="button" class="col-6 btn btn-sm cal-event" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false, false)">${_TRANS['assign_lecture']}</button>
+                            <button type="button" class="col-6 btn btn-sm cal-event-bes" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, true, false)" ${btn_bes}>${_TRANS['assign_bes']}</button>
+                            <button type="button" class="col-12 btn btn-sm cal-event-co-teaching mt-1" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false, true)" ${btn_co_teaching}>${_TRANS['assign_co-teaching']}</button>
                         </div>
-                        <div class="row font-italic">
-                            <span class="col-9">${_TRANS['hours_co-teaching']}</span>
-                            <span class="col-3 tea-hours_bes">${tea.hours_co_teaching}</span>
-                        </div>
-                        <hr/>
-                        <div class="row font-italic">
-                            <span class="col-9">${_TRANS['missing_hours']}:</span>
-                            <span class="col-3 tea-missing_hours">${tea.missing_hours}</span>
-                        </div>
-                        <div class="row font-italic">
-                            <span class="col-9">${_TRANS['hours_bes']}</span>
-                            <span class="col-3 tea-missing_bes">${tea.missing_hours_bes}</span>
-                        </div>
-                        <div class="row font-italic">
-                            <span class="col-9">${_TRANS['hours_co-teaching']}</span>
-                            <span class="col-3 tea-missing_bes">${tea.missing_hours_co_teaching}</span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <button type="button" class="col-6 btn btn-sm cal-event" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false, false)">${_TRANS['assign_lecture']}</button>
-                        <button type="button" class="col-6 btn btn-sm cal-event-bes" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, true, false)" ${btn_bes}>${_TRANS['assign_bes']}</button>
-                        <button type="button" class="col-12 btn btn-sm cal-event-co-teaching mt-1" onclick="teacherClick($(this).parent().parent(), ${tea.id}, ${tea.teacher.id}, ${tea.subject.id}, ${tea.school}, false, true)" ${btn_co_teaching}>${_TRANS['assign_co-teaching']}</button>
-                    </div>
-                </li>`;
-            $('#teachers_list').append(html);
+                    </li>`;
+                $('#teachers_list').append(html);
+            }
         }
     }
     catch{

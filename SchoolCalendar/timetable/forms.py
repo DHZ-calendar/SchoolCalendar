@@ -221,6 +221,10 @@ class UserCreationFormWithoutPassword(UserCreationForm):
 
 
 class TeacherForm(BaseFormWithSchoolCheck):
+    in_activity = forms.BooleanField(help_text=_("Set it to False if you do not want to "
+                                                               "see this professor in the list of teachers "
+                                                               "in the column on the right "
+                                                               "of the timetable page."))
     def __init__(self, user, *args, **kwargs):
         super(TeacherForm, self).__init__(user, *args, **kwargs)
         assign_html_style_to_visible_forms_fields(self)

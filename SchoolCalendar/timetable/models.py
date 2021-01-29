@@ -128,6 +128,7 @@ class Teacher(MyUser):
     """
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("school"))
     notes = models.TextField(blank=True, null=True, verbose_name=_("notes"))  # Optional field
+    # This field is used to choose not to visualize teachers in the right column in the timetable page.
     in_activity = models.BooleanField(default=True, null=False, blank=False, verbose_name=_("in activity"))
 
     def __str__(self):
