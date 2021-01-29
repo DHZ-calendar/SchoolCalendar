@@ -23,6 +23,7 @@ class SchoolTestCase(BaseTestCase):
             'school': self.s1,
             'password1': 'password_demo',
             'password2': 'password_demo',
+            'in_activity': 'true'
         }
         tf = TeacherForm(user=self.a1, data=form_data)
         tf.full_clean()
