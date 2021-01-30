@@ -302,7 +302,7 @@ class ReplicateWeekTestCase(BaseTestCase):
         ass2.delete()
         ass3.delete()
 
-    def test_check_conflict_6(self):
+    def test_check_conflict_6a(self):
         """
         Add test for multiple teachers in the same course and hour slot.
         Room capacity should count only the courses which are concurrent, not the number of assignments
@@ -334,6 +334,19 @@ class ReplicateWeekTestCase(BaseTestCase):
                           absent=False,
                           free_substitution=False)
         ass3.save()
+        ass4 = Assignment(teacher=self.t4,  # Teacher 4 in course 2.
+                          course=self.c2,
+                          subject=self.sub2,
+                          room=self.r1,
+                          date=datetime(year=2020, month=5, day=11),  # Monday 11/5/2020
+                          hour_start=time(hour=9, minute=0),
+                          hour_end=time(hour=10, minute=0),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass4.save()
         response = self.c.post('/timetable/check_week_replication/2020-05-04/2020-05-24',
                                {'assignments[]': [self.ass1.id]})
         json_res = response.json()
@@ -343,6 +356,7 @@ class ReplicateWeekTestCase(BaseTestCase):
         self.assertTrue(len(json_res['course_conflicts']) == 0)
         ass2.delete()
         ass3.delete()
+        ass4.delete()
 
     def test_check_conflict_7(self):
         """
