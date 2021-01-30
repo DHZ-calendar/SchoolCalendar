@@ -441,15 +441,11 @@ class ReplicateWeekTestCase(BaseTestCase):
                 ass1.save()
                 assignments_to_check.append(ass1.id)
 
-        print(len(assignments))  # Make the assignments in advance.
-        print(len(assignments_to_check))
         start = datetime.now()
         response = self.c.post('/timetable/check_week_replication/2020-05-04/2020-05-24',
                                {'assignments[]': assignments_to_check})
         json_res = response.json()
-        print(len(json_res['teacher_conflicts']))
         end = datetime.now()
-        print(start, end)
         self.assertLessEqual((end - start).seconds, 3)  # Just a good constant, so that github can run it :)
         for el in assignments:
             el.delete()
