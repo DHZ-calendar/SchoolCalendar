@@ -126,7 +126,7 @@ class WeekReplicationConflictWrapperView(UserPassesTestMixin, View, metaclass=AB
         counted as a conflict (it gets simply ignored).
 
         Args:
-            assignments_qs: queryset of assignments that are going to be relicated
+            assignments_qs: queryset of assignments that are going to be replicated
             from_date: date of beginning of interval
             to_date: date of end of interval
         """
@@ -134,28 +134,39 @@ class WeekReplicationConflictWrapperView(UserPassesTestMixin, View, metaclass=AB
         teacher_conflicts = Assignment.objects.none()
         room_conflicts = Assignment.objects.none()
 
+        # Define all the possible assignments that can conflict with the replicating assignments
+        # we exclude at the beginning the assignments already replicated, in order to avoid false conflicts
+        possible_conflicts = Assignment.objects.filter(date__gte=from_date, date__lte=to_date)
+        non_conflicts_assign = []
         for a in assignments_qs:
+            # Exclude lectures that are equivalent to the one that we want to replicate, since aren't conflicts
+            # but the same lecture already defined by the user
+            identical_assignments = possible_conflicts.filter(school=a.school,
+                                                              school_year=a.school_year,
+                                                              course=a.course,
+                                                              teacher=a.teacher,
+                                                              subject=a.subject,
+                                                              # _week_day returns dates Sun-Sat (1,7), while weekday (Mon, Sun) (0,6)
+                                                              date__week_day=(a.date.weekday() + 2) % 7,
+                                                              hour_start=a.hour_start,
+                                                              hour_end=a.hour_end,
+                                                              bes=a.bes,
+                                                              co_teaching=a.co_teaching,
+                                                              absent=a.absent,
+                                                              substitution=a.substitution).values_list('id').distinct()
+            # Save in a flatten list the id of the assignments that are already replicated
+            non_conflicts_assign += [item for sublist in identical_assignments for item in sublist]
 
+        possible_conflicts = possible_conflicts.exclude(id__in=non_conflicts_assign)
+
+        for a in assignments_qs:
             # Return all assignments from the same course or teacher that would collide in the future.
             # excluding the assignment in the url.
-            conflicts = Assignment.objects.filter(school=a.school,
+            conflicts = possible_conflicts.filter(school=a.school,
                                                   school_year=a.school_year,
                                                   # _week_day returns dates Sun-Sat (1,7), while weekday (Mon, Sun) (0,6)
                                                   date__week_day=(a.date.weekday() + 2) % 7,
-                                                  hour_start=a.hour_start) \
-                .filter(date__gte=from_date, date__lte=to_date) \
-                .exclude(id=a.pk)
-            # Exclude lectures that are equivalent to the one that we want to replicate, since aren't conflicts
-            # but the same lecture already defined by the user
-            conflicts = conflicts.exclude(course=a.course,
-                                          teacher=a.teacher,
-                                          subject=a.subject,
-                                          hour_start=a.hour_start,
-                                          hour_end=a.hour_end,
-                                          bes=a.bes,
-                                          co_teaching=a.co_teaching,
-                                          absent=a.absent,
-                                          substitution=a.substitution)
+                                                  hour_start=a.hour_start)
 
             course_conflicts |= conflicts.filter(course=a.course)
             teacher_conflicts |= conflicts.filter(teacher=a.teacher)
