@@ -210,9 +210,13 @@ class AssignmentViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin,
             # If we are deleting a substitution
             assignments_same_hour = Assignment.objects.filter(
                 course=instance.course,
+                subject=instance.subject,
+                room=instance.room,
                 date=instance.date,
                 hour_start=instance.hour_start,
-                hour_end=instance.hour_end).exclude(id=instance.id)
+                hour_end=instance.hour_end,
+                bes=instance.bes,
+                co_teaching=instance.co_teaching).exclude(id=instance.id)
             if not assignments_same_hour.filter(
                     substitution=True, free_substitution=True).exists():
                 # If we have no other substitution in the same hour slot
