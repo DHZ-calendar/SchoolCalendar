@@ -41,7 +41,7 @@ class TeacherSummaryViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMi
         """
         :return: only the teachers of the passed year, if given
         """
-        teachers_teaching_in_the_year = HoursPerTeacherInClass.objects.none()
+        teachers_teaching_in_the_year = HoursPerTeacherInClass.objects.all().values('teacher')
         school_year = self.request.query_params.get('school_year')
         if school_year:
             teachers_teaching_in_the_year = HoursPerTeacherInClass.objects.filter(school_year=school_year).values('teacher')
