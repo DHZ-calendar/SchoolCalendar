@@ -578,7 +578,9 @@ class AssignmentSerializer(ModelSerializer):
         :return:
         """
         conflicts = HourSlot.objects.filter(
-            day_of_week=obj.date.weekday()
+            day_of_week=obj.date.weekday(),
+            school=obj.school,
+            school_year=obj.school_year
         ).filter(Q(starts_at__lte=obj.hour_start, ends_at__gt=obj.hour_start) |
                  Q(starts_at__lt=obj.hour_end, ends_at__gte=obj.hour_end) |
                  Q(starts_at__gt=obj.hour_start, ends_at__lt=obj.hour_end))  # the hour_slot's time is included in the assignment's time
