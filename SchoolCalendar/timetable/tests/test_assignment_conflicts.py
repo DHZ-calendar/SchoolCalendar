@@ -159,3 +159,85 @@ class AssignmentConflictsTestCase(BaseTestCase):
                 self.assertTrue(self.hs1.id in assgn['conflicting_hour_slots'])
                 self.assertTrue(self.hs2.id in assgn['conflicting_hour_slots'])
         self.assertTrue(found)
+
+    def test_conflict_in_different_schools(self):
+        """
+        Test when there is a conflict but in two different schools.
+        :return:
+        """
+        hsg = HourSlotsGroup(school=self.s2, school_year=self.school_year_2020, name='Default school 2')
+        hsg.save()
+        hs = HourSlot(hour_number=4,
+                      starts_at=time(hour=9, minute=30),
+                      ends_at=time(hour=10, minute=30),
+                      hour_slots_group=hsg,
+                      day_of_week=0,
+                      legal_duration=timedelta(seconds=3600))
+        hs.save()
+        ass1 = Assignment(teacher=self.t1,
+                          course=self.c1,
+                          subject=self.subj1,
+                          room=None,
+                          date=datetime(day=14, month=9, year=2020),
+                          hour_start=time(hour=9, minute=30),
+                          hour_end=time(hour=10, minute=30),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass1.save()
+
+        response = self.c.get(
+            '/timetable/api/teacher_assignments/{}/{}/'.format(self.t1.id, self.school_year_2020.id))
+        json_res = response.json()
+        found = False
+        for assgn in json_res:
+            if assgn['id'] == ass1.id:
+                found = True
+                self.assertTrue(len(assgn['conflicting_hour_slots']) == 2)
+                self.assertTrue(self.hs1.id in assgn['conflicting_hour_slots'])
+                self.assertTrue(self.hs2.id in assgn['conflicting_hour_slots'])
+        self.assertTrue(found)
+
+    def test_conflict_in_different_school_years(self):
+        """
+        Test when there is a conflict but in two different school years.
+        :return:
+        """
+        school_year_2019 = SchoolYear(year_start=2019, date_start=datetime(month=8, year=2020, day=31))
+        school_year_2019.save()
+        hsg = HourSlotsGroup(school=self.s1, school_year=school_year_2019, name='Default school 2')
+        hsg.save()
+        hs = HourSlot(hour_number=4,
+                      starts_at=time(hour=9, minute=30),
+                      ends_at=time(hour=10, minute=30),
+                      hour_slots_group=hsg,
+                      day_of_week=0,
+                      legal_duration=timedelta(seconds=3600))
+        hs.save()
+        ass1 = Assignment(teacher=self.t1,
+                          course=self.c1,
+                          subject=self.subj1,
+                          room=None,
+                          date=datetime(day=14, month=9, year=2020),
+                          hour_start=time(hour=9, minute=30),
+                          hour_end=time(hour=10, minute=30),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass1.save()
+
+        response = self.c.get(
+            '/timetable/api/teacher_assignments/{}/{}/'.format(self.t1.id, self.school_year_2020.id))
+        json_res = response.json()
+        found = False
+        for assgn in json_res:
+            if assgn['id'] == ass1.id:
+                found = True
+                self.assertTrue(len(assgn['conflicting_hour_slots']) == 2)
+                self.assertTrue(self.hs1.id in assgn['conflicting_hour_slots'])
+                self.assertTrue(self.hs2.id in assgn['conflicting_hour_slots'])
+        self.assertTrue(found)
