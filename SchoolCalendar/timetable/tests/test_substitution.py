@@ -206,3 +206,102 @@ class ReplicateWeekTestCase(BaseTestCase):
         self.assertTrue(last_created['free_substitution'])
         self.assertTrue(last_created['teacher']['id'] == self.t2.id)
 
+    def test_substitute_teacher_deletion(self):
+        """
+        Substitute a teacher with another one that is available and then delete the substitution.
+        Finally check if the original lecture is marked as resolved or not (absent value)
+        """
+        response = self.c.post('/timetable/substitute_teacher_api/{0}/{1}'.format(self.ass1.id, self.t3.id))
+        status_code = response.status_code
+        self.assertTrue(status_code == 200)
+
+        response = self.c.get('/timetable/api/assignments/')
+        json_res = response.json()
+        last_created = max(json_res, key=lambda x: x['id'])
+        self.assertTrue(not last_created['absent'])
+        self.assertTrue(last_created['substitution'])
+        self.assertTrue(not last_created['free_substitution'])
+        self.assertTrue(last_created['teacher']['id'] == self.t3.id)
+
+        # Delete the substitution
+        response = self.c.delete('/timetable/api/assignments/{}/'.format(last_created['id']))
+        self.assertTrue(response.status_code == 204)
+
+        # Old substitution should be deleted now
+        response = self.c.get('/timetable/api/assignments/{}/'.format(last_created['id']))
+        self.assertTrue(response.status_code == 404)
+
+        # Check that the old assignment is not set to absent
+        response = self.c.get('/timetable/api/assignments/{}/'.format(self.ass1.id))
+        json_res = response.json()
+        self.assertTrue(not json_res['absent'])
+        self.assertTrue(not json_res['substitution'])
+        self.assertTrue(json_res['teacher']['id'] == self.t1.id)
+
+    def test_multiple_substitute_teacher_deletion(self):
+        """
+        Substitute two teachers with others that are available and then delete one substitution.
+        Finally check if the original lecture is marked as resolved or not (absent value) and that the others are correct.
+        """
+        # Create a second assignment with a different teacher
+        ass2 = Assignment.objects.get(pk=self.ass1.pk)
+        ass2.teacher = self.t2
+        ass2.subject = self.sub2
+        ass2.pk = None
+        ass2.save()
+
+        response = self.c.post('/timetable/substitute_teacher_api/{0}/{1}'.format(self.ass1.id, self.t3.id))
+        status_code = response.status_code
+        self.assertTrue(status_code == 200)
+
+        response = self.c.get('/timetable/api/assignments/')
+        json_res = response.json()
+        ass1_subst = max(json_res, key=lambda x: x['id'])
+        self.assertTrue(not ass1_subst['absent'])
+        self.assertTrue(ass1_subst['substitution'])
+        self.assertTrue(not ass1_subst['free_substitution'])
+        self.assertTrue(ass1_subst['teacher']['id'] == self.t3.id)
+
+        response = self.c.post('/timetable/substitute_teacher_api/{0}/{1}'.format(ass2.id, self.t4.id))
+        status_code = response.status_code
+        self.assertTrue(status_code == 200)
+
+        response = self.c.get('/timetable/api/assignments/')
+        json_res = response.json()
+        ass2_subst = max(json_res, key=lambda x: x['id'])
+        self.assertTrue(not ass2_subst['absent'])
+        self.assertTrue(ass2_subst['substitution'])
+        self.assertTrue(not ass2_subst['free_substitution'])
+        self.assertTrue(ass2_subst['teacher']['id'] == self.t4.id)
+
+        # Delete the first substitution
+        response = self.c.delete('/timetable/api/assignments/{}/'.format(ass1_subst['id']))
+        self.assertTrue(response.status_code == 204)
+
+        # Assignment 1 substitution should be deleted now
+        response = self.c.get('/timetable/api/assignments/{}/'.format(ass1_subst['id']))
+        self.assertTrue(response.status_code == 404)
+
+        # Check that the old assignment is not set to absent
+        response = self.c.get('/timetable/api/assignments/{}/'.format(self.ass1.id))
+        json_res = response.json()
+        self.assertTrue(not json_res['absent'])
+        self.assertTrue(not json_res['substitution'])
+        self.assertTrue(not json_res['free_substitution'])
+        self.assertTrue(json_res['teacher']['id'] == self.t1.id)
+
+        # Check that the assignment 2 is set to absent
+        response = self.c.get('/timetable/api/assignments/{}/'.format(ass2.id))
+        json_res = response.json()
+        self.assertTrue(json_res['absent'])
+        self.assertTrue(not json_res['substitution'])
+        self.assertTrue(not json_res['free_substitution'])
+        self.assertTrue(json_res['teacher']['id'] == self.t2.id)
+
+        # Check that the assignment 2's substitution is correct
+        response = self.c.get('/timetable/api/assignments/{}/'.format(ass2_subst['id']))
+        json_res = response.json()
+        self.assertTrue(not json_res['absent'])
+        self.assertTrue(json_res['substitution'])
+        self.assertTrue(not json_res['free_substitution'])
+        self.assertTrue(json_res['teacher']['id'] == self.t4.id)
