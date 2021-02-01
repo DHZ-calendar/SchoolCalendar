@@ -275,7 +275,7 @@ class Holiday(models.Model):
                                     verbose_name=_("school year"))
 
     def __str__(self):
-        return _("{}: from {} to {}".format(self.name, self.date_start, self.date_end))
+        return _("{}: from {} to {}").format(self.name, self.date_start, self.date_end)
 
 
 class Stage(models.Model):
