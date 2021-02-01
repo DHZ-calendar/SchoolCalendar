@@ -785,3 +785,152 @@ class ReplicateWeekTestCase(BaseTestCase):
                                                   substitution=True).exists())
         ass1.delete()
         ass2.delete()
+
+    def test_week_replication_with_remove_extra_ass(self):
+        """
+        When we replicate a week and in the target one there are non conflicting lectures, they should be deleted
+        with the `remove_extra_ass` parameter set to True
+        """
+        ass1 = Assignment(teacher=self.t1,
+                          course=self.c1,
+                          subject=self.sub1,
+                          room=self.r1,
+                          date=datetime(day=14, month=9, year=2020),
+                          hour_start=time(hour=7, minute=55),
+                          hour_end=time(hour=8, minute=45),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass2 = Assignment(teacher=self.t2,
+                          course=self.c1,
+                          subject=self.sub1,
+                          room=self.r1,
+                          date=datetime(day=14, month=9, year=2020),
+                          hour_start=time(hour=7, minute=55),
+                          hour_end=time(hour=8, minute=45),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass3 = Assignment(teacher=self.t3,  # Extra non-conflicting lecture.
+                          course=self.c1,
+                          subject=self.sub1,
+                          room=self.r1,
+                          date=datetime(day=21, month=9, year=2020),
+                          hour_start=time(hour=7, minute=55),
+                          hour_end=time(hour=8, minute=45),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass4 = Assignment(teacher=self.t4,  # Extra non-conflicting lecture.
+                          course=self.c1,
+                          subject=self.sub1,
+                          room=self.r1,
+                          date=datetime(day=21, month=9, year=2020),
+                          hour_start=time(hour=8, minute=55),
+                          hour_end=time(hour=9, minute=45),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass1.save()
+        ass2.save()
+        ass3.save()
+        ass4.save()
+        response = self.c.post('/timetable/replicate_week/add/{school_year}/{course}/2020-09-21/2020-09-27'.format(
+            school_year=self.school_year_2020.id,
+            course=self.c1.pk),
+            {'assignments[]': [ass1.id, ass2.id],
+             'remove_extra_ass': 'true'})
+        # Assert that no conflict is raised, although there already is the copy of course 1 in week 21/9 - 27/9
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(Assignment.objects.filter(id=ass1.id).exists())
+        self.assertTrue(Assignment.objects.filter(id=ass2.id).exists())
+        self.assertTrue(not Assignment.objects.filter(id=ass3.id).exists())
+        self.assertTrue(not Assignment.objects.filter(id=ass4.id).exists())
+        self.assertTrue(Assignment.objects.count() == 5)  # self.ass1 + ass1 + ass2 + ass1_dup + ass2_dup
+        ass1.delete()
+        ass2.delete()
+        ass3.delete()
+        ass4.delete()
+
+    def test_week_replication_without_remove_extra_ass(self):
+        """
+        When we replicate a week and in the target one there are non conflicting lectures, they should be kept
+        with the `remove_extra_ass` parameter set to False
+        """
+        ass1 = Assignment(teacher=self.t1,
+                          course=self.c1,
+                          subject=self.sub1,
+                          room=self.r1,
+                          date=datetime(day=14, month=9, year=2020),
+                          hour_start=time(hour=7, minute=55),
+                          hour_end=time(hour=8, minute=45),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass2 = Assignment(teacher=self.t2,
+                          course=self.c1,
+                          subject=self.sub1,
+                          room=self.r1,
+                          date=datetime(day=14, month=9, year=2020),
+                          hour_start=time(hour=7, minute=55),
+                          hour_end=time(hour=8, minute=45),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass3 = Assignment(teacher=self.t3,  # Extra non-conflicting lecture.
+                          course=self.c1,
+                          subject=self.sub1,
+                          room=self.r1,
+                          date=datetime(day=21, month=9, year=2020),
+                          hour_start=time(hour=10, minute=55),
+                          hour_end=time(hour=11, minute=45),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass4 = Assignment(teacher=self.t4,  # Extra non-conflicting lecture.
+                          course=self.c1,
+                          subject=self.sub1,
+                          room=self.r1,
+                          date=datetime(day=21, month=9, year=2020),
+                          hour_start=time(hour=11, minute=55),
+                          hour_end=time(hour=12, minute=45),
+                          bes=False,
+                          co_teaching=False,
+                          substitution=False,
+                          absent=False,
+                          free_substitution=False)
+        ass1.save()
+        ass2.save()
+        ass3.save()
+        ass4.save()
+        response = self.c.post('/timetable/replicate_week/add/{school_year}/{course}/2020-09-21/2020-09-27'.format(
+            school_year=self.school_year_2020.id,
+            course=self.c1.pk),
+            {'assignments[]': [ass1.id, ass2.id],
+             'remove_extra_ass': 'false'})
+        # Assert that no conflict is raised, although there already is the copy of course 1 in week 21/9 - 27/9
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(Assignment.objects.filter(id=ass1.id).exists())
+        self.assertTrue(Assignment.objects.filter(id=ass2.id).exists())
+        self.assertTrue(Assignment.objects.filter(id=ass3.id).exists())
+        self.assertTrue(Assignment.objects.filter(id=ass4.id).exists())
+        self.assertTrue(Assignment.objects.count() == 7)  # self.ass1 + ass1 + ass2 + ass1_dup + ass2_dup + ass3 + ass4
+        ass1.delete()
+        ass2.delete()
+        ass3.delete()
+        ass4.delete()
+
