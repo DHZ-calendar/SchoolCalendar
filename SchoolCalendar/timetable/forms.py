@@ -590,6 +590,20 @@ class HolidayForm(BaseFormWithSchoolCheck):
         """
         if self.cleaned_data['date_start'] > self.cleaned_data['date_end']:
             self.add_error(None, forms.ValidationError(_('The date_start field can\'t be greater than the end date')))
+        courses_conflict = Assignment.objects.filter(school=self.cleaned_data['school'],
+                                                     school_year=self.cleaned_data['school_year'],
+                                                     date__lte=self.cleaned_data['date_end'],
+                                                     date__gte=self.cleaned_data['date_start'])\
+            .values_list('course').distinct()
+        print(courses_conflict)
+        if len (courses_conflict) > 0:
+            # There are some assignments that exist on such date, hence we cannot create the holiday
+            self.add_error(None,
+                           forms.ValidationError(_(
+                               "There are some assignments in these courses: {}.\n"
+                               " You need to remove them first!".format(
+                                   "; ".join([str(c) for c in Course.objects.filter(id__in=courses_conflict)])
+                               ))))
         return self.cleaned_data
 
 
