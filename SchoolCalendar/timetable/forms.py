@@ -641,6 +641,16 @@ class StageForm(BaseFormWithCourseCheck):
         # TODO: Add check for schoolyear!
         return self.cleaned_data
 
+    def save(self, *args, **kwargs):
+        m = super(StageForm, self).save(commit=False)
+
+        assignments_to_delete = Assignment.objects.filter(course=self.cleaned_data['course'],
+                                                          date__lte=self.cleaned_data['date_end'],
+                                                          date__gte=self.cleaned_data['date_start'])
+        assignments_to_delete.delete()
+        m.save()
+        return m
+
 
 class SubjectForm(BaseFormWithSchoolCheck):
     def __init__(self, user, *args, **kwargs):
