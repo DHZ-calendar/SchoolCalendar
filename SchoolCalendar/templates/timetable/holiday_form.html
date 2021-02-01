@@ -22,14 +22,37 @@
         </div>
     </div>
     <div class="row">
-        <form method="post" class="form-group col text-center">
+        <form method="post" id="holidayform" class="form-group col text-center">
             {% csrf_token %}
             {{ form }}
             <br/>
             <br/>
             <br/>
-            <input type="submit" class="btn btn-success" value="Submit">
+            <button type="submit" form="holidayform" id="formSubmitButton" class="btn btn-primary" value="Submit">Submit</button>
+
         </form>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="ConflictModal" tabindex="-1" role="dialog" aria-labelledby="ConflictModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="ConflictModalLabel">Modal title</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="ConflictModelBody">
+
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" form="holidayform" class="btn btn-primary" value="Submit">Submit</button>
+          </div>
+        </div>
+      </div>
     </div>
 </div>
 
@@ -39,5 +62,68 @@
               format: 'yyyy-mm-dd',
             });
         });
+
+        function format_hour(hour){
+            // Format hour from format hh:mm:ss to format hh:mm
+            return hour.split(":")[0] + ":" + hour.split(":")[1];
+        }
+        function format_date(date){
+            // format date from format yyyy-mm-dd to dd/mm/yyyy
+            return date.split("-")[2] + "/" + date.split("-")[1] + "/" + date.split("-")[0] ;
+        }
+
+        function create_message(conflicts_json){
+            // Create the message to show in the modal, with a brief summary of
+            // the assignments that are in conflict with the holiday.
+            var message =  "<h2> {% trans 'There are some conflicts:' %} </h2> <ul>";
+            for (i in conflicts_json){
+                message += "<li>" + conflicts_json[i]['teacher']['first_name'] + " " +
+                    conflicts_json[i]['teacher']['last_name'] + " - " +
+                    conflicts_json[i]['course']['year'] + " " +
+                    conflicts_json[i]['course']['section'] + " - " +
+                    format_hour(conflicts_json[i]['hour_start']) + " - " +
+                    format_hour(conflicts_json[i]['hour_end']) + " - " +
+                    format_date(conflicts_json[i]['date']) ;
+            }
+            message += "</ul> <p>  {% trans 'These assignments are going to be deleted. Do you want to continue?' %} </p>"
+            return message;
+        }
+
+
+
+        $("#formSubmitButton").click(function(e) {
+
+            e.preventDefault(); // avoid to execute the actual submit of the form.
+
+            var form = $("#holidayform");
+            var url = form.attr('action');
+            let params = {
+                'from_date': $("#id_date_start").val(),
+                'to_date': $("#id_date_end").val(),
+                'school': $("#id_school").val(),
+                'school_year': $("#id_school_year").val()
+            };
+            // Get the assignments that might be in conflict.
+            let url_assigns = "{% url 'assignments-list' %}" + "?" + $.param(params);
+            $.ajax({
+                url: url_assigns,
+                type: 'GET',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", Cookies.get("csrftoken"));
+                },
+                success: function(result) {
+                    if (result.length > 0){
+                        // If there are conflicts, then ask for confirmation!
+                        $("#ConflictModelBody").html(create_message(result)).show();
+                        $("#ConflictModal").modal('show');
+                    }
+                    else{
+                        // If there are no conflicts, then OK!
+                        form.submit();
+                    }
+                }
+            });
+        });
+
     </script>
 {% endblock %}
