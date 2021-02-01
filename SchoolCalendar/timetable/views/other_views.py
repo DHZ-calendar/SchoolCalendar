@@ -9,6 +9,7 @@ from django.db.models import Q, Count
 from django.shortcuts import render, redirect, reverse
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from django.forms.models import model_to_dict
 
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
@@ -70,7 +71,7 @@ class WeekReplicationConflictWrapperView(UserPassesTestMixin, View, metaclass=AB
     conflicts for courses, teachers and rooms.
     """
     @staticmethod
-    def get_course_teacher_room_conflict(assignments_qs, from_date, to_date):
+    def get_course_teacher_room_conflict(assignments_qs, from_date, to_date, check_course_conflicts):
         """
         This method returns, given a queryset of assignments to duplicate, and an interval of dates
         when to duplicate the assignments, all the conflicts for courses, teachers and rooms.
@@ -87,6 +88,7 @@ class WeekReplicationConflictWrapperView(UserPassesTestMixin, View, metaclass=AB
             assignments_qs: queryset of assignments that are going to be replicated
             from_date: date of beginning of interval
             to_date: date of end of interval
+            check_course_conflicts: bool to decide if course conflicts should be reported or not
         """
         course_conflicts = Assignment.objects.none()
         teacher_conflicts = Assignment.objects.none()
@@ -99,7 +101,7 @@ class WeekReplicationConflictWrapperView(UserPassesTestMixin, View, metaclass=AB
         for a in assignments_qs:
             # Exclude lectures that are equivalent to the one that we want to replicate, since aren't conflicts
             # but the same lecture already defined by the user
-            identical_assignments = possible_conflicts.filter(school=a.school,
+            non_conflicts_assign += possible_conflicts.filter(school=a.school,
                                                               school_year=a.school_year,
                                                               course=a.course,
                                                               teacher=a.teacher,
@@ -111,9 +113,8 @@ class WeekReplicationConflictWrapperView(UserPassesTestMixin, View, metaclass=AB
                                                               bes=a.bes,
                                                               co_teaching=a.co_teaching,
                                                               absent=a.absent,
-                                                              substitution=a.substitution).values_list('id').distinct()
-            # Save in a flatten list the id of the assignments that are already replicated
-            non_conflicts_assign += [item for sublist in identical_assignments for item in sublist]
+                                                              substitution=a.substitution)\
+                                                        .values_list('id', flat=True).distinct()
 
         possible_conflicts = possible_conflicts.exclude(id__in=non_conflicts_assign)
 
@@ -126,7 +127,8 @@ class WeekReplicationConflictWrapperView(UserPassesTestMixin, View, metaclass=AB
                                                   date__week_day=(a.date.weekday() + 2) % 7,
                                                   hour_start=a.hour_start)
 
-            course_conflicts |= conflicts.filter(course=a.course)
+            if check_course_conflicts:
+                course_conflicts |= conflicts.filter(course=a.course)
             teacher_conflicts |= conflicts.filter(teacher=a.teacher)
 
             # Check both that the room is not null, and is the same as the current room!
@@ -134,11 +136,9 @@ class WeekReplicationConflictWrapperView(UserPassesTestMixin, View, metaclass=AB
             # TODO: This will be super slow!
             for date in conflicts.values_list('date').distinct():
                 # Select the distinct courses for the same date
-                distinct_course_in_date = conf_room.filter(date=date[0]).values_list('course').distinct()
-                # The format of values_list is a list of tuples, like [(1,), (4,), ]. Hence, flatten it.
-                flatten_list = [item for sublist in distinct_course_in_date for item in sublist]
+                distinct_course_in_date = conf_room.filter(date=date[0]).values_list('course', flat=True).distinct()
                 if a.room is not None and \
-                        a.course.id not in flatten_list and \
+                        a.course.id not in distinct_course_in_date and \
                         distinct_course_in_date.count() >= a.room.capacity:
                     # If there is a room in the current assignment,
                     # the course is not one of the already present in the course
@@ -172,6 +172,8 @@ class CheckWeekReplicationView(WeekReplicationConflictWrapperView):
             return HttpResponse(_('Wrong format of date: yyyy-mm-dd'), 400)
         try:
             without_substitutions = json.loads(self.request.POST.get('without_substitutions', 'false'))
+            # If we don't want to automatically delete the extra lectures we should report them as course conflicts
+            check_course_conflicts = not json.loads(self.request.POST.get('remove_extra_ass', 'false'))
             assignments_qs = Assignment.objects.filter(id__in=assignments)
         except ObjectDoesNotExist:
             return HttpResponse(_("One of the assignments specified doesn't exist"), 400)
@@ -179,7 +181,7 @@ class CheckWeekReplicationView(WeekReplicationConflictWrapperView):
         if without_substitutions:  # the user doesn't want to replicate substitutions
             assignments_qs = assignments_qs.exclude(substitution=True)
         course_conflicts, teacher_conflicts, room_conflicts = self.get_course_teacher_room_conflict(
-            assignments_qs, from_date, to_date)
+            assignments_qs, from_date, to_date, check_course_conflicts)
         data = dict(course_conflicts=course_conflicts,
                     teacher_conflicts=teacher_conflicts,
                     room_conflicts=room_conflicts)
@@ -213,6 +215,8 @@ class ReplicateWeekAssignmentsView(WeekReplicationConflictWrapperView):
         """
         assignments = self.request.POST.getlist('assignments[]')
         without_substitutions = json.loads(self.request.POST.get('without_substitutions', 'false'))
+        # States if we should remove the non-conflicting assignments already present in the target week
+        remove_extra_ass = json.loads(self.request.POST.get('remove_extra_ass', 'false'))
         try:
             from_date = datetime.datetime.strptime(kwargs.get('from'), '%Y-%m-%d').date()
             to_date = datetime.datetime.strptime(kwargs.get('to'), '%Y-%m-%d').date()
@@ -226,15 +230,16 @@ class ReplicateWeekAssignmentsView(WeekReplicationConflictWrapperView):
             # From date should be smaller than to_date
             return HttpResponse(_('The beginning of the period is greater then the end of the period'), 400)
         try:
-            # check if there are conflicts
+            # Check if there are conflicts
             assignments_qs = Assignment.objects.filter(id__in=assignments)
 
             if without_substitutions:  # the user doesn't want to replicate substitutions
                 assignments_qs = assignments_qs.exclude(substitution=True)
 
             # Get the possible conflicts for course, teachers and rooms.
+            # If we don't want to automatically delete the extra lectures we should report them as course conflicts
             course_conflicts, teacher_conflicts, room_conflicts = self.get_course_teacher_room_conflict(
-                assignments_qs, from_date, to_date)
+                assignments_qs, from_date, to_date, check_course_conflicts=not remove_extra_ass)
 
             if len(course_conflicts) > 0 or len(teacher_conflicts) > 0 or len(room_conflicts) > 0:
                 # There are conflicts!
@@ -243,17 +248,21 @@ class ReplicateWeekAssignmentsView(WeekReplicationConflictWrapperView):
                                          context={'request': request}, many=True).data,
                     safe=False, status=400)
 
-            # delete the assignments of that course in the specified period of time
+            # Delete the assignments of that course in the specified period of time
             school = utils.get_school_from_user(request.user)
-            assign_to_del = Assignment.objects.filter(school=school,
-                                                      course=course_pk,
-                                                      school_year=school_year_pk,
-                                                      date__gte=from_date,
-                                                      date__lte=to_date). \
-                exclude(id__in=assignments)  # avoid removing replicating assignments
+
+            assign_to_del = Assignment.objects.none()
+            if remove_extra_ass:
+                assign_to_del = Assignment.objects.filter(school=school,
+                                                          course=course_pk,
+                                                          school_year=school_year_pk,
+                                                          date__gte=from_date,
+                                                          date__lte=to_date). \
+                    exclude(id__in=assignments)  # avoid removing replicating assignments
+
             assign_to_del.delete()
 
-            # replicate the assignments
+            # Replicate the assignments
             assignments_list = []
             for a in assignments_qs:
                 d = from_date
@@ -282,7 +291,10 @@ class ReplicateWeekAssignmentsView(WeekReplicationConflictWrapperView):
                             absent=(False if without_substitutions else a.absent),
                             date=d
                         )
-                        assignments_list.append(new_a)
+                        new_a_dict = model_to_dict(new_a, exclude=['id'])
+                        # Add the new assignment only if is not already present
+                        if not Assignment.objects.filter(**new_a_dict).exists():
+                            assignments_list.append(new_a)
                     d += datetime.timedelta(days=1)
 
             # Create with one single query.

@@ -158,6 +158,14 @@
                         {% trans 'Replicate without substitutions' %}
                     </label>
                 </div>
+
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="remove_extra_ass">
+                    <label class="custom-control-label" for="remove_extra_ass">
+                        {% trans 'Remove extra non-conflicting lectures' %}<br/>
+                        {% trans 'If enabled, source and target days will be identical. If disabled, extra lectures are kept.' %}
+                    </label>
+                </div>
                 <hr/>
                 <div id="replicateResult">
 
