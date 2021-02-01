@@ -20,7 +20,7 @@ from timetable.views.rest_framework_views import TeacherViewSet, \
     SubjectViewSet, RoomViewSet, TeacherSummaryViewSet, CourseSummaryViewSet, TeachersYearlyLoadViewSet, \
     CoursesYearlyLoadViewSet, RoomTimetableViewSet, HourSlotsGroupViewSet, SubstitutionAssignmentsViewSet
 from timetable.views.other_views import TimetableView, SubstituteTeacherView, TeacherTimetableView, \
-    LoggedUserRedirectView, TeacherSummaryView, TeacherPDFReportView, SendInvitationTeacherEmailView, \
+    LoggedUserRedirectView, TeacherSummaryView, SendInvitationTeacherEmailView, \
     SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView, \
     TeacherSubstitutionView, SubstituteTeacherApiView, TimetableReportView, \
     CourseSummaryView, RoomTimetableView, SubstitutionSummaryView, \
@@ -83,7 +83,6 @@ urlpatterns = [
     path('teacher_summary_view', TeacherSummaryView.as_view(), name='teacher_summary-view'),
     path('course_summary_view', CourseSummaryView.as_view(), name='course_summary-view'),
     path('substitution_summary_view', SubstitutionSummaryView.as_view(), name='substitution_summary-view'),
-    path('teacher_pdf_report_view', TeacherPDFReportView.as_view(), name='teacher_pdf_report-view'),
     path('timetable_report_view', TimetableReportView.as_view(), name='timetable_report-view'),
     path('substitution_pdf_ticket/<assign_pk>', DownloadTeacherSubstitutionTicketView.as_view(),
          name='substitution_pdf_ticket-view'),

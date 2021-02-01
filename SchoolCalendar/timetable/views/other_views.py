@@ -63,48 +63,6 @@ class SubstitutionSummaryView(LoginRequiredMixin, AdminSchoolPermissionMixin, Te
     template_name = 'timetable/substitution_summary.html'
 
 
-class TeacherPDFReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):
-    def get(self, request, *args, **kwargs):
-        school = utils.get_school_from_user(self.request.user)
-        teachers_report = utils.get_teachers_hours_info(school)
-
-        buffer = io.BytesIO()
-
-        doc = SimpleDocTemplate(buffer, pagesize=letter)
-        styles = getSampleStyleSheet()
-        styles.add(ParagraphStyle(name='title_style', fontName="Helvetica-Bold", fontSize=12, alignment=TA_CENTER))
-        title_style = styles['title_style']
-        elements = [
-            Paragraph(_("Teachers report"), title_style),
-            Spacer(0, 12)
-        ]
-
-        headers = [_('Last name'), _('First name'), _('Subject'), _('Course'), _('Teaching hours made'),
-                   _('Substitution hours made'), _('B.E.S. hours made'), _('Missing teaching hours'),
-                   _('Missing B.E.S. hours')]
-        headers = map(lambda h: '\n'.join(h.split(' ')), headers)  # To avoid breaking page borders
-        data = [headers] + \
-               [[
-                   Paragraph(str(teacher[key]), styles['Normal']) for key in teacher.keys()
-               ] for teacher in teachers_report]
-        t = Table(data)
-
-        t.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (-1, 0), 'Courier-Bold'),
-            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-            ('ALIGN', (4, 1), (-1, -1), 'CENTER'),
-            ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
-        ]))
-
-        elements.append(t)
-
-        doc.build(elements)
-
-        buffer.seek(0)
-        return FileResponse(buffer, as_attachment=True, filename='report.pdf')
-
-
 class WeekReplicationConflictWrapperView(UserPassesTestMixin, View, metaclass=ABCMeta):
     """
     This class is a wrapper for the two views that handle week replication:

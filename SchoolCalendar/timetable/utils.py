@@ -105,61 +105,6 @@ def compute_total_hours_assignments(assignments, hours_slots):
     return int(total / 3600)
 
 
-def get_teachers_hours_info(school):
-    teachers_report = []
-    for hptic in HoursPerTeacherInClass.objects.filter(school_id=school)\
-            .order_by('teacher__last_name', 'teacher__first_name', 'course__year', 'course__section'):
-        assignments = Assignment.objects.filter(teacher=hptic.teacher,
-                                                course=hptic.course,
-                                                subject=hptic.subject,
-                                                school=hptic.school,
-                                                school_year=hptic.school_year).values(
-            'date__week_day', 'hour_start', 'hour_end')
-        for el in assignments:
-            el['date__week_day'] = convert_weekday_into_0_6_format(el['date__week_day'])
-
-        hours_slots = HourSlot.objects.filter(school=hptic.school,
-                                              school_year=hptic.school_year).values("day_of_week", "starts_at",
-                                                                                    "ends_at", "legal_duration")
-        # TODO: Make tests for co-teaching!
-        # Normal assignments lessons
-        normal_done_assign = assignments.filter(bes=False, substitution=False, co_teaching=False)
-        total_normal_done = compute_total_hours_assignments(normal_done_assign, hours_slots)
-
-        # Substitution assignments
-        subst_done_assign = Assignment.objects.filter(teacher=hptic.teacher,
-                                                      school=hptic.school,
-                                                      school_year=hptic.school_year,
-                                                      substitution=True, free_substitution=False).values(
-            'date__week_day', 'hour_start', 'hour_end')
-        for el in subst_done_assign:
-            el['date__week_day'] = convert_weekday_into_0_6_format(el['date__week_day'])
-        total_subst_done = compute_total_hours_assignments(subst_done_assign, hours_slots)
-
-        # BES assignments
-        bes_done_assign = assignments.filter(bes=True)
-        total_bes_done = compute_total_hours_assignments(bes_done_assign, hours_slots)
-
-        # Co-teaching assignments
-        co_teaching_done_assign = assignments.filter(co_teaching=True)
-        total_co_teaching_done = compute_total_hours_assignments(co_teaching_done_assign, hours_slots)
-
-        teachers_report.append({
-            'first_name': hptic.teacher.first_name,
-            'last_name': hptic.teacher.last_name,
-            'subject': hptic.subject.name,
-            'course': str(hptic.course.year) + " " + hptic.course.section,
-            'normal_done': total_normal_done,
-            'substitution_done': total_subst_done,
-            'bes_done': total_bes_done,
-            'co_teaching_done': total_co_teaching_done,
-            'missing_hours': hptic.hours - total_normal_done,
-            'missing_bes': hptic.hours_bes - total_bes_done,
-            'missing_co_teaching': hptic.hours_co_teaching - total_co_teaching_done
-        })
-    return teachers_report
-
-
 def assign_html_style_to_visible_forms_fields(form):
     """
     Add the form-control class to the html of the form fields,
