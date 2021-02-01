@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.contrib.auth.models import User
 from datetime import datetime
 
 from timetable.models import *
@@ -7,6 +8,9 @@ from timetable.forms import *
 
 class BaseTestCase(TestCase):
     def setUp(self):
+        self.django_admin = User.objects.create_superuser(username='admin', email='admin@fake.com',
+                                                          password='password_demo')
+
         self.s1 = School(name='Scuola 1')
         self.s2 = School(name='Scuola 2')
         self.s1.save()
