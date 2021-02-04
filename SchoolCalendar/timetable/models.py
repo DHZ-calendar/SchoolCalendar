@@ -403,6 +403,8 @@ class Assignment(models.Model):
     bes = models.BooleanField(null=False, blank=False, default=False, verbose_name=_("BES"))
     co_teaching = models.BooleanField(null=False, blank=False, default=False, verbose_name=_("Co-teaching"))
     substitution = models.BooleanField(null=False, blank=False, default=False, verbose_name=_("substitution"))
+    substituted_assignment = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True,
+                                               default=None, verbose_name=_("substituted assignment"))
     absent = models.BooleanField(null=False, blank=False, default=False,
                                  verbose_name=_("absence"))  # for substituted teachers
 
