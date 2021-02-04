@@ -341,3 +341,63 @@ class TimetableGeneralCSVReportViewSet(PandasSimpleView):
         df.rename(columns=general_labels, inplace=True)
 
         return df
+
+
+class SubstitutionsCSVReportViewSet(PandasSimpleView):
+    renderer_classes = [PandasExcelRenderer]
+    queryset = Assignment.objects.none()  # needed to avoid throwing errors
+    permission_classes = [IsAuthenticated, SchoolAdminCanWriteDelete]    # In the meantime only school admin.
+
+    def get_pandas_filename(self, request, format):
+        return _('Substitutions')
+
+    def get_data(self, request, *args, **kwargs):
+        try:
+            school_year = kwargs.get('school_year_pk')
+            school = utils.get_school_from_user(self.request.user)
+        except ValueError:
+            return []
+
+        assignments = Assignment.objects.filter(school=school,
+                                                school_year=school_year,
+                                                substitution=True) \
+                                    .order_by('-date', 'hour_start', 'hour_end') \
+                                    .values('date', 'hour_start', 'hour_end', 'course__year', 'course__section',
+                                            'subject__name', 'room__name', 'bes', 'co_teaching',
+                                            'teacher__first_name', 'teacher__last_name',
+                                            'substituted_assignment__teacher__last_name',
+                                            'substituted_assignment__teacher__first_name', 'free_substitution')
+
+        df = pd.DataFrame(assignments)
+        df['substitution_teacher'] = df['teacher__last_name'] + " " + df['teacher__first_name']
+        del df['teacher__last_name']
+        del df['teacher__first_name']
+        df['absent_teacher'] = df['substituted_assignment__teacher__last_name'] + " " + df['substituted_assignment__teacher__first_name']
+        del df['substituted_assignment__teacher__last_name']
+        del df['substituted_assignment__teacher__first_name']
+        # Set the hour format to hh:mm
+        df['hour_start'] = df['hour_start'].apply(lambda x: x.strftime('%H:%M'))
+        df['hour_end'] = df['hour_end'].apply(lambda x: x.strftime('%H:%M'))
+        # Set the date format
+        df['date'] = df['date'].apply(lambda x: x.strftime('%d/%m/%Y'))
+        # Set the boolean formats
+        df['free_substitution'] = df['free_substitution'].apply(lambda x: _('True') if x else _('False'))
+        df['bes'] = df['bes'].apply(lambda x: _('True') if x else _('False'))
+        df['co_teaching'] = df['co_teaching'].apply(lambda x: _('True') if x else _('False'))
+        # Rename both the index and the columns with reasonable human-readable names.
+        subst_labels = {
+            'date': _('Date'),
+            'course__year': _('Course year'),
+            'course__section': _('Course section'),
+            'substitution_teacher': _('Substitution teacher'),
+            'absent_teacher': _('Absent teacher'),
+            'free_substitution': _('Free substitution'),
+            'subject__name': _('Subject'),
+            'room__name': _('Room'),
+            'bes': _('B.E.S.'),
+            'co_teaching': _('Co-teaching')
+        }
+        subst_labels.update(labels)
+        df.rename(columns=subst_labels, inplace=True)
+
+        return df

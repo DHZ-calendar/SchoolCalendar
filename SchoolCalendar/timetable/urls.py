@@ -26,7 +26,8 @@ from timetable.views.other_views import TimetableView, SubstituteTeacherView, Te
     CourseSummaryView, RoomTimetableView, SubstitutionSummaryView, \
     SendTeacherSubstitutionEmailView, DownloadTeacherSubstitutionTicketView
 from timetable.views.csv_views import TimetableTeacherCSVReportViewSet, TimetableCourseCSVReportViewSet, \
-                                      TimetableRoomCSVReportViewSet, TimetableGeneralCSVReportViewSet
+                                      TimetableRoomCSVReportViewSet, TimetableGeneralCSVReportViewSet, \
+                                      SubstitutionsCSVReportViewSet
 
 from rest_framework.routers import DefaultRouter
 
@@ -73,6 +74,8 @@ urlpatterns = [
     url(r'timetable_general_csv_report_view/(?P<school_year_pk>[0-9]+)'
         r'(?P<monday_date>\d\d\d\d-\d\d-\d\d)', TimetableGeneralCSVReportViewSet.as_view(),
         name='timetable_general_csv_report'),
+    url(r'substitutions_csv_report_view/(?P<school_year_pk>[0-9]+)', SubstitutionsCSVReportViewSet.as_view(),
+        name='substitutions_csv_report'),
 
     path('', LoggedUserRedirectView.as_view(), name='user_redirect-view'),
     path('user_guide', TemplateView.as_view(template_name='timetable/user_guide.html'), name='user_guide'),
