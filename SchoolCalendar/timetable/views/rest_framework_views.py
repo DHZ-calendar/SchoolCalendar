@@ -208,23 +208,11 @@ class AssignmentViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin,
         instance = self.get_object()
         if instance.substitution or instance.free_substitution:
             # If we are deleting a substitution
-            assignments_same_hour = Assignment.objects.filter(
-                course=instance.course,
-                subject=instance.subject,
-                room=instance.room,
-                date=instance.date,
-                hour_start=instance.hour_start,
-                hour_end=instance.hour_end,
-                bes=instance.bes,
-                co_teaching=instance.co_teaching).exclude(id=instance.id)
-            if not assignments_same_hour.filter(
-                    substitution=True, free_substitution=True).exists():
-                # If we have no other substitution in the same hour slot
-                for a in assignments_same_hour.exclude(
-                        substitution=True, free_substitution=True):
-                    # Set the absent to False for all other assignments.
-                    a.absent = False
-                    a.save()
+            substituted_assign = Assignment.objects.get(
+                id=instance.substituted_assignment.id)
+            # Set to False absent flag, so that a new substitution can be created.
+            substituted_assign.absent = False
+            substituted_assign.save()
         return super(AssignmentViewSet, self).destroy(request, *args, **kwargs)
 
 

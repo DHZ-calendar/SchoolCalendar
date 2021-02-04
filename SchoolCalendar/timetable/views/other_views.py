@@ -190,7 +190,6 @@ class CheckWeekReplicationView(WeekReplicationConflictWrapperView):
         return JsonResponse(serializer.data)
 
 
-
 class ReplicateWeekAssignmentsView(WeekReplicationConflictWrapperView):
     def test_func(self):
         """
@@ -240,7 +239,6 @@ class ReplicateWeekAssignmentsView(WeekReplicationConflictWrapperView):
             # If we don't want to automatically delete the extra lectures we should report them as course conflicts
             course_conflicts, teacher_conflicts, room_conflicts = self.get_course_teacher_room_conflict(
                 assignments_qs, from_date, to_date, check_course_conflicts=not remove_extra_ass)
-
             if len(course_conflicts) > 0 or len(teacher_conflicts) > 0 or len(room_conflicts) > 0:
                 # There are conflicts!
                 return JsonResponse(
@@ -264,7 +262,9 @@ class ReplicateWeekAssignmentsView(WeekReplicationConflictWrapperView):
 
             # Replicate the assignments
             assignments_list = []
-            for a in assignments_qs:
+            # Iterate only over non substitutions.
+            # In case we want to replicate them, then both substituted and substitution is going to be created,
+            for a in assignments_qs.exclude(substitution=True):
                 d = from_date
                 while d <= to_date:
                     if d != a.date and d.weekday() == a.date.weekday() and not \
@@ -278,6 +278,7 @@ class ReplicateWeekAssignmentsView(WeekReplicationConflictWrapperView):
                                                  date_end__gte=d,
                                                  course=a.course):
                         # Found the correct day of the week when to duplicate the assignment
+                        # First we create the "substituted" or normal hour
                         new_a = Assignment(
                             teacher=a.teacher,
                             course=a.course,
@@ -288,6 +289,7 @@ class ReplicateWeekAssignmentsView(WeekReplicationConflictWrapperView):
                             bes=a.bes,
                             co_teaching=a.co_teaching,
                             substitution=a.substitution,
+                            substituted_assignment=a.substituted_assignment,
                             absent=(False if without_substitutions else a.absent),
                             date=d
                         )
@@ -295,6 +297,29 @@ class ReplicateWeekAssignmentsView(WeekReplicationConflictWrapperView):
                         # Add the new assignment only if is not already present
                         if not Assignment.objects.filter(**new_a_dict).exists():
                             assignments_list.append(new_a)
+
+                        if not without_substitutions and Assignment.objects.filter(
+                                substituted_assignment=a).exists():
+                            # If we want to replicate even the substitutions, then do it:
+                            substitution_ass = Assignment.objects.filter(substituted_assignment=a).first()
+                            new_a_substitution = Assignment(
+                                teacher=substitution_ass.teacher,
+                                course=substitution_ass.course,
+                                subject=substitution_ass.subject,
+                                room=substitution_ass.room,
+                                hour_start=substitution_ass.hour_start,
+                                hour_end=substitution_ass.hour_end,
+                                bes=substitution_ass.bes,
+                                co_teaching=substitution_ass.co_teaching,
+                                substitution=True,
+                                substituted_assignment=new_a,  # The newly created assignment.
+                                absent=substitution_ass.absent,
+                                date=d
+                            )
+                            new_a_substitution_dict = model_to_dict(new_a_substitution, exclude=['id'])
+                            # Add the new assignment only if is not already present
+                            if not Assignment.objects.filter(**new_a_substitution_dict).exists():
+                                assignments_list.append(new_a_substitution)
                     d += datetime.timedelta(days=1)
 
             # Create with one single query.
@@ -389,6 +414,7 @@ class SubstituteTeacherApiView(UserPassesTestMixin, View):
             co_teaching=a.co_teaching,
             substitution=True,
             absent=False,
+            substituted_assignment=a,
             free_substitution=False
         )
 
@@ -420,19 +446,9 @@ class SendTeacherSubstitutionEmailView(LoginRequiredMixin, AdminSchoolPermission
     def post(self, request, *args, **kwargs):
         assign_pk = kwargs.get('assign_pk')
         assignment_to_subst = Assignment.objects.get(id=assign_pk)
-        assignment = Assignment.objects.filter(
-            course=assignment_to_subst.course,
-            subject=assignment_to_subst.subject,
-            room=assignment_to_subst.room,
-            school=assignment_to_subst.school,
-            date=assignment_to_subst.date,
-            hour_start=assignment_to_subst.hour_start,
-            hour_end=assignment_to_subst.hour_end,
-            bes=assignment_to_subst.bes,
-            co_teaching=assignment_to_subst.co_teaching,
-            substitution=True,
-            absent=False
-        ).first()
+        assignment = Assignment.objects.get(
+            substituted_assignment=assignment_to_subst
+        )
         if assignment:
             subject = 'SchoolCalendar - Substitution assigned'
             html_message = render_to_string('email_templates/substitution.html',
@@ -450,19 +466,9 @@ class DownloadTeacherSubstitutionTicketView(LoginRequiredMixin, AdminSchoolPermi
     def get(self, request, *args, **kwargs):
         assign_pk = kwargs.get('assign_pk')
         assignment_to_subst = Assignment.objects.get(id=assign_pk)
-        assignment = Assignment.objects.filter(
-            course=assignment_to_subst.course,
-            subject=assignment_to_subst.subject,
-            room=assignment_to_subst.room,
-            school=assignment_to_subst.school,
-            date=assignment_to_subst.date,
-            hour_start=assignment_to_subst.hour_start,
-            hour_end=assignment_to_subst.hour_end,
-            bes=assignment_to_subst.bes,
-            co_teaching=assignment_to_subst.co_teaching,
-            substitution=True,
-            absent=False
-        ).first()
+        assignment = Assignment.objects.get(
+            substituted_assignment=assignment_to_subst
+        )
         if assignment:
             buffer = io.BytesIO()
             doc = SimpleDocTemplate(buffer, pagesize=letter)

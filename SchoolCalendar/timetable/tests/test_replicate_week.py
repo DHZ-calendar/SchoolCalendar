@@ -700,7 +700,8 @@ class ReplicateWeekTestCase(BaseTestCase):
                           co_teaching=False,
                           substitution=True,
                           absent=False,
-                          free_substitution=False)
+                          free_substitution=False,
+                          substituted_assignment=ass1)
         ass1.save()
         ass2.save()
         response = self.c.post('/timetable/replicate_week/add/{school_year}/{course}/2020-09-21/2020-09-27'.format(
@@ -756,7 +757,8 @@ class ReplicateWeekTestCase(BaseTestCase):
                           co_teaching=False,
                           substitution=True,
                           absent=False,
-                          free_substitution=False)
+                          free_substitution=False,
+                          substituted_assignment=ass1)
         ass1.save()
         ass2.save()
         response = self.c.post('/timetable/replicate_week/add/{school_year}/{course}/2020-09-21/2020-09-27'.format(

@@ -60,10 +60,25 @@ class RestFrameworkApiTestCase(BaseTestCase):
                                hour_end=time(hour=10, minute=0),
                                bes=False,
                                co_teaching=False,
-                               substitution=True,
-                               absent=False,
+                               substitution=False,
+                               absent=True,
                                free_substitution=False)
         self.ass1.save()
+
+        self.ass2 = Assignment(teacher=self.t1,
+                               course=self.c1,
+                               subject=self.sub1,
+                               room=self.r1,
+                               date=datetime(year=2020, month=5, day=4),  # Monday 4/5/2020
+                               hour_start=time(hour=9, minute=0),
+                               hour_end=time(hour=10, minute=0),
+                               bes=False,
+                               co_teaching=False,
+                               substitution=True,
+                               absent=False,
+                               free_substitution=False,
+                               substituted_assignment=self.ass1)
+        self.ass2.save()
 
         self.holiday = Holiday(date_start=datetime(year=2020, month=12, day=25),
                                date_end=datetime(year=2020, month=12, day=25),
