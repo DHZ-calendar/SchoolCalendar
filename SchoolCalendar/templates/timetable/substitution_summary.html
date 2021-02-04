@@ -31,6 +31,10 @@
             </select>
         </div>
         <div class="col">
+            <select id="absent-teacher" class="form-control form-control-custom" onchange="loadData(true)">
+            </select>
+        </div>
+        <div class="col">
             <select id="course" class="form-control form-control-custom" onchange="loadData(true)">
             </select>
         </div>
@@ -93,6 +97,7 @@
             from_date: formatDate(startDate),
             to_date: formatDate(endDate),
             teacher: $('#teacher').val(),
+            substituted_teacher: $('#absent-teacher').val(),
             course: $('#course').val()
         };
         try {
@@ -105,7 +110,9 @@
     async function loadTeachers(){
         let url = _URL['teachers'];
         $('#teacher').empty();
+        $('#absent-teacher').empty();
         $('#teacher').append(`<option value="">{% trans 'All substitution teachers' %}</option>`);
+        $('#absent-teacher').append(`<option value="">{% trans 'All absent teachers' %}</option>`);
         let data = {
             school_year: $('#school_year').val()
         };
@@ -114,6 +121,7 @@
             for(let el of data){
                 let html = `<option value="${el.id}">${el.last_name} ${el.first_name}</option>`;
                 $('#teacher').append(html);
+                $('#absent-teacher').append(html);
             }
         }
         catch{

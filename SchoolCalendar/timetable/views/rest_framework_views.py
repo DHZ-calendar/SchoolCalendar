@@ -17,7 +17,8 @@ from timetable.permissions import SchoolAdminCanWriteDelete, TeacherCanView
 from timetable.filters import TeacherFromSameSchoolFilterBackend, HolidayPeriodFilter, QuerysetFromSameSchool, \
     StageFilter, HourSlotFilter, HoursPerTeacherInClassFilter, CourseSectionOnlyFilter, CourseYearOnlyFilter, \
     AssignmentFilter, AbsenceBlockFilter, RoomFilter, TeachersYearlyLoadFilter, CoursesYearlyLoadFilter, \
-    CourseFromSameSchoolFilterBackend, HourSlotsGroupFromSameSchoolFilterBackend, HourSlotsGroupFilter
+    CourseFromSameSchoolFilterBackend, HourSlotsGroupFromSameSchoolFilterBackend, HourSlotsGroupFilter, \
+    SubstitutionAssignmentFilter
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 
 from timetable import utils
@@ -322,6 +323,6 @@ class SubstitutionAssignmentsViewSet(ListModelMixin, GenericViewSet):
     queryset = Assignment.objects.filter(substitution=True)
     serializer_class = SubstitutionAssignmentSerializer
     filter_backends = (DjangoFilterBackend, OrderingFilter, QuerysetFromSameSchool,)
-    filterset_class = AssignmentFilter
+    filterset_class = SubstitutionAssignmentFilter
     ordering = ['-date', 'hour_start', 'hour_end', 'teacher__last_name', 'teacher__first_name',
                 'course__year', 'course__section', 'subject__name']

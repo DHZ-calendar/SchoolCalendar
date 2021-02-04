@@ -169,6 +169,17 @@ class AssignmentFilter(FilterSet):
         fields = ['school_year', 'course', 'teacher', 'from_date', 'to_date']
 
 
+class SubstitutionAssignmentFilter(AssignmentFilter):
+    substituted_teacher = NumberFilter(field_name='substituted_teacher', method='substituted_teacher_filter')
+
+    def substituted_teacher_filter(self, queryset, name, value):
+        return queryset.filter(substituted_assignment__teacher__id=value)
+
+    class Meta:
+        model = Assignment
+        fields = ['school_year', 'course', 'teacher', 'substituted_teacher', 'from_date', 'to_date']
+
+
 class RoomFilter(FilterSet):
     def filter_queryset(self, queryset):
         """

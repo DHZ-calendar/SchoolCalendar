@@ -846,21 +846,9 @@ class SubstitutionAssignmentSerializer(AssignmentSerializer):
         :param obj: the assignment instance
         :return:
         """
-        assign = Assignment.objects.filter(
-            course=obj.course,
-            subject=obj.subject,
-            room=obj.room,
-            date=obj.date,
-            hour_start=obj.hour_start,
-            hour_end=obj.hour_end,
-            bes=obj.bes,
-            co_teaching=obj.co_teaching,
-            substitution=False,
-            absent=True
-        ).first()
-        if assign:  # Free substitutions don't have an absent teacher
+        if obj.substituted_assignment:
             serializer_context = {'request': self.context.get('request')}
-            serializer = TeacherSerializer(assign.teacher, context=serializer_context)
+            serializer = TeacherSerializer(obj.substituted_assignment.teacher, context=serializer_context)
             return serializer.data
         return None
 
