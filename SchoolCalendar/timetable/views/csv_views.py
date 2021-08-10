@@ -378,8 +378,7 @@ class SubstitutionsCSVReportViewSet(PandasSimpleView):
         # Set the hour format to hh:mm
         df['hour_start'] = df['hour_start'].apply(lambda x: x.strftime('%H:%M'))
         df['hour_end'] = df['hour_end'].apply(lambda x: x.strftime('%H:%M'))
-        # Set the date format
-        df['date'] = df['date'].apply(lambda x: x.strftime('%d/%m/%Y'))
+
         # Set the boolean formats
         df['free_substitution'] = df['free_substitution'].apply(lambda x: _('True') if x else _('False'))
         df['bes'] = df['bes'].apply(lambda x: _('True') if x else _('False'))
