@@ -261,9 +261,11 @@ class ReplicateWeekAssignmentsView(WeekReplicationConflictWrapperView):
             assign_to_del.delete()
 
             # Replicate the assignments
-            assignments_list = []
+            assignments_list_a, assignments_list_b = [], []
+            # Necessary to reassign the foreign key reference after the creation of the assignments_list_a of the assgnments in the assignments_list_b
+            link_assg_b_to_a = []
             # Iterate only over non substitutions.
-            # In case we want to replicate them, then both substituted and substitution is going to be created,
+            # In case we want to replicate them, then both substituted and substitution is going to be created
             for a in assignments_qs.exclude(substitution=True):
                 d = from_date
                 while d <= to_date:
@@ -296,7 +298,7 @@ class ReplicateWeekAssignmentsView(WeekReplicationConflictWrapperView):
                         new_a_dict = model_to_dict(new_a, exclude=['id'])
                         # Add the new assignment only if is not already present
                         if not Assignment.objects.filter(**new_a_dict).exists():
-                            assignments_list.append(new_a)
+                            assignments_list_a.append(new_a)
 
                         if not without_substitutions and Assignment.objects.filter(
                                 substituted_assignment=a).exists():
@@ -319,11 +321,24 @@ class ReplicateWeekAssignmentsView(WeekReplicationConflictWrapperView):
                             new_a_substitution_dict = model_to_dict(new_a_substitution, exclude=['id'])
                             # Add the new assignment only if is not already present
                             if not Assignment.objects.filter(**new_a_substitution_dict).exists():
-                                assignments_list.append(new_a_substitution)
+                                assignments_list_b.append(new_a_substitution)
+                                link_assg_b_to_a.append(len(assignments_list_a) - 1)
                     d += datetime.timedelta(days=1)
 
-            # Create with one single query.
-            Assignment.objects.bulk_create(assignments_list)
+            # Create in blocks: in the first one the new assignments that could even be substituted, 
+            # while in the second one only substitutions assignments. Divided in two due to reference constraints.
+            Assignment.objects.bulk_create(assignments_list_a)
+
+            # Fix the substituted_assignment foreign key after the just made creation, and create in blocks the substitution assignments
+            for b_idx in range(len(assignments_list_b)):
+                # Retrieve the created original assignment now knowing its pk, and re-assign it
+                a_idx = link_assg_b_to_a[b_idx]
+                created_assgn_a_dict = model_to_dict(assignments_list_a[a_idx], exclude=['id'])
+                created_assgn_a = Assignment.objects.get(**created_assgn_a_dict)
+                assignments_list_b[b_idx].substituted_assignment = created_assgn_a
+            # Create in blocks all the substitution assignments
+            Assignment.objects.bulk_create(assignments_list_b)
+            
             return HttpResponse(status=201)
         except ObjectDoesNotExist:
             return HttpResponse(_("One of the Assignments specified doesn't exist"), 404)
