@@ -17,7 +17,7 @@ async function loadData(loadAssign=true, resetTeachers=true){
     await getHolidays(startDate, endDate);
     await getStages(startDate, endDate);
     if(loadAssign)
-        await getAssignments(startDate, endDate);
+        await getAssignments(startDate, endDate, true);
 }
 
 async function loadTeacherData(){
@@ -44,6 +44,19 @@ async function loadRoomData(){
 
     await getHolidays(startDate, endDate);
     await getRoomAssignments(startDate, endDate);
+}
+
+async function loadSecretaryData(){
+    timetable.deleteAllEvents();
+    timetable.deleteAllBlocks();
+
+    let startDate = currentDate;
+    let endDate = moment(startDate).add(6, 'days').toDate();
+
+    timetable.setDays(new Date(startDate));
+
+    await getHolidays(startDate, endDate);
+    await getAssignments(startDate, endDate, false);
 }
 
 async function goNextWeek(teacher=false, room=false){
@@ -402,9 +415,9 @@ async function getAssignmentsGeneric(url, startDate, endDate, showTeacher=true){
     }
 }
 
-async function getAssignments(startDate, endDate){
+async function getAssignments(startDate, endDate, canEdit){
     let url = _URL['assignments'];
-    await getAssignmentsGeneric(url, startDate, endDate);
+    await getAssignmentsGeneric(url, startDate, endDate, canEdit);
 }
 
 async function getTeacherAssignments(startDate, endDate){

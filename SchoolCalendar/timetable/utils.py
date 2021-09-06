@@ -7,14 +7,14 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q, Subquery
 from django.utils.text import capfirst
-from timetable.models import Teacher, AdminSchool, HoursPerTeacherInClass, Assignment, HourSlot, School
+from timetable.models import Teacher, AdminSchool, Secretary, HoursPerTeacherInClass, Assignment, HourSlot, School
 
 
 def get_school_from_user(user):
     """
-    Returns the school related to a Teacher or an AdminSchool instance.
+    Returns the school related to a Teacher or an AdminSchool or a Secretary instance.
     :param user:
-    :return: the school related to that user. None if no teacher or AdminSchool is related to that user.
+    :return: the school related to that user. None if no teacher or AdminSchool or Secretary is related to that user.
     """
     teacher = Teacher.objects.filter(id=user.id)
     if teacher:
@@ -22,6 +22,9 @@ def get_school_from_user(user):
     admin_school = AdminSchool.objects.filter(id=user.id)
     if admin_school:
         return admin_school[0].school
+    secretary = Secretary.objects.filter(id=user.id)
+    if secretary:
+        return secretary[0].school
     return None
 
 
@@ -66,6 +69,26 @@ def is_adminschool(user):
     if not user:
         return False
     return AdminSchool.objects.filter(id=user.id).exists()
+
+
+def is_teacher(user):
+    """
+    :param user:
+    :return: True when the user is a Teacher corresponding to the given user
+    """
+    if not user:
+        return False
+    return Teacher.objects.filter(id=user.id).exists()
+    
+
+def is_secretary(user):
+    """
+    :param user:
+    :return: True when the user is a Secretary corresponding to the given user
+    """
+    if not user:
+        return False
+    return Secretary.objects.filter(id=user.id).exists()
 
 
 def compute_total_hours_assignments(assignments, hours_slots):

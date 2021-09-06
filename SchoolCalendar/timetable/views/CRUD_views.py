@@ -6,10 +6,10 @@ from django.urls import reverse_lazy
 from timetable.forms import SchoolForm, TeacherForm, AdminSchoolForm, SchoolYearForm, CourseForm, HourSlotForm, \
     AbsenceBlockForm, HolidayForm, StageForm, SubjectForm, HoursPerTeacherInClassForm, \
     AssignmentForm, TeacherCreationForm, AdminSchoolCreationForm, RoomForm, HourSlotCreateForm, TeachersYearlyLoadForm, \
-    CoursesYearlyLoadForm, AbsenceBlockCreateForm, HourSlotsGroupForm
+    CoursesYearlyLoadForm, AbsenceBlockCreateForm, HourSlotsGroupForm, SecretaryForm, SecretaryCreationForm
 from timetable.mixins import AdminSchoolPermissionMixin, SuperUserPermissionMixin, TeacherPermissionMixin
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
-    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad, CoursesYearlyLoad, HourSlotsGroup
+    Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad, CoursesYearlyLoad, HourSlotsGroup, Secretary
 
 
 class CreateViewWithUser(CreateView):
@@ -112,6 +112,33 @@ class AdminSchoolDelete(SuperUserPermissionMixin, DeleteView):
 class AdminSchoolList(SuperUserPermissionMixin, ListView):
     model = AdminSchool
     template_name = 'timetable/adminschool_list.html'
+
+
+# Secretary CRUD
+class SecretaryCreate(AdminSchoolPermissionMixin, CreateViewWithUser):
+    model = Secretary
+    form_class = SecretaryCreationForm
+    template_name = 'timetable/secretary_form.html'
+    success_url = reverse_lazy('secretary-listview')
+
+
+class SecretaryUpdate(AdminSchoolPermissionMixin, UpdateViewWithUser):
+    model = Secretary
+    form_class = SecretaryForm
+    template_name = 'timetable/secretary_form.html'
+    success_url = reverse_lazy('secretary-listview')
+
+
+class SecretaryDelete(AdminSchoolPermissionMixin, DeleteView):
+    model = Secretary
+    form_class = SecretaryForm
+    template_name = 'timetable/delete_form.html'
+    success_url = reverse_lazy('secretary-listview')
+
+
+class SecretaryList(AdminSchoolPermissionMixin, ListView):
+    model = Secretary
+    template_name = 'timetable/secretary_list.html'
 
 
 # SchoolYear CRUD

@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from timetable import models
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
     Stage, Subject, HoursPerTeacherInClass, Assignment, Room, TeachersYearlyLoad, CoursesYearlyLoad, HourSlotsGroup, \
-    HourSlotsGroup
+    HourSlotsGroup, Secretary
 from timetable.utils import get_school_from_user, assign_html_style_to_visible_forms_fields, generate_random_password, \
     assign_translated_labels_to_form_fields
 
@@ -269,6 +269,30 @@ class AdminSchoolCreationForm(UserCreationFormWithoutPassword):
 
     class Meta:
         model = AdminSchool
+        fields = ['username', 'first_name', 'last_name', 'email', 'school']
+
+
+class SecretaryForm(BaseFormWithSchoolCheck):
+    def __init__(self, user, *args, **kwargs):
+        super(SecretaryForm, self).__init__(user, *args, **kwargs)
+        assign_html_style_to_visible_forms_fields(self)
+
+    class Meta:
+        model = Secretary
+        fields = ['username', 'first_name', 'last_name', 'email', 'school']
+
+
+class SecretaryCreationForm(UserCreationFormWithoutPassword, BaseFormWithSchoolCheck):
+    """
+    Form for creating a Secretary entity without asking passwords
+    """
+
+    def __init__(self, user, *args, **kwargs):
+        super(SecretaryCreationForm, self).__init__(user, *args, **kwargs)
+        assign_html_style_to_visible_forms_fields(self)
+
+    class Meta:
+        model = Secretary
         fields = ['username', 'first_name', 'last_name', 'email', 'school']
 
 

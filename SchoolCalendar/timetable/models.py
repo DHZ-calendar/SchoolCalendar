@@ -146,6 +146,18 @@ class AdminSchool(MyUser):
     school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("school"))
 
 
+class Secretary(MyUser):
+    """
+    This is an account for the secretaries, they can see all the timetables without editing possibilities 
+    and report download functionalities 
+    """
+
+    class Meta:
+        verbose_name = _('Secretary')
+
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=False, blank=False, verbose_name=_("school"))
+
+
 class SchoolYear(models.Model):
     """
     The school year is identified by a pair of consecutive years (like 2020/2021).

@@ -28,7 +28,8 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 
-from timetable.mixins import AdminSchoolPermissionMixin, SuperUserPermissionMixin, TeacherPermissionMixin
+from timetable.mixins import AdminSchoolPermissionMixin, SuperUserPermissionMixin, TeacherPermissionMixin, SecretaryPermissionMixin, \
+    AdminSchoolOrSecretaryPermissionMixin
 from timetable.models import School, MyUser, Teacher, AdminSchool, SchoolYear, Course, HourSlot, AbsenceBlock, Holiday, \
     Stage, Subject, HoursPerTeacherInClass, Assignment, Room
 from timetable import utils
@@ -48,7 +49,11 @@ class TeacherTimetableView(LoginRequiredMixin, TeacherPermissionMixin, TemplateV
     template_name = 'timetable/teacher_timetable.html'
 
 
-class RoomTimetableView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateViewWithSchoolYears):
+class SecretaryTimetableView(LoginRequiredMixin, SecretaryPermissionMixin, TemplateViewWithSchoolYears):
+    template_name = 'timetable/secretary_timetable.html'
+
+
+class RoomTimetableView(LoginRequiredMixin, AdminSchoolOrSecretaryPermissionMixin, TemplateViewWithSchoolYears):
     template_name = 'timetable/room_timetable.html'
 
 
@@ -447,7 +452,7 @@ class SubstituteTeacherApiView(UserPassesTestMixin, View):
         return HttpResponse(status=200)
 
 
-class TimetableReportView(LoginRequiredMixin, AdminSchoolPermissionMixin, TemplateView):
+class TimetableReportView(LoginRequiredMixin, AdminSchoolOrSecretaryPermissionMixin, TemplateView):
     template_name = 'timetable/timetable_report.html'
 
     def get_context_data(self, **kwargs):
@@ -533,8 +538,12 @@ class LoggedUserRedirectView(LoginRequiredMixin, RedirectView):
             return reverse('timetable-view')
         elif self.request.user.is_superuser:
             return reverse('school-listview')
-        else:
+        elif utils.is_teacher(self.request.user):
             return reverse('teacher_timetable-view')
+        elif utils.is_secretary(self.request.user):
+            return reverse('secretary_timetable-view')
+        else: # Unknown type of user
+            return None
 
 
 class SendInvitationTeacherEmailView(LoginRequiredMixin, AdminSchoolPermissionMixin, View):

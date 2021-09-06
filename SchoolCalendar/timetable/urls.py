@@ -12,7 +12,8 @@ from timetable.views.CRUD_views import SchoolCreate, TeacherCreate, AdminSchoolC
     HolidayDelete, StageDelete, SubjectDelete, HoursPerTeacherInClassDelete, RoomCreate, RoomUpdate, RoomDelete, \
     RoomList, TeachersYearlyLoadCreate, TeachersYearlyLoadUpdate, TeachersYearlyLoadDelete, TeachersYearlyLoadList, \
     CoursesYearlyLoadCreate, CoursesYearlyLoadUpdate, CoursesYearlyLoadDelete, CoursesYearlyLoadList, \
-    HourSlotsGroupCreate, HourSlotsGroupUpdate, HourSlotsGroupDelete, HourSlotsGroupList
+    HourSlotsGroupCreate, HourSlotsGroupUpdate, HourSlotsGroupDelete, HourSlotsGroupList, \
+    SecretaryCreate, SecretaryUpdate, SecretaryDelete, SecretaryList
 from timetable.views.rest_framework_views import TeacherViewSet, \
     CourseYearOnlyListViewSet, CourseSectionOnlyListViewSet, HolidayViewSet, StageViewSet, \
     HourSlotViewSet, HoursPerTeacherInClassViewSet, AssignmentViewSet, TeacherAssignmentsViewSet, \
@@ -24,7 +25,7 @@ from timetable.views.other_views import TimetableView, SubstituteTeacherView, Te
     SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView, \
     TeacherSubstitutionView, SubstituteTeacherApiView, TimetableReportView, \
     CourseSummaryView, RoomTimetableView, SubstitutionSummaryView, \
-    SendTeacherSubstitutionEmailView, DownloadTeacherSubstitutionTicketView
+    SendTeacherSubstitutionEmailView, DownloadTeacherSubstitutionTicketView, SecretaryTimetableView
 from timetable.views.csv_views import TimetableTeacherCSVReportViewSet, TimetableCourseCSVReportViewSet, \
                                       TimetableRoomCSVReportViewSet, TimetableGeneralCSVReportViewSet, \
                                       SubstitutionsCSVReportViewSet
@@ -82,6 +83,7 @@ urlpatterns = [
     path('admin_school', TimetableView.as_view(), name='timetable-view'),
     path('substitute_teacher', SubstituteTeacherView.as_view(), name='substitute_teacher-view'),
     path('teacher_view', TeacherTimetableView.as_view(), name='teacher_timetable-view'),
+    path('secretary_view', SecretaryTimetableView.as_view(), name='secretary_timetable-view'),
     path('room_view', RoomTimetableView.as_view(), name='room_timetable-view'),
     path('teacher_summary_view', TeacherSummaryView.as_view(), name='teacher_summary-view'),
     path('course_summary_view', CourseSummaryView.as_view(), name='course_summary-view'),
@@ -112,6 +114,10 @@ urlpatterns = [
     path('admin_school/<pk>/edit/', AdminSchoolUpdate.as_view(), name='adminschool-edit'),
     path('admin_school/<pk>/delete/', AdminSchoolDelete.as_view(), name='adminschool-delete'),
     path('admin_school/', AdminSchoolList.as_view(), name='adminschool-listview'),
+    path('secretary/add/', SecretaryCreate.as_view(), name='secretary-add'),
+    path('secretary/<pk>/edit/', SecretaryUpdate.as_view(), name='secretary-edit'),
+    path('secretary/<pk>/delete/', SecretaryDelete.as_view(), name='secretary-delete'),
+    path('secretary/', SecretaryList.as_view(), name='secretary-listview'),
     path('school_year/add/', SchoolYearCreate.as_view(), name='school_year-add'),
     path('school_year/<pk>/edit/', SchoolYearUpdate.as_view(), name='school_year-edit'),
     path('school_year/<pk>/delete/', SchoolYearDelete.as_view(), name='school_year-delete'),
