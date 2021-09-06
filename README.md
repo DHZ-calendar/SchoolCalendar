@@ -172,7 +172,7 @@ Lastly, you have to setup an email that our website uses to invite teachers to j
 ### Update translations
 - Update the .po files executing:
 ```
-python manage.py makemessages
+python manage.py makemessages --all
 ```
 - Edit the translations in the *.po files 
 - Compile the translation files executing:
