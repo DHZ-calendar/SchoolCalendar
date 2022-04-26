@@ -29,7 +29,7 @@ You should see something like:
 
 ![Home Empty](readme_pics/home_empty.png)
 
-Now open the menu at the upper left corner, click the `Admin` button, open the instance you want to edit (like `Teacher`) and start adding the objects you will need to have the service working (using the button `+ Add new`). We make a brief tour of them:
+Now open the menu at the upper left corner, click the `Manage entities` button, open the instance you want to edit (like `Teacher`) and start adding the objects you will need to have the service working (using the button `+ Add new`). We make a brief tour of them:
 
 - **Teacher**: the teachers in your school. For every teacher an account will be created, so that the teacher in question will be able to consult his own timetable whenever she wises. The ```username``` is the login credential (so choose it carefully, no spaces are available). The `email` address that you insert will receive soon an email by the website, so that every teacher can choose her own password and finish the registration (you will not need her to finish the registration, the Teacher will be usable in the system as soon as you create it)!
 - **Course**: for instance, class IA or whatever. The field `Year` is a number (not Roman!) for the year of the class (in our example, class IA has `Year` field set to 1). The section would instead be `A`. 
@@ -50,47 +50,71 @@ Fill these fields carefully! All the information that you provide to the website
 ### An example creation of entries 
 Now that we have done the initialization step, we can finally start to use the service! We guide you through this process in this subsection.
 
-For the sake of the example, we just created a School Admin account (the same type of account that you are using right now) called John Doe, who is the manager of the school called "Galilei High School". You cannot create nor a school nor a school_year with your current account: you have to ask the administrators (the same guys who created for you your account) of the website to add your `school` and the `school_year` to the system!
+For the sake of the example, we just created a School Admin account (the same type of account that you are using right now) called John Doe, who is the manager of the school called "Galilei High School". You cannot create a school nor a school_year with your current account: you have to ask the administrators (the same guys who created for you your account) of the website to add your `school` and the `school_year` to the system!
 
-Now that we have everything up and running we start to fill what is necessary in order to utilize properly the website: let us start by the basis, and insert some hour-slots. Open the left menu, click the `Admin` option and select `Hour-Slots`. Add a new one and fill it as you wish. (Note that in this case the hour lasts physically speaking only 50 minutes, but the legal duration makes sure that it is going to be counted as a full hour long lesson). We insert both the hour slot for the first hour (7.55-8.45) and the second hour (8.45-9.35)
+Now that we have everything up and running we start to fill what is necessary in order to utilize properly the website: let us start by the basis, and insert some hour-slots. Open the left menu, click the `Manage entities` option and select `Hour-Slots`. Add a new Hour Slot Group for the current school year.
+
+![HourSlotGroupCreate](readme_pics/HourSlotGroupInsertion.png)
+
+You should see now a list of all your hour slots groups:
+
+![HourSlotsGroupsList](readme_pics/HourSlotsGroupsList.png)
+
+Click the `Edit blocks` button, and add the individual hour slots (with the green button `+ Add new`).
 
 ![HourSlotCreate](readme_pics/HourSlotInsertion.png)
 
-You can check that the insertion was successful by going back to the home page (left menu -> Timetable), and see that the hourslots appear in a gray overlay on the timetable.
+(Note that in this case the hour lasts physically speaking only 50 minutes, but the legal duration makes sure that it is going to be counted as a full hour long lesson). We insert both the hour slot for the first hour (7.55-8.45) and the second hour (8.45-9.35)
 
 ![TimetableWithHourslots](readme_pics/timetable_with_hourslots.png)
 
-We now insert a few courses (1A, 2A, 3A, 4A, 5A): go to left menu -> Admin -> Courses -> Add new, and fill the forms with the information for the various courses (careful, if the course is 1A, then the year is 1 - it must be a number - and the section is A). For example:
+We now insert a few courses (1A, 2A, 3A, 4A, 5A): go to left menu -> Manage entities -> Courses -> Add new, and fill the forms with the information for the various courses (careful, if the course is 1A, then the year is 1 - it must be a number - and the section is A). For example:
 
 ![CourseCreation](readme_pics/Course_creation.png)
 
-We now insert some subjects (left menu -> Admin -> Subjects -> Add New): Maths, Physics, Italian Literature, English Literature.
+Notice that the Hour Slot Group field defines the school year of the current Course: in fact, you might have that there is a Course IA in both school year 2020-2021 and 2021-2022: you can differentiate among them by simply looking at the Hour Slot Group field! 
+
+We now insert some subjects (left menu -> Manage entities -> Subjects -> Add New): Maths, Physics, Italian Literature, English Literature. The Color field is used to define the color they will appear on the timetable.
 
 Let us now insert a few rooms: you do not need to insert all of them (although you are not prohibited either from doing so), but just the ones you believe will be likely to have conflicts (for instance, the laboratories that can be used by multiple courses).
 
-In order to add some rooms go to left menu -> Admin -> Rooms -> Add new. We create a couple of rooms, the Physics laboratory (with capacity 2, which means that can be used concurrently by two courses and not that it can fit only two students) and the Multimedia Laboratory (with capacity 1).
+In order to add some rooms go to left menu -> Manage entities -> Rooms -> Add new. We create a couple of rooms, the Physics laboratory (with capacity 2, which means that can be used concurrently by two courses and not that it can fit only two students) and the Multimedia Laboratory (with capacity 1).
 
 ![RoomCreation](readme_pics/rooms_creation.png)
 
-It is time to add some teachers: go to left menu -> Admin -> Teachers -> Add new, and create a few teachers. We are going to create for this example the teachers Marie Curie, Dante Alighieri, Oscar Wilde and Carl Friedrich Gauss. 
+It is time to add some teachers: go to left menu -> Manage entities -> Teachers -> Add new, and create a few teachers. We are going to create for this example the teachers Marie Curie, Dante Alighieri, Oscar Wilde and Carl Friedrich Gauss. 
 
-Note that: the `username` field is going to be the username that the teacher will use use in order to login - choose it carefully, there cannot be duplicates and it cannot contain spaces! The email is instead required since the teacher is going to receive an email from SchoolCalendar, so that she can set her own password (she will use the account to check her personal timetable, she will not be able to alter anything since she is not an admin as you are!). The email is not sent automatically: you need to click the button `Send Invite` in the page left menu -> Admin -> Teachers.
+Note that: the `username` field is going to be the username that the teacher will use in order to login - choose it carefully, there cannot be duplicates and it cannot contain spaces (we advise to use firstname_lastname, for instance dante_alighieri can be the username of the teacher Dante Alighieri)! The email is instead required since the teacher is going to receive an email from SchoolCalendar, so that she can set her own password (she will use the account to check her personal timetable, she will not be able to alter anything since she is not an admin as you are!). The email is not sent automatically: you need to click the button `Send Invite` in the page left menu -> Manage entities -> Teachers.
 
 ![TeacherCreate](readme_pics/teacher_create.png)
 
-We create now an absence block: our poor Dante cannot be present at school from 8:00 to 9:00 on Mondays, since he has to take care of his old friend Virgilio. Just go to left menu -> Admin -> Absence Blocks -> Add new, and fill the form with Dante's information.
+We create now an absence block: our poor Dante cannot be present at school from 7:55 to 8:45 on Mondays, since he has to take care of his old friend Virgilio. Just go to left menu -> Manage entities -> Absence Blocks -> Add new, and fill the form with Dante's information.
 
 ![AbsenceBlockCreation](readme_pics/absence_block_create.png)
 
-Now we insert the important information regarding the teachers and courses: how many hours does every teacher need to teach in every course. To keep things simple, we just say that every teachers in our example teaches her own subject (we do not need to explain who teaches what, right?) in courses 1A and 2A. For the sake of the simplicity of the example, we just assign 100 normal hours to every teacher in every course, apart from Dante in 1A, who teaches both 100 normal hours and 50 BES.
+Now we insert the important information regarding the teachers and courses: how many hours does every teacher need to teach in every course.
+
+First, we insert how many hours every teacher needs to teach according to her contract for the entire school year. We expect this number to be around 1000 hours per year.
+
+Go to left menu -> Manage entities -> Teachers' yearly load -> + Add new and insert the information.
+
+![HourPerTeacherInClass](readme_pics/teacher_yearly_load.png)
+
+The same happens for Courses: go to the left menu -> Manage entities -> Courses' yearly load -> Add new and fill how many hours every course needs to do by the end of the school year.
+
+Now, we need to insert how many hours every teacher needs to teach in every course, and for what subject (for instance, if a teacher teaches both Math and Physics in the same course IA, you need to insert both HourPerTeacher, one for Math and one for Physics). 
+
+To keep things simple, we just say that every teacher in our example teaches her own subject (Dante -> Italian Literature and so on) in courses 1A and 2A. For the sake of the simplicity of the example, we just assign 100 normal hours to every teacher in every course, apart from Dante in 1A, who teaches both 100 normal hours and 50 BES. Go to left menu -> Manage entities -> Hours per teacher -> + Add new.
 
 ![HourPerTeacherInClass](readme_pics/hour_per_teacher_in_class_create.png)
 
-Lastly, we insert some holidays and some stages. First, go to left menu -> Admin -> Holidays -> Add new and create a new holiday: 
+Lastly, we insert some holidays and some stages. First, go to left menu -> Manage entities -> Holidays -> Add new and create a new holiday: 
 
 ![HolidayCreate](readme_pics/holiday_create.png)
 
-Then a stage for class 1A: left menu -> Admin -> Stages -> Add new.
+Notice that if you create a holiday on a day when some teacher is working, you will be warned that the teacher job is going to be deleted (since there is a holiday)!
+
+Then a stage for class 1A: left menu -> Manage entities -> Stages -> Add new.
 
 ![StageCreate](readme_pics/stage_create.png)
 
@@ -101,7 +125,7 @@ You can check how those two instances are rendered in the timetable: go to left 
 After we have finished to set all the entries of our mock school, we can finally start to see how the system works. Go to the timetable page (left menu -> Timetable) and start to play with the teachers assignments.
 This view shows you the weekly timetable for a specific course and school year (you can select which course and school year to visualize in the upper left menu). Note that the list of teachers in the right column will change according to the course you have selected. If you try to select course 3A, for instance, you will notice that it has no teacher assigned (if you remember, we only add hours for teachers in courses 1A and 2A).
 
-Try now to add an Italian lecture the second hour on Monday in course 1A. Click the button `Assign lecture` in Dante's square, and afterwards select the first hour slot on Monday morning (it should have been filled in green).
+Try now to add an Italian lecture the second hour on Monday in course 1A. Click the button `Assign lecture` in Dante's square, and afterwards select the second hour slot on Monday morning (it should have been filled in green).
 
 ![AssignButton](readme_pics/Assign_teacher.png)
 
@@ -112,11 +136,11 @@ It will be asked whether you want to assign a room to this lecture, to which you
 
 What about the first hour slot? Why is it still gray and it doesn't turn into green? Simple enough, Dante is by Virgilio's, we have added an absence block for him at that time.
 
-So good so far: let us now add a Math class during the first hour slot on Monday morning. Just repeat the same procedure with Gauss: notice that when you press the button `Assign lecture` under Gauss' square, the Italian lecture we added earlier will appear split in half: this is to let you add more than one teacher during the same course.
+So good so far: let us now add a Math class during the first hour slot on Monday morning. Just repeat the same procedure with Gauss: notice that when you press the button `Assign lecture` under Gauss' square, the Italian lecture we added earlier will appear split in half: this is to let you add more than one teacher during the same hour slot.
 
 ![HourSlotSplit](readme_pics/Hour_Slot_split.png)
 
-Before starting to add lectures in the other course, try to click the downward arrow in the teachers' box in the right column: it will show you a summary of how many hours does the teacher still need to do in the course.
+Before starting to add courses in the other course, try to click the downward arrow in the teachers' box in the right column: it will show you a summary of how many hours does the teacher still need to do in the course.
 
 Ok, move on right now in class 2A (using the menu at the top left corner). Try to add a lecture for Dante; as you can see, Monday is off limits: first hour Dante is as usual by Virgilio, second hour instead there would be a conflict with course 1A. It is shown in red.
 
@@ -147,7 +171,7 @@ If you click on it, a list of all teachers will open at your disposal
 
 ![GaussSubstitution2](readme_pics/substitute_gauss_teacher_list.png)
 
-The information in this page should help you decide who will make the substitution: first, you may want to give the lecture to the teacher with less hours of substitutions made so far during the year. Moreover, you may want to prefer to give the hour to teachers already at school: note for instance that Oscar Wilde is home on Tuesday both the hour before the substitution and the one after, whereas Dante would already be at school (he teaches the hour before Gauss in course 2A). We believe this information will help you to decide to which teacher to assign the substitution.
+The information in this page should help you decide who will make the substitution: first, you may want to give the lecture to the teacher with the least hours of substitutions made so far during the year. Moreover, you may want to prefer to give the hour to teachers already at school: note for instance that Oscar Wilde is home on Tuesday both the hour before the substitution and the one after, whereas Dante would already be at school (he teaches the hour before Gauss in course 2A). We believe this information will help you to decide to which teacher to assign the substitution.
 
 In the end, Marie Curie is teaching in another class at that hour, hence she will be listed in `Other Teachers` list: you should not choose her, but if you have very good reasons for doing so, feel free (for instance, Marie Curie's class is doing an educational trip, and she is not one of the accompanists. In this case, the substitution is considered as free, and will not be counted in the final reports).
 
@@ -157,7 +181,7 @@ If we choose Dante, and assign him to the substitution, you will notice in the T
 
 
 ## Week replication
-After filling all the lessons of the first week for a class, you should consider using the "Replicate week" button. It avoids you filling by hand the same exact week for the rest of the academic year. Before using this functionality, you should visualize the templat eweek that you are intersted in replicating. The dialog that opens up let you select the target period that you want to fill with the source week. You have a couple of choices to deal with:
+After filling all the lessons of the first week for a class, you should consider using the "Replicate week" button. It avoids you filling by hand the same exact week for the rest of the academic year. Before using this functionality, you should visualize the template week that you are interested in replicating. The dialog that opens up let you select the target period that you want to fill with the source week. You have a couple of choices to deal with:
 - Replicate without substitutions: if enabled, all the substitutions present in the current week are ignored and all the lessons are copying just like every teacher is not absent.
 - Remove extra non-conflicting lectures: if enabled, every lesson already present in the target week will be deleted if it does not lead to a collision. If disabled, the extra lectures are kept.
 
@@ -170,6 +194,9 @@ In the menu there are several pages that help you in managing the whole timetabl
 - **Courses summary**: this page is similar to the Teacher summary one, but instead focused on the courses. For instance, this page can be useful to see how many teaching hours are missing for a course.
 - **Substitutions summary**: this page shows, and let you download, all the substitutions made in your school during this academic year. You can also apply several filters like the teacher one, the course one or the period range one in order to let you easily manage them.  
 
+## Co-teaching
+
+It might happen that some external professors are teaching in your school (for example, a mother-tongue English lecturer during the foreign language class). Such external professors usually teach together with the regular professor (e.g. the English professor). Since in the yearly report page you want the number of hours taught by all professors for a specific course to be equal to the number of hours that the course must perform, you do not want to count such hours taught by two teachers concurrently twice. So, what you should do is to assign regularly the hour of the English professor, and add the external professor as a co-teaching hour (co-teaching hours are not counted when doing the annual reports). You can assign a co-teaching hour in the regular timetable page: every professor has three buttons, one green for the regular hours `Assign lecture`, one yellow for BES lectures `Assign B.E.S.` and finally a blue one for co-teaching hours `Assign co-teaching`.
 
 ## Installation
 Two possibilities are there available at the moment: either you download the code (it is an open source repository after all) and start the service by yourself on your school servers, either you pay an annual licence and enjoy the possibility to use the service out of the box on our servers. It will be moreover kept up to date and maintained by our developers! :) The choice is up to you.
