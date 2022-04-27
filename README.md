@@ -31,17 +31,17 @@ You should see something like:
 
 Now open the menu at the upper left corner, click the `Manage entities` button, open the instance you want to edit (like `Teacher`) and start adding the objects you will need to have the service working (using the button `+ Add new`). We make a brief tour of them:
 
-- **Teacher**: the teachers in your school. For every teacher an account will be created, so that the teacher in question will be able to consult his own timetable whenever she wises. The ```username``` is the login credential (so choose it carefully, no spaces are available). The `email` address that you insert will receive soon an email by the website, so that every teacher can choose her own password and finish the registration (you will not need her to finish the registration, the Teacher will be usable in the system as soon as you create it)!
+- **Teacher**: the teachers in your school. For every teacher an account will be created, so that the teacher in question will be able to consult her own timetable whenever she wises. The ```username``` is the login credential (so choose it carefully, no spaces are available). We advise using lowercase `firstname_lastname`, i.e. `dante_alighieri`.  The `email` address that you insert will receive an email by the website, so that every teacher can choose her own password and finish the registration (you will not need her to finish the registration, the Teacher will be usable in the system as soon as you create it)! The email is not sent automatically, but rather it is sent clicking the button left menu -> Manage entities -> Teachers -> Send Invite.
 - **Course**: for instance, class IA or whatever. The field `Year` is a number (not Roman!) for the year of the class (in our example, class IA has `Year` field set to 1). The section would instead be `A`. 
 - **Room**: for maximal flexibility, you can optionally register into the system all the rooms of your school. In this way, you can keep track of the conflicts happening in the rooms (the same room cannot be used concurrently by too many courses). Watch out, the field `Capacity` does not stand for how many pupils can fit into the room, but how many courses can be there concurrently (imagine a large laboratory or the gym, we may have multiple courses all having class there at the same time). We still expect that the vast majority of the rooms will have capacity of 1.
 - **Subject**: the subjects taught in the school (Maths, Literature and so on).
 - **Holiday**: you do not want your poor teachers and pupils to work at Christmas ;) The holiday period specified will be valid for all the courses of the school! Try to insert one, you will see it painted in orange in the home page calendar!
 - **Stage**: same as holiday (no class can be held if there is a stage that day), but this time it is specific for a single course.
-- **Hour Slot**: this is the slot in which a lesson can be taught. For instance, assume that on Tuesday the third hour goes from 11:05 to 11:55. Then the field `Hour number` is 3. Still, when you count how many hours a teacher has done during the year, you may want to count the class duratoin as 1 hour, even if it lasts only 50 minutes (after 6 classes of 50 minutes, the teacher has done actually only 5 hours!). This is what the `Legal Duration` field is for! (You can set it with hours and minutes, but we believe that the vast majority will be 1 hour and 0 minutes). This insertion is going to be a bit painful since you may have potentially 30 or more hour slots in a week! But do not worry, we saved you a bunch of time by letting you decide in which days of the week to repeat the hour slot. For instance, if you want the first hour of the morning from 8:00 to 9:00 to be repeated every morning from Monday to Friday, just select the correct days in the field `Replicate on Days`. In order to select multiple options use the key `ctrl`, or `shift`.
-The hour slots are organized in groups, called **Hour Slots Groups**. This entity allows you to manage different hour slots for different courses in an easy way. In some schools, some courses have an hour configuration, while others have a completely different one (E.g. The course `1A` starts the first lesson at 7.45, while the course `1B` starts it at 8.15). In this case, two different hour slots groups can easily handle the two hour slots configurations avoiding collitions and problems. On the other hand, if your school has the same hour configuration for all the classes during the same accademic year, then you will need only on hour slots group entity.
-- **Absence Block**: if any teacher has some chronical indisposability to teach in certain hour slots, you can register them using the `Absence Block`. When you later check for the disposability of a teacher to teach in a certain course, such hour slot will not be considered valid, even if the teacher has no other conflicts at such time.
-- **Hours Per Teacher In Class**: this records how many hours of teaching (field `Hours`) any teacher needs to do in every course. Note that when computing the total amount of hours done by the teacher in a course, the field `Legal Duration` of the instance `Hour Slot` is used). If a teacher teaches multiple subjects in the same course (like Physics and Maths), she needs multiple Hours Per Teacher In Class (one for Math, the other for Physics in the example). The `Hour BES` field is meant for special hours of teaching (like hours done with pupils carrying disability and so on). If your school does not have such special hours, just leave them set to zero.
-- **Secretary**: the secretaries of your school that need to see all the timetables. This is necessary if, for instance, a secretary needs to send an urgent communication to a teacher and wants to know where the teacher is teaching now. Secretaries have even the possibility to download the excel reports reporting the various timetables of the course, of a teacher or of a room. 
+- **Hour Slot**: this is the slot in which a lesson can be taught. For instance, assume that on Tuesday the third hour goes from 11:05 to 11:55. Then the field `Hour number` is 3. Still, when you count how many hours a teacher has done during the year, you may want to count the class duration as 1 hour, even if it lasts only 50 minutes (after 6 classes of 50 minutes, the teacher has done actually only 5 hours!). This is what the `Legal Duration` field is for! (You can set it with hours and minutes, but we believe that the vast majority will be 1 hour and 0 minutes). This insertion is going to be a bit painful since you may have potentially 30 or more hour slots in a week! But do not worry, we saved you a bunch of time by letting you decide in which days of the week to repeat the hour slot. For instance, if you want the first hour of the morning from 8:00 to 9:00 to be repeated every morning from Monday to Friday, just select the correct days in the field `Replicate on Days`. In order to select multiple options use the key `ctrl`, or `shift`.
+The hour slots are organized in groups, called **Hour Slots Groups**. This entity allows you to manage different hour slots for different courses in an easy way. In some schools, some courses have an hour configuration, while others have a completely different one (E.g. The course `1A` starts the first lesson at 7.45, while the course `1B` starts it at 8.15). In this case, two different hour slots groups can easily handle the two hour slots configurations avoiding collisions and problems. On the other hand, if your school has the same hour configuration for all the classes during the same academic year, then you will need only on hour slots group entity.
+- **Absence Block**: if any teacher has some chronic unavailability to teach in certain hour slots, you can register them using the `Absence Block`. When you later check for the availability of a teacher to teach in a certain course, such hour slot will not be considered valid, even if the teacher has no other conflicts at such time.
+- **Hours Per Teacher In Class**: this records how many hours of teaching (field `Hours`) any teacher needs to do in every course. Note that when computing the total amount of hours done by the teacher in a course, the field `Legal Duration` of the instance `Hour Slot` is used. If a teacher teaches multiple subjects in the same course (like Physics and Maths), she needs multiple Hours Per Teacher In Class (one for Math, the other for Physics in the example). The `Hour BES` field is meant for special hours of teaching (like hours done with pupils carrying disability and so on). If your school does not have such special hours, just leave them set to zero. Co-teaching hours are explained in the dedicated section below.
+- **Secretary**: the secretaries of your school that need to see all the timetables. This is necessary if, for instance, a secretary needs to send an urgent communication to a teacher and wants to know where the teacher is teaching now. Secretaries have even the possibility to download the excel reports with the timetables of courses, teachers and rooms. 
 - **Teachers' Yearly Load**: the total amount of hours that a teacher should teach in an academic year. The hours are divided in normal hours, B.E.S hours and co-teaching hours. *This is an optional entity that can help while creating a timetable to immediately compare the number of hours assigned to a teacher and the desired yearly load for that teacher.* 
 - **Courses' Yearly Load**: the total amount of teaching hours that a course should have in an academic year. The hours are divided in normal hours and B.E.S hours. *This is an optional entity that can help while creating a timetable to immediately compare the number of hours assigned to a course and the desired yearly load for that course.* 
 
@@ -84,7 +84,7 @@ In order to add some rooms go to left menu -> Manage entities -> Rooms -> Add ne
 
 It is time to add some teachers: go to left menu -> Manage entities -> Teachers -> Add new, and create a few teachers. We are going to create for this example the teachers Marie Curie, Dante Alighieri, Oscar Wilde and Carl Friedrich Gauss. 
 
-Note that: the `username` field is going to be the username that the teacher will use in order to login - choose it carefully, there cannot be duplicates and it cannot contain spaces (we advise to use firstname_lastname, for instance dante_alighieri can be the username of the teacher Dante Alighieri)! The email is instead required since the teacher is going to receive an email from SchoolCalendar, so that she can set her own password (she will use the account to check her personal timetable, she will not be able to alter anything since she is not an admin as you are!). The email is not sent automatically: you need to click the button `Send Invite` in the page left menu -> Manage entities -> Teachers.
+Note that: the `username` field is going to be the username that the teacher will use in order to login - choose it carefully, there cannot be duplicates and it cannot contain spaces (we advise to use firstname_lastname, for instance dante_alighieri can be the username of the teacher Dante Alighieri). The email is instead required since the teacher is going to receive an email from SchoolCalendar, so that she can set her own password (she will use the account to check her personal timetable, she will not be able to alter anything since she is not an admin as you are!). The email is not sent automatically: you need to click the button `Send Invite` in the page left menu -> Manage entities -> Teachers.
 
 ![TeacherCreate](readme_pics/teacher_create.png)
 
@@ -112,13 +112,13 @@ Lastly, we insert some holidays and some stages. First, go to left menu -> Manag
 
 ![HolidayCreate](readme_pics/holiday_create.png)
 
-Notice that if you create a holiday on a day when some teacher is working, you will be warned that the teacher job is going to be deleted (since there is a holiday)!
+Notice that if you create a holiday on a day when some teacher is working, you will be warned that the teacher's job is going to be deleted (since there is a holiday)!
 
 Then a stage for class 1A: left menu -> Manage entities -> Stages -> Add new.
 
 ![StageCreate](readme_pics/stage_create.png)
 
-You can check how those two instances are rendered in the timetable: go to left menu -> Timetable, go to the desired week using the button `go`, right above the timetable (for the stage and the holiday), and look for them, they should be fairly easy to spot.
+You can check how those two instances are rendered in the timetable: go to left menu -> Timetable, go to the desired week using the button `go`, right above the timetable and look for them, they should be fairly easy to spot.
 
 ### Teacher Assignment
 
@@ -140,9 +140,9 @@ So good so far: let us now add a Math class during the first hour slot on Monday
 
 ![HourSlotSplit](readme_pics/Hour_Slot_split.png)
 
-Before starting to add courses in the other course, try to click the downward arrow in the teachers' box in the right column: it will show you a summary of how many hours does the teacher still need to do in the course.
+Before starting to add lectures in the other course, try to click the downward arrow in the teachers' box in the right column: it will show you a summary of how many hours does the teacher still need to do in the course.
 
-Ok, move on right now in class 2A (using the menu at the top left corner). Try to add a lecture for Dante; as you can see, Monday is off limits: first hour Dante is as usual by Virgilio, second hour instead there would be a conflict with course 1A. It is shown in red.
+Ok, move on right now in class 2A (using the menu in the top left corner). Try to add a lecture for Dante; as you can see, Monday is off limits: first hour Dante is as usual by Virgilio, second hour instead there would be a conflict with course 1A. It is shown in red.
 
 ![ConflictRedHourSlot](readme_pics/conflict_red_hour_slot.png)
 
@@ -185,12 +185,12 @@ After filling all the lessons of the first week for a class, you should consider
 - Replicate without substitutions: if enabled, all the substitutions present in the current week are ignored and all the lessons are copying just like every teacher is not absent.
 - Remove extra non-conflicting lectures: if enabled, every lesson already present in the target week will be deleted if it does not lead to a collision. If disabled, the extra lectures are kept.
 
-If some conflicting lectures are present (e.g. the same teacher is already teaching in another course), the week replication will fail. To know which lectures are causing conflicts you should click the "Check conflicts" button since it will show you all the conflincting lectures and why they are a conflict.
+If some conflicting lectures are present (e.g. the same teacher is already teaching in another course), the week replication will fail. To know which lectures are causing conflicts you should click the "Check conflicts" button since it will show you all the conflicting lectures and why they are a conflict.
 
 ## Summaries and reports
 In the menu there are several pages that help you in managing the whole timetables. 
 - **Timetable report**: this page let you download all the timetables that you would need: the room timetable, the course timetable, the teacher timetable and a general timetable that shows all the lectures of your school in a compact way.
-- **Teachers summary**: this page provides you a summary of all the teaching hours that a teacher has made compared with her hearly load. If you click the proper button on the left of each teacher, you can obtain his detailed information, to see the teaching hours divided for each one of her courses and subjects.
+- **Teachers summary**: this page provides you a summary of all the teaching hours that a teacher has made compared with her yearly load. If you click the proper button on the left of each teacher, you can obtain his detailed information, to see the teaching hours divided for each one of her courses and subjects.
 - **Courses summary**: this page is similar to the Teacher summary one, but instead focused on the courses. For instance, this page can be useful to see how many teaching hours are missing for a course.
 - **Substitutions summary**: this page shows, and let you download, all the substitutions made in your school during this academic year. You can also apply several filters like the teacher one, the course one or the period range one in order to let you easily manage them.  
 
@@ -211,9 +211,9 @@ We suggest that you create a virtual environment, where you can install the requ
 ```
 pip install -r requirements.txt
 ```
-You will have to play with the settings.py file too, in order to setup your Database (Postgresql is our choice, but you can have whatever you wish, and an sqlite3 DB comes out of the box), and of course be careful not to disclose your credentials!
+You will have to play with the settings.py file too, in order to set up your Database (Postgresql is our choice, but you can have whatever you wish, and an sqlite3 DB comes out of the box), and of course be careful not to disclose your credentials!
 
-Lastly, you have to setup an email that our website uses to invite teachers to join the service. 
+Lastly, you have to set up an email that our website uses to invite teachers to join the service. 
 
 ## How to contribute
 ### Update translations
