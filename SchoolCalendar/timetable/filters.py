@@ -185,7 +185,7 @@ class RoomFilter(FilterSet):
         """
         If the necessary parameters are given we return only the free rooms in the time period specified
         """
-        school = self.request.GET.get('school')
+        school = get_school_from_user(self.request.user)
         school_year = self.request.GET.get('school_year')
         hour_start = self.request.GET.get('hour_start')
         hour_end = self.request.GET.get('hour_end')
@@ -198,7 +198,7 @@ class RoomFilter(FilterSet):
             hour_start = datetime.strptime(hour_start, '%H:%M')
             hour_end = datetime.strptime(hour_end, '%H:%M')
 
-        if school and school_year and hour_start and hour_end and date:
+        if school_year and hour_start and hour_end and date:
             # Search assignments with an intersection in time but in a different course (in this way we allow to assign
             # more teachers in the same course, in the same hour_slot and in the same room. Useful for co-teaching)
             # and we group them by room, course
