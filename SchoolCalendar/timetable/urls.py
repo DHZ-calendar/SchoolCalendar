@@ -1,6 +1,8 @@
+from django.conf import settings
 from django.conf.urls import url
 from django.urls import path, re_path, include
 from django.views.generic import TemplateView
+from django.views.generic.base import RedirectView
 from timetable.views.CRUD_views import SchoolCreate, TeacherCreate, AdminSchoolCreate, SchoolYearCreate, CourseCreate, \
     HourSlotCreate, AbsenceBlockCreate, HolidayCreate, StageCreate, SubjectCreate, \
     HoursPerTeacherInClassCreate, AssignmentCreate, \
@@ -25,7 +27,7 @@ from timetable.views.other_views import TimetableView, SubstituteTeacherView, Te
     SendInvitationAdminSchoolEmailView, CheckWeekReplicationView, ReplicateWeekAssignmentsView, \
     TeacherSubstitutionView, SubstituteTeacherApiView, TimetableReportView, \
     CourseSummaryView, RoomTimetableView, SubstitutionSummaryView, \
-    SendTeacherSubstitutionEmailView, DownloadTeacherSubstitutionTicketView, SecretaryTimetableView
+    SendTeacherSubstitutionEmailView, DownloadTeacherSubstitutionTicketView, SecretaryTimetableView, UserGuideView
 from timetable.views.csv_views import TimetableTeacherCSVReportViewSet, TimetableCourseCSVReportViewSet, \
                                       TimetableRoomCSVReportViewSet, TimetableGeneralCSVReportViewSet, \
                                       SubstitutionsCSVReportViewSet
@@ -79,7 +81,8 @@ urlpatterns = [
         name='substitutions_csv_report'),
 
     path('', LoggedUserRedirectView.as_view(), name='user_redirect-view'),
-    path('user_guide', TemplateView.as_view(template_name='timetable/user_guide.html'), name='user_guide'),
+    re_path(r'^static/(?P<rest>.*)', RedirectView.as_view(url=settings.STATIC_URL+'%(rest)s', query_string=True)),
+    path('user_guide', UserGuideView.as_view(), name='user_guide'),
     path('admin_school', TimetableView.as_view(), name='timetable-view'),
     path('substitute_teacher', SubstituteTeacherView.as_view(), name='substitute_teacher-view'),
     path('teacher_view', TeacherTimetableView.as_view(), name='teacher_timetable-view'),

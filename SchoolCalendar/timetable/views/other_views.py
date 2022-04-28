@@ -9,6 +9,7 @@ from django.db.models import Q, Count
 from django.shortcuts import render, redirect, reverse
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from django.utils.translation import get_language_from_request
 from django.forms.models import model_to_dict
 
 from django.views.generic import TemplateView
@@ -558,3 +559,17 @@ class SendInvitationAdminSchoolEmailView(LoginRequiredMixin, SuperUserPermission
         user_pk = kwargs.get('user_pk')
         utils.send_invitation_email(user_pk, request)
         return HttpResponse(status=200)
+
+
+class UserGuideView(TemplateView):
+    template_name = 'timetable/user_guide.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        lang = get_language_from_request(self.request)
+        guide_file = 'GUIDE.md'
+        if lang == 'it':
+            guide_file = 'GUIDE_IT.md'
+        md = open(guide_file, 'r').read()
+        context['guide_md'] = md
+        return context

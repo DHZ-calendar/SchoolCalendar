@@ -1,7 +1,4 @@
-# SchoolCalendar
-![Django CI](https://github.com/DHZ-calendar/SchoolCalendar/workflows/Django%20CI/badge.svg)
-[![CodeFactor](https://www.codefactor.io/repository/github/dhz-calendar/schoolcalendar/badge)](https://www.codefactor.io/repository/github/dhz-calendar/schoolcalendar)
-
+[TOC]
 
 ## Presentazione
 
@@ -27,7 +24,7 @@ Per cominciare, apri un browser (sconsigliamo vivamente l'utilizzo di Internet E
 
 Dovresti vedere una pagina simile a questa:
 
-![Home Empty](readme_pics/home_empty.png)
+![Home Empty](static/readme_pics/home_empty.png)
 
 Apri il menù in alto a sinistra, clicca sul bottone `Gestisci le entità`, apri l'istanza che vuoi inserire (ad esempio `Insegnanti`), e inserisci gli oggetti che ti servono per far funzionare il servizio. Facciamo un breve riepilogo delle entità:
 

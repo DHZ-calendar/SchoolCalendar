@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django_filters',
     'durationwidget',
     'colorfield',
+    'markdownify.apps.MarkdownifyConfig',
     'timetable'
 ]
 
@@ -180,4 +181,56 @@ LOGGING = {
             'handlers': ['logfile'],
         },
     },
+}
+
+# Markdownify settings
+MARKDOWNIFY = {
+   "default": {
+        "MARKDOWN_EXTENSIONS": [
+            'markdown.extensions.fenced_code',
+            'markdown.extensions.extra',
+            'markdown.extensions.toc'
+        ],
+        "STRIP": False,
+        "WHITELIST_TAGS": [
+            'a',
+            'abbr',
+            'acronym',
+            'b',
+            'blockquote',
+            'em',
+            'i',
+            'li',
+            'ol',
+            'p',
+            'strong',
+            'ul',
+            'code',
+            'span',
+            'div', 'class',
+            'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+            'table',
+            'thead',
+            'tbody',
+            'th',
+            'tr',
+            'td',
+            'br', 'hr',
+            'img'
+        ],
+        "WHITELIST_ATTRS": [
+            'href',
+            'src',
+            'alt',
+            'class',
+        ],
+        "WHITELIST_PROTOCOLS": [
+            'http',
+            'https',
+        ],
+        "LINKIFY_TEXT": {
+            "PARSE_URLS": True,
+            "PARSE_EMAIL": True,
+        }
+   }
 }
