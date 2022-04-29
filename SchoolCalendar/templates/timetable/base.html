@@ -75,6 +75,8 @@
                 <a href="{% url 'teacher_timetable-view' %}">
                 {% elif user|is_secretary %}
                 <a href="{% url 'secretary_timetable-view' %}">
+                {% else %}
+                <a style="display:none">
                 {% endif %}
 
                     <svg class="bi bi-calendar3" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
