@@ -27,7 +27,7 @@ You should see something like:
 
 Now open the menu at the upper left corner, click the `Manage entities` button, open the instance you want to edit (like `Teacher`) and start adding the objects you will need to have the service working (using the button `+ Add new`). We make a brief tour of them:
 
-- **Teacher**: the teachers in your school. For every teacher an account will be created, so that the teacher in question will be able to consult her own timetable whenever she wises. The ```username``` is the login credential (so choose it carefully, no spaces are available). We advise using lowercase `firstname_lastname`, i.e. `dante_alighieri`.  The `email` address that you insert will receive an email by the website, so that every teacher can choose her own password and finish the registration (you will not need her to finish the registration, the Teacher will be usable in the system as soon as you create it)! The email is not sent automatically, but rather it is sent clicking the button left menu -> Manage entities -> Teachers -> Send Invite.
+- **Teacher**: the teachers in your school. For every teacher an account will be created, so that the teacher in question will be able to consult her own timetable whenever she wises. The ```username``` is the login credential (so choose it carefully, no spaces are available). We advise using lowercase `firstname_lastname`, i.e. `dante_alighieri`.  The `email` address that you insert will receive an email by the website, so that every teacher can choose her own password and finish the registration (you will not need her to finish the registration, the Teacher will be usable in the system as soon as you create it)! The email is not sent automatically, but rather it is sent clicking the button left menu -> `Manage entities` -> `Teachers` -> `Send Invite`.
 - **Course**: for instance, class IA or whatever. The field `Year` is a number (not Roman!) for the year of the class (in our example, class IA has `Year` field set to 1). The section would instead be `A`. 
 - **Room**: for maximal flexibility, you can optionally register into the system all the rooms of your school. In this way, you can keep track of the conflicts happening in the rooms (the same room cannot be used concurrently by too many courses). Watch out, the field `Capacity` does not stand for how many pupils can fit into the room, but how many courses can be there concurrently (imagine a large laboratory or the gym, we may have multiple courses all having class there at the same time). We still expect that the vast majority of the rooms will have capacity of 1.
 - **Subject**: the subjects taught in the school (Maths, Literature and so on).
@@ -64,27 +64,27 @@ Click the `Edit blocks` button, and add the individual hour slots (with the gree
 
 ![TimetableWithHourslots](static/readme_pics/timetable_with_hourslots.png)
 
-We now insert a few courses (1A, 2A, 3A, 4A, 5A): go to left menu -> Manage entities -> Courses -> Add new, and fill the forms with the information for the various courses (careful, if the course is 1A, then the year is 1 - it must be a number - and the section is A). For example:
+We now insert a few courses (1A, 2A, 3A, 4A, 5A): go to left menu -> `Manage entities` -> `Courses` -> `Add new`, and fill the forms with the information for the various courses (careful, if the course is 1A, then the year is 1 - it must be a number - and the section is A). For example:
 
 ![CourseCreation](static/readme_pics/Course_creation.png)
 
 Notice that the Hour Slot Group field defines the school year of the current Course: in fact, you might have that there is a Course IA in both school year 2020-2021 and 2021-2022: you can differentiate among them by simply looking at the Hour Slot Group field! 
 
-We now insert some subjects (left menu -> Manage entities -> Subjects -> Add New): Maths, Physics, Italian Literature, English Literature. The Color field is used to define the color they will appear on the timetable.
+We now insert some subjects (left menu -> `Manage entities` -> `Subjects` -> `Add New`): Maths, Physics, Italian Literature, English Literature. The Color field is used to define the color they will appear on the timetable.
 
 Let us now insert a few rooms: you do not need to insert all of them (although you are not prohibited either from doing so), but just the ones you believe will be likely to have conflicts (for instance, the laboratories that can be used by multiple courses).
 
-In order to add some rooms go to left menu -> Manage entities -> Rooms -> Add new. We create a couple of rooms, the Physics laboratory (with capacity 2, which means that can be used concurrently by two courses and not that it can fit only two students) and the Multimedia Laboratory (with capacity 1).
+In order to add some rooms go to left menu -> `Manage entities` -> `Rooms` -> `Add new`. We create a couple of rooms, the Physics laboratory (with capacity 2, which means that can be used concurrently by two courses and not that it can fit only two students) and the Multimedia Laboratory (with capacity 1).
 
 ![RoomCreation](static/readme_pics/rooms_creation.png)
 
-It is time to add some teachers: go to left menu -> Manage entities -> Teachers -> Add new, and create a few teachers. We are going to create for this example the teachers Marie Curie, Dante Alighieri, Oscar Wilde and Carl Friedrich Gauss. 
+It is time to add some teachers: go to left menu -> `Manage entities` -> `Teachers` -> `Add new`, and create a few teachers. We are going to create for this example the teachers Marie Curie, Dante Alighieri, Oscar Wilde and Carl Friedrich Gauss. 
 
-Note that: the `username` field is going to be the username that the teacher will use in order to login - choose it carefully, there cannot be duplicates and it cannot contain spaces (we advise to use firstname_lastname, for instance dante_alighieri can be the username of the teacher Dante Alighieri). The email is instead required since the teacher is going to receive an email from SchoolCalendar, so that she can set her own password (she will use the account to check her personal timetable, she will not be able to alter anything since she is not an admin as you are!). The email is not sent automatically: you need to click the button `Send Invite` in the page left menu -> Manage entities -> Teachers.
+Note that: the `username` field is going to be the username that the teacher will use in order to login - choose it carefully, there cannot be duplicates and it cannot contain spaces (we advise to use firstname_lastname, for instance dante_alighieri can be the username of the teacher Dante Alighieri). The email is instead required since the teacher is going to receive an email from SchoolCalendar, so that she can set her own password (she will use the account to check her personal timetable, she will not be able to alter anything since she is not an admin as you are!). The email is not sent automatically: you need to click the button `Send Invite` in the page left menu -> `Manage entities` -> `Teachers`.
 
 ![TeacherCreate](static/readme_pics/teacher_create.png)
 
-We create now an absence block: our poor Dante cannot be present at school from 7:55 to 8:45 on Mondays, since he has to take care of his old friend Virgilio. Just go to left menu -> Manage entities -> Absence Blocks -> Add new, and fill the form with Dante's information.
+We create now an absence block: our poor Dante cannot be present at school from 7:55 to 8:45 on Mondays, since he has to take care of his old friend Virgilio. Just go to left menu -> `Manage entities` -> `Absence Blocks` -> `Add new`, and fill the form with Dante's information.
 
 ![AbsenceBlockCreation](static/readme_pics/absence_block_create.png)
 
@@ -92,33 +92,33 @@ Now we insert the important information regarding the teachers and courses: how 
 
 First, we insert how many hours every teacher needs to teach according to her contract for the entire school year. We expect this number to be around 1000 hours per year.
 
-Go to left menu -> Manage entities -> Teachers' yearly load -> + Add new and insert the information.
+Go to left menu -> `Manage entities` -> `Teachers' yearly load` -> `+ Add new` and insert the information.
 
 ![HourPerTeacherInClass](static/readme_pics/teacher_yearly_load.png)
 
-The same happens for Courses: go to the left menu -> Manage entities -> Courses' yearly load -> Add new and fill how many hours every course needs to do by the end of the school year.
+The same happens for Courses: go to the left menu -> `Manage entities` -> `Courses' yearly load` -> `Add new` and fill how many hours every course needs to do by the end of the school year.
 
 Now, we need to insert how many hours every teacher needs to teach in every course, and for what subject (for instance, if a teacher teaches both Math and Physics in the same course IA, you need to insert both HourPerTeacher, one for Math and one for Physics). 
 
-To keep things simple, we just say that every teacher in our example teaches her own subject (Dante -> Italian Literature and so on) in courses 1A and 2A. For the sake of the simplicity of the example, we just assign 100 normal hours to every teacher in every course, apart from Dante in 1A, who teaches both 100 normal hours and 50 BES. Go to left menu -> Manage entities -> Hours per teacher -> + Add new.
+To keep things simple, we just say that every teacher in our example teaches her own subject (Dante -> Italian Literature and so on) in courses 1A and 2A. For the sake of the simplicity of the example, we just assign 100 normal hours to every teacher in every course, apart from Dante in 1A, who teaches both 100 normal hours and 50 BES. Go to left menu -> `Manage entities` -> `Hours per teacher` -> `+ Add new`.
 
 ![HourPerTeacherInClass](static/readme_pics/hour_per_teacher_in_class_create.png)
 
-Lastly, we insert some holidays and some stages. First, go to left menu -> Manage entities -> Holidays -> Add new and create a new holiday: 
+Lastly, we insert some holidays and some stages. First, go to left menu -> `Manage entities` -> `Holidays` -> `Add new` and create a new holiday: 
 
 ![HolidayCreate](static/readme_pics/holiday_create.png)
 
 Notice that if you create a holiday on a day when some teacher is working, you will be warned that the teacher's job is going to be deleted (since there is a holiday)!
 
-Then a stage for class 1A: left menu -> Manage entities -> Stages -> Add new.
+Then a stage for class 1A: left menu -> `Manage entities` -> `Stages` -> `Add new`.
 
 ![StageCreate](static/readme_pics/stage_create.png)
 
-You can check how those two instances are rendered in the timetable: go to left menu -> Timetable, go to the desired week using the button `go`, right above the timetable and look for them, they should be fairly easy to spot.
+You can check how those two instances are rendered in the timetable: go to left menu -> `Timetable`, go to the desired week using the button `go`, right above the timetable and look for them, they should be fairly easy to spot.
 
 ### Teacher Assignment
 
-After we have finished to set all the entries of our mock school, we can finally start to see how the system works. Go to the timetable page (left menu -> Timetable) and start to play with the teachers assignments.
+After we have finished to set all the entries of our mock school, we can finally start to see how the system works. Go to the timetable page (left menu -> `Timetable`) and start to play with the teachers assignments.
 This view shows you the weekly timetable for a specific course and school year (you can select which course and school year to visualize in the upper left menu). Note that the list of teachers in the right column will change according to the course you have selected. If you try to select course 3A, for instance, you will notice that it has no teacher assigned (if you remember, we only add hours for teachers in courses 1A and 2A).
 
 Try now to add an Italian lecture the second hour on Monday in course 1A. Click the button `Assign lecture` in Dante's square, and afterwards select the second hour slot on Monday morning (it should have been filled in green).
@@ -157,7 +157,7 @@ There is the possibility to create some particular hour slots clicking on the bl
 
 We explore now another feature of SchoolCalendar: assume it is Monday evening, and Gauss calls you to tell you that he is ill and will not be able to attend the lecture he has in course 2A. You have therefore to find a right candidate for a substitution. Normally you should consider all lectures that Gauss teaches on Tuesday, look for a candidate to substitute him, check for the candidate's conflicts, and repeat the process for all Gauss' lectures of the day: a nightmare. And with SchoolCalendar? Just a piece of cake. 
 
-Open the left menu -> Substitute a teacher, and fill the form with the correct information (Gauss, on the 7th of July). 
+Open the left menu -> `Substitute a teacher`, and fill the form with the correct information (Gauss, on the 7th of July). 
 
 ![GaussSubstitution](static/readme_pics/gauss_substitution.png)
 
