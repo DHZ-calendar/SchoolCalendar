@@ -1,4 +1,4 @@
-Django==3.2.13
+Django==3.2.15
 ipython==7.16.1
 django-durationwidget==1.0.5
 djangorestframework==3.12.4
