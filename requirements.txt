@@ -1,5 +1,5 @@
 Django==3.2.13
-ipython==7.16.1
+ipython==8.10.0
 django-durationwidget==1.0.5
 djangorestframework==3.12.4
 Markdown==3.2.2
